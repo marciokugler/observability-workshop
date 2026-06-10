@@ -7,13 +7,18 @@ time: 10 minutes
 description: Recover from common local setup, telemetry, and remediation issues during the workshop.
 ---
 
-{{% notice icon="user" style="orange" title="Persona" %}}
-You are a **workshop facilitator** recovering the lab without changing the learning objective. Your goal is to keep the audience focused on customer impact, evidence, policy, approval, and validation.
-{{% /notice %}}
+Recover common setup, telemetry, and remediation issues without changing the learning objective.
 
 ## `npm install` Fails
 
 Check:
+
+- If the shell says `npm: command not found`, install Node.js and npm first:
+
+```bash
+sudo apt update
+sudo apt install -y nodejs npm
+```
 
 - Internet access or package registry access.
 - Node version compatibility.
@@ -136,5 +141,5 @@ If the live path is unstable:
 2. Explain and trigger cache pressure.
 3. Use the fallback evidence text in the operator console.
 4. Explain policy and approval.
-5. Approve the bounded action if the local services are healthy.
+5. Approve the controlled action if the local services are healthy.
 6. Close on validation and auditability.

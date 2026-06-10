@@ -7,9 +7,7 @@ time: 15 minutes
 description: Understand the AI support portal, deterministic incident, service topology, and governed remediation path.
 ---
 
-{{% notice icon="user" style="orange" title="Persona" %}}
-You are an **incident commander** responsible for a customer-facing AI support experience. Your job is to connect customer impact to backend evidence, then decide whether a bounded remediation action is safe to approve.
-{{% /notice %}}
+Connect customer impact to backend evidence, then decide whether the controlled cache-cleanup action is safe to approve.
 
 ## Use Case
 
@@ -44,10 +42,10 @@ Run all app commands from that directory unless a step says otherwise.
 | `apps/api-gateway` | Main backend entry point for the portal. |
 | `apps/assistant-service` | Claim status workflow. |
 | `apps/case-service` | Policy coverage lookup workflow. |
-| `apps/knowledge-service` | Knowledge search and bounded cache-pressure source. |
+| `apps/knowledge-service` | Knowledge search and controlled cache-pressure source. |
 | `apps/scenario-controller` | Deterministic incident trigger and reset service. |
 | `apps/remediation-orchestrator` | Evidence intake, enrichment, policy, proposal, approval, and validation coordinator. |
-| `apps/remediation-agent` | Python remediation agent with a bounded toolset and model-backed action selection. |
+| `apps/remediation-agent` | Python remediation agent with a limited toolset and model-backed action selection. |
 
 ## Observability Signals
 
@@ -65,7 +63,7 @@ Do not make logs or custom demo metrics the required proof path. Use browser exp
 
 ## Remediation Boundary
 
-The bounded action is:
+The controlled action is:
 
 ```text
 clean_claims_knowledge_cache

@@ -40,10 +40,9 @@ Use this checklist before the group begins the investigation:
 
 | Check | Why it matters |
 |-------|----------------|
-| Alert is active or recently resolved | The alert page has a bounded investigation window. |
+| Alert is active or recently resolved | The alert page has a clear investigation time window. |
 | Detector uses supported standard metrics | The AI troubleshooting feature can run in the expected path. |
 | Service or Kubernetes object is named clearly | Responders can connect AI output to operational ownership. |
 | Telemetry has consistent `service.name`, `environment`, and Kubernetes metadata | Evidence can be correlated across product areas. |
 | Alert has enough impact to discuss | The team can practice prioritization and blast-radius review. |
 | Remediation environment is controlled | Suggested commands can be reviewed and tested without production risk. |
-

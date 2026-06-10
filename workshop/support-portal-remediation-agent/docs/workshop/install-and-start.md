@@ -6,6 +6,8 @@ This page is the full bring-up runbook.
 
 ### 1. Install Node workspace dependencies
 
+If `npm` is missing, return to the prerequisites page and install Node.js and npm first.
+
 ```bash
 npm install
 ```
@@ -119,7 +121,7 @@ Confirm:
 
 Click `Trigger Cache Pressure`.
 
-The scenario fills the claims-knowledge cache directory up to `CLAIMS_KNOWLEDGE_CACHE_QUOTA_BYTES`. In Docker Compose, that directory is also a shared bounded tmpfs volume mounted into the collector, so Splunk host filesystem metrics see real pressure without risking the host disk.
+The scenario fills the claims-knowledge cache directory up to `CLAIMS_KNOWLEDGE_CACHE_QUOTA_BYTES`. In Docker Compose, that directory is also a size-limited tmpfs volume mounted into the collector, so Splunk host filesystem metrics see real pressure without risking the host disk.
 
 ### 10. Reproduce the degraded transaction
 

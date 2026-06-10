@@ -3,17 +3,17 @@ title: 2. Understand the Lab Application
 weight: 2
 ---
 
-The lab application is a small checkout workflow designed for this workshop. It is intentionally smaller than the OpenTelemetry Demo or PetClinic so students can understand the failure mode quickly.
+The lab application is a small checkout workflow built for this incident exercise. It is intentionally simple so students can quickly understand the request path, telemetry, and injected failure.
 
 The source lives in `workshop/ai-troubleshooting-remediation`.
 
 ## What the App Does
 
-The app models one customer-facing action: a shopper submits a checkout request and the checkout service reserves inventory before accepting the order. The workflow has three running components:
+The app models one customer action: checkout during a winter storm demand spike.
 
-1. `remediation-loadgen` sends one checkout request about every second.
-2. `checkout-service` receives `/checkout` requests, chooses a cart type and product SKU, then calls `inventory-service`.
-3. `inventory-service` receives `/reserve` requests and either reserves inventory normally or behaves badly when an issue mode is enabled.
+- `remediation-loadgen` sends steady `/checkout` traffic.
+- `checkout-service` accepts checkout requests and calls `inventory-service`.
+- `inventory-service` reserves inventory or creates the controlled lab issue.
 
 ```mermaid
 flowchart LR
@@ -26,20 +26,15 @@ flowchart LR
     Collector --> O11y["Splunk Observability Cloud"]
 ```
 
-Component roles:
-
-- `checkout-service`: FastAPI service that receives `/checkout` requests, creates checkout context, and calls `inventory-service`.
-- `inventory-service`: FastAPI service that reserves inventory and contains the injectable latency, error, and crash-loop behavior.
-- `remediation-loadgen`: Python process that sends steady traffic so APM has traces and service metrics before, during, and after the incident.
-- Splunk OpenTelemetry Collector: Kubernetes agent that receives OTLP traces from the app and collects pod logs, Kubernetes events, and infrastructure metrics.
+The Splunk OpenTelemetry Collector receives OTLP traces from the app and collects pod logs, Kubernetes events, and infrastructure metrics.
 
 ## How Instrumentation Is Added
 
-The app intentionally shows both OpenTelemetry automatic instrumentation and small custom instrumentation additions. Automatic instrumentation creates the baseline service map, request spans, and dependency spans. Custom instrumentation adds the domain-specific attributes that make the traces useful during an incident.
+The app uses both automatic and custom OpenTelemetry instrumentation.
 
 ### Auto Instrumentation Example
 
-The container image installs OpenTelemetry packages for FastAPI, outbound HTTP requests, logging, and OTLP export:
+Automatic instrumentation creates the baseline service map and HTTP spans. The image installs OpenTelemetry packages for FastAPI, outbound HTTP requests, logging, and OTLP export:
 
 ```text
 opentelemetry-distro
@@ -55,7 +50,7 @@ During the Docker build, the image runs:
 RUN opentelemetry-bootstrap -a install
 ```
 
-That command installs the instrumentation dependencies detected for the Python application. At runtime, Kubernetes starts each app process through the OpenTelemetry launcher:
+At runtime, Kubernetes starts each process through the OpenTelemetry launcher:
 
 ```yaml
 command:
@@ -73,7 +68,7 @@ command:
   - loadgen.py
 ```
 
-This automatic instrumentation creates spans for inbound FastAPI requests and outbound `requests` calls. The `tracecontext` propagator keeps the load generator, checkout service, and inventory service in one distributed trace without adding manual trace propagation code.
+This creates spans for inbound FastAPI requests and outbound `requests` calls. The `tracecontext` propagator keeps the load generator, checkout service, and inventory service in one trace without manual trace propagation code.
 
 The Kubernetes manifest supplies the service identity and export path:
 
@@ -84,9 +79,9 @@ The Kubernetes manifest supplies the service identity and export path:
 
 ### Custom Instrumentation Example
 
-Automatic instrumentation explains that a request was slow or failed. Custom instrumentation explains what the request was doing when that happened.
+Custom instrumentation adds business and failure context to the automatic spans.
 
-In `checkout_service.py`, the service gets the current request span, adds business context, and creates a child span around the inventory dependency call:
+In `checkout_service.py`, the service adds checkout context and creates a child span around the inventory dependency:
 
 ```python
 span = trace.get_current_span()
@@ -100,7 +95,7 @@ with tracer.start_as_current_span("checkout.reserve_inventory") as reserve_span:
     reserve_span.set_attribute("app.quantity", quantity)
 ```
 
-When the inventory call fails, the code records the exception and marks the span as an error:
+When inventory fails, the code records the exception and marks the span as an error:
 
 ```python
 reserve_span.record_exception(exc)
@@ -108,7 +103,7 @@ reserve_span.set_status(Status(StatusCode.ERROR, str(exc)))
 span.set_status(Status(StatusCode.ERROR, "inventory request failed"))
 ```
 
-In `inventory_service.py`, the service adds the active issue mode to the span so the trace shows whether the pod was healthy, slow, erroring, or crash-looping:
+In `inventory_service.py`, the service adds the active issue mode:
 
 ```python
 span = trace.get_current_span()
@@ -118,9 +113,7 @@ span.set_attribute("app.quantity", quantity)
 span.set_attribute("app.cart.type", cart)
 ```
 
-Those custom attributes are intentionally simple. They give students a concrete pattern they can reuse: keep automatic instrumentation for the common framework and network spans, then add a small number of domain attributes that explain customer impact and remediation context.
-
-The Python code adds these workshop-specific span attributes:
+These custom attributes are intentionally simple:
 
 - `app.cart.type`: set by `checkout-service` and `inventory-service` to show which simulated cart path the request used.
 - `app.cart.value`: set by `checkout-service` to show the approximate business value of the checkout request.
@@ -129,7 +122,7 @@ The Python code adds these workshop-specific span attributes:
 - `app.issue_mode`: set by `inventory-service` to show whether the service is healthy, slow, erroring, or crash-looping.
 - `app.checkout.duration_ms`: set by `checkout-service` to show end-to-end checkout duration observed by the service.
 
-This gives the AI troubleshooting agent multiple signal types to compare: APM service latency and error rate, trace spans, span attributes, Kubernetes pod health, restarts, and logs.
+Together, the app gives the AI troubleshooting agent APM latency, errors, traces, span attributes, Kubernetes health, restarts, and logs.
 
 ## Issue Modes
 

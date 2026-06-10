@@ -4,12 +4,10 @@ linkTitle: 5. Govern Remediation
 weight: 5
 archetype: chapter
 time: 25 minutes
-description: Gather evidence in the operator console, evaluate policy, approve the bounded action, and validate recovery.
+description: Gather evidence in the operator console, evaluate policy, approve the controlled action, and validate recovery.
 ---
 
-{{% notice icon="user" style="orange" title="Persona" %}}
-You are a **service owner** deciding whether a state-changing remediation is allowed. Your job is to keep model reasoning, policy, approval, execution, and validation separate.
-{{% /notice %}}
+Keep model reasoning, deterministic policy, approval, execution, and validation separate before allowing a state-changing remediation.
 
 ## Gather Evidence
 
@@ -87,12 +85,12 @@ Before approving, answer:
 | --- | --- |
 | What resource changes? | The lab cache-pressure scenario for `claims-knowledge`. |
 | What action runs? | `clean_claims_knowledge_cache`. |
-| Is the action bounded? | Yes, it targets only the lab cache scenario. |
+| Is the action limited to the lab scenario? | Yes, it targets only the lab cache cleanup. |
 | Is there a validation plan? | Yes, rerun `AI Claim Status` and check scenario state plus telemetry. |
 | Is human approval required? | Yes, for the state-changing remediation path. |
 
 {{% notice title="Governance Rule" style="warning" %}}
-The model can recommend a bounded action, but deterministic policy and human approval decide what is allowed to execute.
+The model can recommend an action, but deterministic policy and human approval decide what is allowed to execute.
 {{% /notice %}}
 
 ## Approve and Execute

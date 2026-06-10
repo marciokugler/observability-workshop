@@ -7,9 +7,7 @@ time: 25 minutes
 description: Trigger the cache-pressure incident, reproduce the degraded transaction, and validate the evidence in Splunk Observability Cloud.
 ---
 
-{{% notice icon="user" style="orange" title="Persona" %}}
-You are an **observability lead** proving the incident with telemetry. Your job is to separate customer impact, service behavior, and infrastructure cause before anyone approves a remediation action.
-{{% /notice %}}
+Prove the incident with telemetry before approving any remediation action. Separate customer impact, service behavior, and infrastructure cause.
 
 ## Trigger the Incident
 

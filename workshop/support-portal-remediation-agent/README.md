@@ -45,6 +45,13 @@ python3 -m venv apps/remediation-agent/.venv
 apps/remediation-agent/.venv/bin/pip install --index-url https://pypi.org/simple -e apps/remediation-agent
 ```
 
+If `npm` is missing on an Ubuntu or Debian workshop VM, install Node.js and npm before running setup:
+
+```bash
+sudo apt update
+sudo apt install -y nodejs npm
+```
+
 The app stack can run without credentials. Add `OPENAI_API_KEY`, `GALILEO_API_KEY` or `GALILEO_API_KEY_FILE`, `SPLUNK_ACCESS_TOKEN`, `SPLUNK_REALM`, and browser RUM values when you want model-backed remediation, Galileo agent monitoring, and live Splunk export.
 
 Start everything locally:
@@ -93,9 +100,9 @@ The demo is now metric-driven and uses out-of-the-box Splunk Observability signa
 - Splunk OTel Collector hostmetrics show filesystem pressure.
 - The remediation agent can be instrumented with Galileo for agent steps, tool calls, and OpenAI model calls.
 
-The deterministic incident is `cache-disk-pressure`. The scenario controller asks `claims-knowledge` to fill a bounded cache directory or tmpfs mount. That creates filesystem pressure visible through host metrics and slows the AI Claim Status path through normal APM spans. Policy Coverage Lookup and Claims FAQ Search remain available as healthy comparison journeys.
+The deterministic incident is `cache-disk-pressure`. The scenario controller asks `claims-knowledge` to fill a controlled cache directory or tmpfs mount. That creates filesystem pressure visible through host metrics and slows the AI Claim Status path through normal APM spans. Policy Coverage Lookup and Claims FAQ Search remain available as healthy comparison journeys.
 
-The bounded remediation action is `clean_claims_knowledge_cache`. Approval calls the remediation agent, which resets the scenario through the scenario controller and verifies recovery by running a post-remediation claim status request.
+The controlled remediation action is `clean_claims_knowledge_cache`. Approval calls the remediation agent, which resets the scenario through the scenario controller and verifies recovery by running a post-remediation claim status request.
 
 ## Student Isolation
 

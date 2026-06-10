@@ -7,9 +7,7 @@ time: 20 minutes
 description: Start the collector and application stack, verify local endpoints, and create a healthy baseline.
 ---
 
-{{% notice icon="user" style="orange" title="Persona" %}}
-You are a **service team engineer** creating the healthy baseline. Your job is to prove the portal, backend, telemetry, and operator console work before the failure is introduced.
-{{% /notice %}}
+Create a healthy baseline before introducing the failure. Confirm the portal, backend services, telemetry path, and operator console all work.
 
 ## Start the Collector
 

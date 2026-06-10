@@ -17,20 +17,16 @@ This workshop is designed for advanced users who already know the basics of Splu
 
 ## Workshop Overview
 
+In this scenario, a severe winter storm is driving a sudden spike in online checkout traffic as customers buy emergency supplies. The checkout path starts slowing down and failing, operations teams need evidence quickly, and the AI troubleshooting workflow helps responders move from alert to root-cause hypothesis to recovery validation.
+
 In this 3-hour 15-minute hands-on session, you'll cover:
 
 - **Deploy the Lab App** - Install required laptop tools, run the instrumented checkout application on a local laptop or cloud Kubernetes cluster, and send telemetry to Splunk Observability Cloud.
-- **Prepare the Incident** - Confirm feature availability, select a supported alert, and capture the incident context the agent needs.
+- **Prepare the Incident** - Select a useful alert and capture the incident context the agent needs.
 - **Troubleshoot With the Agent** - Review the alert overview, suspected root causes, impact analysis, and supporting evidence.
 - **Remediate With the Action Plan** - Use AI-generated hypotheses and guided steps while keeping humans in control of production changes.
 - **Advanced Use Cases** - Apply the workflow to deployment regressions, Kubernetes infrastructure alerts, cross-signal investigations, and incident command.
 - **Operationalize the Feature** - Build readiness checklists, runbook templates, and success metrics for teams adopting AI-assisted remediation.
-
-{{% notice title="Feature Availability" style="info" %}}
-The AI troubleshooting agent and remediation plan are currently available only for Splunk Observability Cloud customers in the `us1` realm. The feature supports alerts for Splunk APM services and Kubernetes in Infrastructure Monitoring when the detector uses standard, default metrics. Custom metric detectors are not supported at this time.
-
-Before running this workshop, review the current product documentation: [AI troubleshooting agent and remediation plan in Splunk Observability Cloud](https://help.splunk.com/en/splunk-observability-cloud/create-alerts-detectors-and-service-level-objectives/create-alerts-and-detectors/ai-troubleshooting-agent-and-remediation-plan).
-{{% /notice %}}
 
 ## Incident Flow
 
@@ -49,7 +45,7 @@ flowchart LR
 
 ## What You Need
 
-- Access to a Splunk Observability Cloud organization in the `us1` realm where the feature is enabled.
+- Access to a Splunk Observability Cloud organization.
 - Docker, `kubectl`, Helm, and either a local `kind` cluster or a cloud Kubernetes cluster.
 - A Splunk Observability Cloud access token that can send telemetry.
 - A supported alert from Splunk APM or Kubernetes in Infrastructure Monitoring.

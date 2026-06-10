@@ -7,9 +7,7 @@ time: 20 minutes
 description: Inspect remediation spans in Splunk and use Galileo showcase and experiments to evaluate agent behavior.
 ---
 
-{{% notice icon="user" style="orange" title="Persona" %}}
-You are an **AI operations lead** responsible for making the remediation agent observable. Your job is to inspect evidence grounding, guardrails, approval, action execution, and verification.
-{{% /notice %}}
+Inspect evidence grounding, guardrails, approval, action execution, and verification so the remediation agent is observable.
 
 ## Inspect Splunk Spans
 
@@ -64,7 +62,7 @@ Walk through these traces:
 | `showcase.triage_agent` | Separation of trusted observability evidence from untrusted notes. |
 | `showcase.hypothesis_agent` | Comparison of cache pressure, provider latency, dependency, and restart hypotheses. |
 | `showcase.guardrail_pre_action_check` | Unsafe restart instruction and fake PII are blocked. |
-| `showcase.action_planning_agent` | Selected bounded action is `clean_claims_knowledge_cache`. |
+| `showcase.action_planning_agent` | Selected controlled action is `clean_claims_knowledge_cache`. |
 | `showcase.human_approval` | Approval is captured as part of the workflow. |
 | `showcase.execute_remediation` | Remediation tool execution. |
 | `showcase.verify_recovery` | Validation latency and healthy scenario state. |
@@ -115,7 +113,7 @@ Expected themes:
 
 - Clear customer impact.
 - Two or more corroborating telemetry signals.
-- Bounded tool permissions.
+- Limited tool permissions.
 - Deterministic policy.
 - Human approval for production.
 - Verified recovery.

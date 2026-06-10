@@ -17,7 +17,7 @@ You practiced how to:
 - Prove the incident with browser, APM, and filesystem evidence.
 - Build a structured remediation evidence package.
 - Keep model reasoning, deterministic policy, approval, execution, and validation separate.
-- Approve the bounded `clean_claims_knowledge_cache` action.
+- Approve the controlled `clean_claims_knowledge_cache` action.
 - Validate recovery through the portal, operator console, and telemetry.
 - Inspect remediation agent spans and optional Galileo monitoring.
 

@@ -6,6 +6,15 @@ Use this pre-flight checklist before debugging application code.
 
 ### Node.js and npm
 
+Install Node.js and npm before checking versions.
+
+Ubuntu or Debian workshop VM:
+
+```bash
+sudo apt update
+sudo apt install -y nodejs npm
+```
+
 ```bash
 node --version
 npm --version

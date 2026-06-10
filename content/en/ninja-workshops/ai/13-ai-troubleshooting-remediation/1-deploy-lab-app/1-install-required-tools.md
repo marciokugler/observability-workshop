@@ -7,7 +7,38 @@ Students can run this workshop on macOS, Windows, or Linux. Every local deployme
 
 The tools below are used to deploy a small instrumented checkout application into Kubernetes. The app sends traces, service metadata, pod logs, and Kubernetes infrastructure telemetry to Splunk Observability Cloud so the AI troubleshooting agent has real evidence to analyze after an issue is injected.
 
-## Required Tools
+## 1. Get the Workshop Files
+
+Start by downloading this repository to the laptop or VM where you will run the lab.
+
+Clone with Git:
+
+```bash
+git clone https://github.com/splunk/observability-workshop.git
+cd observability-workshop
+```
+
+If Git is not installed yet, download the repository ZIP with `curl`:
+
+```bash
+curl -L https://github.com/splunk/observability-workshop/archive/refs/heads/main.zip -o observability-workshop.zip
+unzip observability-workshop.zip
+cd observability-workshop-main
+```
+
+Or download with `wget`:
+
+```bash
+wget -O observability-workshop.zip https://github.com/splunk/observability-workshop/archive/refs/heads/main.zip
+unzip observability-workshop.zip
+cd observability-workshop-main
+```
+
+{{% notice title="Workshop Branch" style="info" %}}
+If your instructor provides a fork or branch URL, use that URL instead of `https://github.com/splunk/observability-workshop.git`.
+{{% /notice %}}
+
+## 2. Install Required Software
 
 | Tool | Why it is needed |
 |------|------------------|
@@ -20,7 +51,7 @@ The tools below are used to deploy a small instrumented checkout application int
 
 {{% notice title="Exercise" style="green" icon="running" %}}
 
-Choose the instructions for your operating system.
+Choose the instructions for your operating system and run the install command before checking versions.
 
 ## macOS
 
@@ -84,6 +115,13 @@ Then open Ubuntu and follow the Linux instructions below.
 
 The Linux helper supports Debian and Ubuntu systems with `apt-get`. Set `LOCAL_RUNTIME` to the runtime you want to use.
 
+If `curl`, `wget`, `unzip`, or Git are missing on a fresh VM, install the bootstrap tools first:
+
+```bash
+sudo apt update
+sudo apt install -y curl wget unzip git
+```
+
 For `kind`:
 
 ```bash
@@ -134,5 +172,5 @@ Only the runtime you selected needs to pass its version or status check.
 {{% /notice %}}
 
 {{% notice title="Access Token" style="info" %}}
-The install scripts do not create Splunk Observability Cloud tokens. Before deploying the lab app, create or obtain an access token for your `us1` organization and keep it available as `SPLUNK_ACCESS_TOKEN`.
+The install scripts do not create Splunk Observability Cloud tokens. Before deploying the lab app, create or obtain an access token and keep it available as `SPLUNK_ACCESS_TOKEN`.
 {{% /notice %}}

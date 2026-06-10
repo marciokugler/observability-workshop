@@ -5,7 +5,7 @@ weight: 16
 layout: chapter
 time: 2 hours
 authors: ["Marcio Kugler Rodrigues"]
-description: Run an AI support portal incident, gather Splunk Observability evidence, and approve a bounded remediation agent action with validation and auditability.
+description: Run an AI support portal incident, gather Splunk Observability evidence, and approve a controlled remediation agent action with validation and auditability.
 draft: false
 hidden: false
 product: "Observability Cloud"
@@ -20,7 +20,7 @@ The runnable lab app is included in this repository at `workshop/support-portal-
 In this hands-on session, you will cover:
 
 - **Lab Overview** - Understand the support portal, operator console, service topology, and remediation boundary.
-- **Prepare the Environment** - Configure local prerequisites, credentials, student identity, and port checks.
+- **Install Required Software** - Install local prerequisites, configure credentials, student identity, and port checks.
 - **Run the Lab Stack** - Start the collector and app services, then create a healthy baseline.
 - **Investigate Cache Pressure** - Trigger the `cache-disk-pressure` scenario and validate customer, APM, and infrastructure evidence.
 - **Govern Remediation** - Gather evidence, explain the incident, propose `clean_claims_knowledge_cache`, approve execution, and validate recovery.
@@ -28,7 +28,7 @@ In this hands-on session, you will cover:
 - **Troubleshoot the Lab** - Recover from common workshop-day failures without changing the story.
 
 {{% notice title="Workshop Scope" style="info" %}}
-This workshop demonstrates a separate remediation workflow that uses Splunk Observability Cloud as the evidence and investigation layer. It does not imply that Splunk directly invokes arbitrary external actions. The action is bounded, policy-checked, operator-approved, and validated after execution.
+This workshop demonstrates a separate remediation workflow that uses Splunk Observability Cloud as the evidence and investigation layer. It does not imply that Splunk directly invokes arbitrary external actions. The action is policy-checked, operator-approved, limited to the lab cache-cleanup scenario, and validated after execution.
 {{% /notice %}}
 
 ## Incident Flow

@@ -1,19 +1,26 @@
 ---
-title: Prepare the Environment
-linkTitle: 2. Prepare the Environment
+title: Install Required Software
+linkTitle: 2. Install Required Software
 weight: 2
 archetype: chapter
 time: 20 minutes
-description: Install prerequisites, configure credentials and student identity, and verify local port availability.
+description: Install prerequisites first, then configure credentials, student identity, and local port checks.
 ---
-
-{{% notice icon="user" style="orange" title="Persona" %}}
-You are a **platform engineer** preparing a reliable lab environment. Your goal is to make the local app, Splunk evidence path, and optional agent monitoring path predictable before the incident starts.
-{{% /notice %}}
 
 ## Required Software
 
-Check your local tools:
+Install the required software before running any `npm` commands.
+
+For Ubuntu or Debian workshop VMs:
+
+```bash
+sudo apt update
+sudo apt install -y nodejs npm python3 python3-venv docker.io docker-compose-plugin
+```
+
+If your laptop uses Homebrew, Chocolatey, `winget`, Docker Desktop, or an existing corporate image, install the equivalent packages with your approved package manager.
+
+After installation, check your local tools:
 
 ```bash
 node --version
