@@ -19,7 +19,7 @@ At the end of this flow you should have:
 You need:
 
 - Node.js and `npm`
-- Python 3
+- Python 3 with venv support
 - Docker Desktop or another local Docker daemon if you want the collector
 - Splunk and OpenAI credentials if you want live telemetry and model-backed remediation
 
@@ -59,8 +59,12 @@ Each student should use a different `INSTANCE`, such as `student-014`.
 ```bash
 npm install
 python3 -m venv apps/remediation-agent/.venv
-apps/remediation-agent/.venv/bin/pip install --index-url https://pypi.org/simple -e apps/remediation-agent
+apps/remediation-agent/.venv/bin/python -m pip install --index-url https://pypi.org/simple --upgrade pip
+apps/remediation-agent/.venv/bin/python -m pip install --index-url https://pypi.org/simple -e apps/remediation-agent
+apps/remediation-agent/.venv/bin/python -m pip show ibobs-remediation-agent
 ```
+
+If the venv command reports that `ensurepip` is missing on Debian or Ubuntu, run `sudo apt update`, `sudo apt install -y python3-venv`, and `sudo apt install -y python3-pip`, then rerun the venv commands.
 
 ## 5. Start the collector
 

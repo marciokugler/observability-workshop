@@ -22,8 +22,18 @@ npm --version
 
 ### Python 3
 
+Install Python and venv support before checking versions on Ubuntu or Debian:
+
+```bash
+sudo apt update
+sudo apt install -y python3
+sudo apt install -y python3-venv
+sudo apt install -y python3-pip
+```
+
 ```bash
 python3 --version
+python3 -m pip --version
 ```
 
 ### Docker
@@ -101,7 +111,7 @@ Recommended windows:
 ## Final go/no-go checklist
 
 - Node and npm work
-- Python 3 works
+- Python 3 and venv support work
 - Docker is running if collector is needed
 - dependencies are installed
 - remediation agent virtual environment exists

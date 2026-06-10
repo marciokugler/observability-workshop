@@ -34,13 +34,22 @@ Capture the first real error and fix that root issue before changing application
 
 ## Python Agent Setup Fails
 
+If `apps/remediation-agent/.venv` does not exist, the virtual environment creation failed. On Debian or Ubuntu, install Python venv support first:
+
+```bash
+sudo apt update
+sudo apt install -y python3-venv
+sudo apt install -y python3-pip
+```
+
 Recreate the virtual environment only when you intend to replace it:
 
 ```bash
-cd apps/remediation-agent
-rm -rf .venv
-python3 -m venv .venv
-.venv/bin/pip install --index-url https://pypi.org/simple -e .
+rm -rf apps/remediation-agent/.venv
+python3 -m venv apps/remediation-agent/.venv
+apps/remediation-agent/.venv/bin/python -m pip install --index-url https://pypi.org/simple --upgrade pip
+apps/remediation-agent/.venv/bin/python -m pip install --index-url https://pypi.org/simple -e apps/remediation-agent
+apps/remediation-agent/.venv/bin/python -m pip show ibobs-remediation-agent
 ```
 
 ## Collector Will Not Start

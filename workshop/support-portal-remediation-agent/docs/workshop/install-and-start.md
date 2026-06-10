@@ -21,13 +21,23 @@ Expected result:
 
 ```bash
 python3 -m venv apps/remediation-agent/.venv
-apps/remediation-agent/.venv/bin/pip install --index-url https://pypi.org/simple -e apps/remediation-agent
+apps/remediation-agent/.venv/bin/python -m pip install --index-url https://pypi.org/simple --upgrade pip
+apps/remediation-agent/.venv/bin/python -m pip install --index-url https://pypi.org/simple -e apps/remediation-agent
+apps/remediation-agent/.venv/bin/python -m pip show ibobs-remediation-agent
 ```
 
 Expected result:
 
 - `apps/remediation-agent/.venv` exists
 - the Python package installs in editable mode
+
+If the venv command reports that `ensurepip` is missing, install venv support before retrying:
+
+```bash
+sudo apt update
+sudo apt install -y python3-venv
+sudo apt install -y python3-pip
+```
 
 ## Phase 2: start optional telemetry support
 

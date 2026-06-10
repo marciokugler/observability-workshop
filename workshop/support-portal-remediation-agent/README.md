@@ -32,7 +32,7 @@ cd workshop/support-portal-remediation-agent
 Prerequisites:
 
 - Node.js 22 and npm
-- Python 3.11 or newer
+- Python 3.11 or newer, including venv support
 - Docker Desktop or another Docker daemon, only if you want the local Splunk OTel Collector or Docker Compose flow
 - `cloudflared`, only if you want to test the optional live Splunk webhook delivery path
 
@@ -42,14 +42,20 @@ One-time setup from this app directory:
 test -f .env || cp .env.example .env
 npm install
 python3 -m venv apps/remediation-agent/.venv
-apps/remediation-agent/.venv/bin/pip install --index-url https://pypi.org/simple -e apps/remediation-agent
+apps/remediation-agent/.venv/bin/python -m pip install --index-url https://pypi.org/simple --upgrade pip
+apps/remediation-agent/.venv/bin/python -m pip install --index-url https://pypi.org/simple -e apps/remediation-agent
+apps/remediation-agent/.venv/bin/python -m pip show ibobs-remediation-agent
 ```
 
-If `npm` is missing on an Ubuntu or Debian workshop VM, install Node.js and npm before running setup:
+If `npm` or Python venv support is missing on an Ubuntu or Debian workshop VM, install the required packages before running setup:
 
 ```bash
 sudo apt update
-sudo apt install -y nodejs npm
+sudo apt install -y nodejs
+sudo apt install -y npm
+sudo apt install -y python3
+sudo apt install -y python3-venv
+sudo apt install -y python3-pip
 ```
 
 The app stack can run without credentials. Add `OPENAI_API_KEY`, `GALILEO_API_KEY` or `GALILEO_API_KEY_FILE`, `SPLUNK_ACCESS_TOKEN`, `SPLUNK_REALM`, and browser RUM values when you want model-backed remediation, Galileo agent monitoring, and live Splunk export.
