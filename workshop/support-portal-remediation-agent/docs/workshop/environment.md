@@ -26,11 +26,23 @@ In a shared Splunk Observability Cloud account, this is what lets students filte
 ```dotenv
 SPLUNK_ACCESS_TOKEN=...
 SPLUNK_REALM=...
+VITE_SPLUNK_RUM_TOKEN=...
 OPENAI_API_KEY=...
 GALILEO_API_KEY_FILE=/path/to/galileo_api_key
 ```
 
-The stack can run without these values, but live Splunk export, MCP evidence intake, model-backed remediation, and Galileo agent monitoring will be limited. You can set `GALILEO_API_KEY` directly for local-only runs, but `GALILEO_API_KEY_FILE` keeps the secret out of shell history and process arguments. MCP uses the direct Observability endpoint by default:
+Credential purpose:
+
+| Variable | Use |
+| --- | --- |
+| `SPLUNK_ACCESS_TOKEN` | Sends collector telemetry to Splunk Observability Cloud and enables live Splunk evidence lookup. |
+| `SPLUNK_REALM` | Splunk realm for API and ingest endpoints, such as `us1`. |
+| `VITE_SPLUNK_RUM_TOKEN` | Browser RUM token for the claims portal. |
+| `OPENAI_API_KEY` | Optional model-backed remediation agent decisions. |
+| `GALILEO_API_KEY_FILE` | Optional path to a Galileo key file; preferred when you do not want the key in shell history. |
+| `GALILEO_API_KEY` | Optional direct Galileo key for local agent monitoring. |
+
+The stack can run without these values, but live Splunk export, MCP evidence intake, browser RUM, model-backed remediation, and Galileo agent monitoring will be limited. You can set `GALILEO_API_KEY` directly for local-only runs, but `GALILEO_API_KEY_FILE` keeps the secret out of shell history and process arguments. MCP uses the direct Observability endpoint by default:
 
 ```dotenv
 SPLUNK_MCP_ENABLED=true

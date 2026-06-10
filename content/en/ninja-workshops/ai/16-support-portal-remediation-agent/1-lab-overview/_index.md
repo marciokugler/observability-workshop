@@ -60,13 +60,3 @@ The primary story uses default Splunk Observability signals:
 {{% notice title="Key Rule" style="info" %}}
 Do not make logs or custom demo metrics the required proof path. Use browser experience, APM service health, and host filesystem metrics as the main evidence chain.
 {{% /notice %}}
-
-## Remediation Boundary
-
-The controlled action is:
-
-```text
-clean_claims_knowledge_cache
-```
-
-The action clears the cache-pressure scenario through the scenario controller and then verifies that the `AI Claim Status` path recovered. The operator console should show why the action was proposed, what policy mode applies, who approved it, and whether validation passed.

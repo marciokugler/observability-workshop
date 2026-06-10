@@ -13,15 +13,18 @@ Recover common setup, telemetry, and remediation issues without changing the lea
 
 Check:
 
-- If the shell says `npm: command not found`, install Node.js and npm first:
+- If the shell says `npm: command not found`, install Node.js 22 first:
 
 ```bash
 sudo apt update
-sudo apt install -y nodejs npm
+sudo apt install -y curl
+sudo apt install -y ca-certificates
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt install -y nodejs
 ```
 
 - Internet access or package registry access.
-- Node version compatibility.
+- Node version compatibility. If `npm install` prints `EBADENGINE` with current Node `v18.x`, Ubuntu installed an older Node package. Install Node 22, then rerun `npm install`.
 - Whether a previous partial install left a corrupted `node_modules`.
 
 Action:
@@ -57,16 +60,31 @@ apps/remediation-agent/.venv/bin/python -m pip show ibobs-remediation-agent
 Check:
 
 - Docker daemon is running.
+- Your user can access `/var/run/docker.sock`.
+- Docker Compose v2 is installed.
 - `.env` is loaded.
 - Host port `14318` is free.
 
 Action:
 
 ```bash
+sudo systemctl enable --now docker
+sudo usermod -aG docker "$USER"
+newgrp docker
 docker info
+docker compose version
 grep -E '^OTEL_EXPORTER_OTLP_ENDPOINT=' .env
 npm run dev:collector
 ```
+
+If `docker compose version` is not available on Ubuntu, install the Compose package used by your Docker installation:
+
+```bash
+sudo apt update
+sudo apt install -y docker-compose-v2
+```
+
+If your system uses Docker's upstream package repository instead of Ubuntu's `docker.io` package, install `docker-compose-plugin`.
 
 Expected local endpoint:
 

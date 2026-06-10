@@ -15,16 +15,20 @@ For Ubuntu or Debian workshop VMs:
 
 ```bash
 sudo apt update
+sudo apt install -y curl
+sudo apt install -y ca-certificates
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt install -y nodejs
-sudo apt install -y npm
 sudo apt install -y python3
 sudo apt install -y python3-venv
 sudo apt install -y python3-pip
 sudo apt install -y docker.io
-sudo apt install -y docker-compose-plugin
+sudo apt install -y docker-compose-v2
+sudo systemctl enable --now docker
+sudo usermod -aG docker "$USER"
 ```
 
-If your laptop uses Homebrew, Chocolatey, `winget`, Docker Desktop, or an existing corporate image, install the equivalent packages with your approved package manager.
+Close and reopen the terminal after adding your user to the `docker` group, or run `newgrp docker` in the current terminal. If your laptop uses Homebrew, Chocolatey, `winget`, Docker Desktop, or an existing corporate image, install the equivalent packages with your approved package manager.
 
 After installation, check your local tools:
 
@@ -41,12 +45,6 @@ docker info
 Docker is required for the local collector and Docker Compose path. `cloudflared` is optional and is only needed if you test live detector webhook delivery.
 
 ## Configure the App Copy
-
-Change into the local workshop copy:
-
-```bash
-cd workshop/support-portal-remediation-agent
-```
 
 Create a local environment file:
 
@@ -75,6 +73,17 @@ OPENAI_API_KEY=
 GALILEO_API_KEY=
 GALILEO_API_KEY_FILE=
 ```
+
+Credential purpose:
+
+| Variable | Use |
+| --- | --- |
+| `SPLUNK_ACCESS_TOKEN` | Sends collector telemetry to Splunk Observability Cloud and enables live Splunk evidence lookup. |
+| `SPLUNK_REALM` | Splunk realm for API and ingest endpoints, such as `us1`. |
+| `VITE_SPLUNK_RUM_TOKEN` | Browser RUM token for the claims portal. |
+| `OPENAI_API_KEY` | Optional model-backed remediation agent decisions. Without it, the agent uses fallback logic. |
+| `GALILEO_API_KEY` | Optional direct Galileo key for local agent monitoring. |
+| `GALILEO_API_KEY_FILE` | Optional path to a Galileo key file; preferred when you do not want the key in shell history. |
 
 If credentials are missing:
 

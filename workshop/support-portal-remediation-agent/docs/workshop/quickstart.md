@@ -18,7 +18,7 @@ At the end of this flow you should have:
 
 You need:
 
-- Node.js and `npm`
+- Node.js 22 and `npm`
 - Python 3 with venv support
 - Docker Desktop or another local Docker daemon if you want the collector
 - Splunk and OpenAI credentials if you want live telemetry and model-backed remediation
@@ -48,11 +48,14 @@ Set these for a full shared-account lab:
 INSTANCE=student-001
 SPLUNK_ACCESS_TOKEN=...
 SPLUNK_REALM=...
+VITE_SPLUNK_RUM_TOKEN=...
 OPENAI_API_KEY=...
 GALILEO_API_KEY_FILE=/path/to/galileo_api_key
 ```
 
 Each student should use a different `INSTANCE`, such as `student-014`.
+
+`SPLUNK_ACCESS_TOKEN` and `SPLUNK_REALM` enable Splunk export and evidence lookup. `VITE_SPLUNK_RUM_TOKEN` enables browser RUM. `OPENAI_API_KEY` enables model-backed remediation. `GALILEO_API_KEY_FILE` or `GALILEO_API_KEY` enables agent monitoring.
 
 ## 4. Install dependencies
 
@@ -71,6 +74,7 @@ If the venv command reports that `ensurepip` is missing on Debian or Ubuntu, run
 Use this only when you are validating telemetry:
 
 ```bash
+docker compose version
 set -a
 source .env
 set +a

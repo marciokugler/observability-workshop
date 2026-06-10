@@ -51,14 +51,22 @@ If `npm` or Python venv support is missing on an Ubuntu or Debian workshop VM, i
 
 ```bash
 sudo apt update
+sudo apt install -y curl
+sudo apt install -y ca-certificates
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt install -y nodejs
-sudo apt install -y npm
 sudo apt install -y python3
 sudo apt install -y python3-venv
 sudo apt install -y python3-pip
+sudo apt install -y docker.io
+sudo apt install -y docker-compose-v2
+sudo systemctl enable --now docker
+sudo usermod -aG docker "$USER"
 ```
 
-The app stack can run without credentials. Add `OPENAI_API_KEY`, `GALILEO_API_KEY` or `GALILEO_API_KEY_FILE`, `SPLUNK_ACCESS_TOKEN`, `SPLUNK_REALM`, and browser RUM values when you want model-backed remediation, Galileo agent monitoring, and live Splunk export.
+Close and reopen the terminal after adding your user to the `docker` group, or run `newgrp docker`.
+
+The app stack can run without credentials. Add `OPENAI_API_KEY`, `GALILEO_API_KEY` or `GALILEO_API_KEY_FILE`, `SPLUNK_ACCESS_TOKEN`, `SPLUNK_REALM`, and `VITE_SPLUNK_RUM_TOKEN` when you want model-backed remediation, Galileo agent monitoring, live Splunk export, and browser RUM.
 
 Start everything locally:
 
@@ -126,8 +134,10 @@ Dashboards and detectors filter by `deployment.environment` plus `service.instan
 The repo includes a development compose file at [infra/docker/docker-compose.yml](infra/docker/docker-compose.yml).
 
 ```bash
-docker compose --env-file .env -f infra/docker/docker-compose.yml up
+npm run dev:collector
 ```
+
+The npm command uses `docker compose` when Compose v2 is installed and falls back to `docker-compose` when only the legacy standalone binary is available.
 
 The compose path mounts a shared 128 MiB tmpfs at `/var/cache/claims-knowledge` for the knowledge service and the collector. The cache-pressure scenario fills that tmpfs, which gives the collector a real filesystem signal without risking the host disk.
 

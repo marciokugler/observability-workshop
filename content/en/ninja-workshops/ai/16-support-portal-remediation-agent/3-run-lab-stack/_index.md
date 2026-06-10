@@ -14,7 +14,6 @@ Create a healthy baseline before introducing the failure. Confirm the portal, ba
 Use this when you want Splunk APM, RUM, and host metric export:
 
 ```bash
-cd workshop/support-portal-remediation-agent
 set -a
 source .env
 set +a

@@ -6,15 +6,26 @@ This page is optimized for workshop-day failures.
 
 Check:
 
+- Node version compatibility. If `npm install` prints `EBADENGINE` with current Node `v18.x`, Ubuntu installed an older Node package.
 - internet access or package registry access
-- Node version compatibility
 - whether a previous partial install left a corrupted `node_modules`
 
 Action:
 
-1. re-run `npm install`
-2. capture the first real error
-3. resolve that root issue before changing application code
+1. install Node.js 22 if needed
+2. re-run `npm install`
+3. capture the first real error
+4. resolve that root issue before changing application code
+
+Ubuntu or Debian Node 22 install:
+
+```bash
+sudo apt update
+sudo apt install -y curl
+sudo apt install -y ca-certificates
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt install -y nodejs
+```
 
 ## Python agent setup fails
 
@@ -41,16 +52,31 @@ apps/remediation-agent/.venv/bin/python -m pip show ibobs-remediation-agent
 Check:
 
 - Docker daemon is running
+- your user can access `/var/run/docker.sock`
+- Docker Compose v2 is installed
 - `.env` is loaded
 - host port `14318` is free
 
 Action:
 
 ```bash
+sudo systemctl enable --now docker
+sudo usermod -aG docker "$USER"
+newgrp docker
 docker info
+docker compose version
 grep -E '^OTEL_EXPORTER_OTLP_ENDPOINT=' .env
 npm run dev:collector
 ```
+
+If `docker compose version` is not available on Ubuntu:
+
+```bash
+sudo apt update
+sudo apt install -y docker-compose-v2
+```
+
+If your system uses Docker's upstream package repository instead of Ubuntu's `docker.io` package, install `docker-compose-plugin`.
 
 Expected local value:
 

@@ -15,7 +15,7 @@ export function initSplunkNodeTelemetry(serviceName: string) {
   const endpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
   const directSplunkExport = !endpoint || endpoint.includes("signalfx.com");
 
-  if (!endpoint && (!accessToken || !realm)) {
+  if (directSplunkExport && (!accessToken || !realm)) {
     return false;
   }
 
@@ -53,7 +53,31 @@ export function initSplunkNodeTelemetry(serviceName: string) {
     options.realm = realm;
   }
 
-  start(options);
+  const originalSplunkRealm = process.env.SPLUNK_REALM;
+  const originalSplunkAccessToken = process.env.SPLUNK_ACCESS_TOKEN;
+  const localCollectorExport = endpoint && !directSplunkExport;
+  const missingDirectCredentials = !accessToken || !realm;
+
+  try {
+    if (localCollectorExport && missingDirectCredentials) {
+      delete process.env.SPLUNK_REALM;
+      delete process.env.SPLUNK_ACCESS_TOKEN;
+    }
+
+    start(options);
+  } finally {
+    if (originalSplunkRealm === undefined) {
+      delete process.env.SPLUNK_REALM;
+    } else {
+      process.env.SPLUNK_REALM = originalSplunkRealm;
+    }
+
+    if (originalSplunkAccessToken === undefined) {
+      delete process.env.SPLUNK_ACCESS_TOKEN;
+    } else {
+      process.env.SPLUNK_ACCESS_TOKEN = originalSplunkAccessToken;
+    }
+  }
 
   globalThis.__ibobsTelemetryStarted = true;
   return true;

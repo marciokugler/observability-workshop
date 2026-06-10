@@ -6,7 +6,7 @@ This page is the full bring-up runbook.
 
 ### 1. Install Node workspace dependencies
 
-If `npm` is missing, return to the prerequisites page and install Node.js and npm first.
+If `npm` is missing or `node --version` reports Node 18, return to the prerequisites page and install Node.js 22 first.
 
 ```bash
 npm install
@@ -43,7 +43,12 @@ sudo apt install -y python3-pip
 
 ### 3. Start Docker
 
-Make sure the Docker daemon is running before you start the collector.
+Make sure the Docker daemon is running, Docker Compose v2 is installed, and your user can access Docker before you start the collector:
+
+```bash
+docker info
+docker compose version
+```
 
 ### 4. Start the Splunk OTel Collector
 

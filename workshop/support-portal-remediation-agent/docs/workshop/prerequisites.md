@@ -4,15 +4,18 @@ Use this pre-flight checklist before debugging application code.
 
 ## Required software
 
-### Node.js and npm
+### Node.js 22 and npm
 
-Install Node.js and npm before checking versions.
+Install Node.js 22 and npm before checking versions. Ubuntu's default `nodejs` package can install Node 18, which is too old for this app.
 
 Ubuntu or Debian workshop VM:
 
 ```bash
 sudo apt update
-sudo apt install -y nodejs npm
+sudo apt install -y curl
+sudo apt install -y ca-certificates
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt install -y nodejs
 ```
 
 ```bash
@@ -40,8 +43,20 @@ python3 -m pip --version
 
 Required for the local collector and Docker Compose flow.
 
+Ubuntu or Debian workshop VM:
+
+```bash
+sudo apt install -y docker.io
+sudo apt install -y docker-compose-v2
+sudo systemctl enable --now docker
+sudo usermod -aG docker "$USER"
+```
+
+Close and reopen the terminal after adding your user to the `docker` group, or run `newgrp docker`.
+
 ```bash
 docker --version
+docker compose version
 docker info
 ```
 
@@ -57,11 +72,14 @@ cloudflared --version
 
 Recommended for a realistic workshop:
 
-- `SPLUNK_ACCESS_TOKEN`
-- `SPLUNK_REALM`
-- `OPENAI_API_KEY`
-- `GALILEO_API_KEY_FILE` or `GALILEO_API_KEY`
-- `VITE_SPLUNK_RUM_TOKEN`
+| Variable | Use |
+| --- | --- |
+| `SPLUNK_ACCESS_TOKEN` | Sends collector telemetry to Splunk Observability Cloud and enables live Splunk evidence lookup. |
+| `SPLUNK_REALM` | Splunk realm for API and ingest endpoints, such as `us1`. |
+| `VITE_SPLUNK_RUM_TOKEN` | Browser RUM token for the claims portal. |
+| `OPENAI_API_KEY` | Optional model-backed remediation agent decisions. |
+| `GALILEO_API_KEY_FILE` | Optional path to a Galileo key file; preferred when you do not want the key in shell history. |
+| `GALILEO_API_KEY` | Optional direct Galileo key for local agent monitoring. |
 
 If credentials are missing:
 
