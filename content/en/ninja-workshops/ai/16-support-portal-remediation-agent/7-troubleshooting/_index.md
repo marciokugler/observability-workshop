@@ -1,7 +1,7 @@
 ---
 title: Troubleshooting
-linkTitle: 7. Troubleshooting
-weight: 7
+linkTitle: 6. Troubleshooting
+weight: 6
 archetype: chapter
 time: 10 minutes
 description: Recover from common local setup, telemetry, and remediation issues during the workshop.
@@ -144,12 +144,12 @@ Check:
 - `AI Claim Status` was rerun after the scenario became active.
 - `CLAIMS_KNOWLEDGE_CACHE_DIR` points at a writable lab directory.
 
-Useful checks:
+Action:
 
-```bash
-curl -s http://127.0.0.1:18104/scenario/state
-curl -s http://127.0.0.1:18103/knowledge/cache/status
-```
+1. Confirm the portal or operator console shows cache pressure as active.
+2. Rerun `AI Claim Status` from the claims portal.
+3. Generate fresh browser traffic with `npm run simulate:rum`.
+4. Compare `AI Claim Status` to `Policy Coverage Lookup` and `Claims FAQ Search`.
 
 ## Telemetry Is Not Visible in Splunk
 
@@ -181,22 +181,12 @@ Check:
 - `Gather MCP Evidence` created an evidence package.
 - The orchestrator built an evidence bundle.
 - Policy mode is visible.
-- The remediation agent is reachable on `18800`.
+- The operator console can propose `clean_claims_knowledge_cache`.
 
 Action:
 
-```bash
-curl -s http://127.0.0.1:18800/agent/health
-curl -s http://127.0.0.1:18110/remediation/health
-```
-
-## Safe Fallback
-
-If the live path is unstable:
-
-1. Show the portal baseline.
-2. Explain and trigger cache pressure.
-3. Use the fallback evidence text in the operator console.
-4. Explain policy and approval.
-5. Approve the controlled action if the local services are healthy.
-6. Close on validation and auditability.
+1. Refresh the operator console.
+2. Click `Gather MCP Evidence`.
+3. Click `Explain`.
+4. Click `Propose`.
+5. If the proposal is still missing, inspect the terminal running `npm run dev` for the first failing service.

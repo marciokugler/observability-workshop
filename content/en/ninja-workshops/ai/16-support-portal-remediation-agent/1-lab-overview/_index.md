@@ -65,7 +65,6 @@ The primary story uses default Splunk Observability signals:
 - Splunk APM service metrics for latency, count, and errors.
 - Splunk OpenTelemetry Collector host metrics for filesystem utilization.
 - Remediation orchestrator and remediation agent spans for action auditability.
-- Galileo traces for agent, tool, guardrail, approval, and model-call visibility when configured.
 
 {{% notice title="Key Rule" style="info" %}}
 Do not make logs or custom demo metrics the required proof path. Use browser experience, APM service health, and host filesystem metrics as the main evidence chain.

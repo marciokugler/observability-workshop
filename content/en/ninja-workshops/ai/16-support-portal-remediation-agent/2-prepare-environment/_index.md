@@ -96,8 +96,6 @@ SPLUNK_ACCESS_TOKEN=
 SPLUNK_REALM=us1
 VITE_SPLUNK_RUM_TOKEN=
 OPENAI_API_KEY=
-GALILEO_API_KEY=
-GALILEO_API_KEY_FILE=
 ```
 
 Credential purpose:
@@ -108,15 +106,12 @@ Credential purpose:
 | `SPLUNK_REALM` | Splunk realm for API and ingest endpoints, such as `us1`. |
 | `VITE_SPLUNK_RUM_TOKEN` | Browser RUM token for the claims portal. |
 | `OPENAI_API_KEY` | Optional model-backed remediation agent decisions. Without it, the agent uses fallback logic. |
-| `GALILEO_API_KEY` | Optional direct Galileo key for local agent monitoring. |
-| `GALILEO_API_KEY_FILE` | Optional path to a Galileo key file; preferred when you do not want the key in shell history. |
 
 If credentials are missing:
 
 - The local app still runs.
 - Splunk telemetry export is absent or partial.
 - The remediation agent uses fallback logic when no OpenAI key is present.
-- Galileo monitoring is disabled when no Galileo key is present.
 
 ## Install Dependencies
 

@@ -13,18 +13,10 @@ Prove the incident with telemetry before approving any remediation action. Separ
 
 Use the portal or operator console button named `Trigger Cache Pressure`.
 
-You can also trigger the scenario from a terminal:
-
-```bash
-curl -X POST http://127.0.0.1:18104/scenario/activate/cache-disk-pressure
-curl -s http://127.0.0.1:18104/scenario/state
-```
-
 Expected result:
 
-```text
-cache-disk-pressure
-```
+- The portal or operator console shows that cache pressure is active.
+- `AI Claim Status` begins using the degraded path after the next browser request.
 
 ## Reproduce Customer Impact
 
@@ -40,25 +32,12 @@ Expected result:
 - `Policy Coverage Lookup` and `Claims FAQ Search` remain healthier comparison journeys.
 - The whole application is not down.
 
-Optional local checks:
-
-```bash
-curl -s http://127.0.0.1:18104/scenario/state
-curl -s http://127.0.0.1:18103/knowledge/cache/status
-```
-
 ## Drive Degraded Traffic
 
-Use this if you need more telemetry points:
+Use browser traffic to create more telemetry points. The simulator clicks the portal journeys instead of calling backend APIs directly.
 
 ```bash
-SIMULATOR_SCENARIO=current SIMULATOR_DURATION_SECONDS=300 SIMULATOR_INTERVAL_MS=750 SIMULATOR_MIX=claim-heavy npm run simulate:traffic
-```
-
-Keep comparison traffic visible:
-
-```bash
-SIMULATOR_SCENARIO=current SIMULATOR_DURATION_SECONDS=180 SIMULATOR_INTERVAL_MS=1000 SIMULATOR_MIX=balanced npm run simulate:traffic
+RUM_SIMULATOR_USERS=8 RUM_SIMULATOR_ROUNDS=8 RUM_SIMULATOR_BROWSERS=chromium RUM_SIMULATOR_CONCURRENCY=2 npm run simulate:rum
 ```
 
 ## Validate in Splunk
@@ -89,7 +68,3 @@ Write a short evidence statement before moving to remediation:
 ```text
 AI Claim Status is degraded for <INSTANCE>. APM shows elevated claims-knowledge duration, and infrastructure metrics show cache filesystem pressure for /var/cache/claims-knowledge. Policy Coverage Lookup and Claims FAQ Search remain healthier comparison journeys. The narrow recommended action is clean_claims_knowledge_cache.
 ```
-
-{{% notice title="Stop and Check" style="warning" %}}
-Do not approve remediation until you can connect the degraded customer journey to `claims-knowledge` service latency and cache filesystem pressure. If one signal is missing, document the gap and lower confidence.
-{{% /notice %}}

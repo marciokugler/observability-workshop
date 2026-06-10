@@ -1,7 +1,7 @@
 ---
-title: Observe the Agent
-linkTitle: 6. Observe the Agent
-weight: 6
+title: "Appendix: Galileo Agent Monitoring"
+linkTitle: "Appendix: Galileo"
+weight: 99
 archetype: chapter
 time: 20 minutes
 description: Inspect remediation spans in Splunk and use Galileo showcase and experiments to evaluate agent behavior.

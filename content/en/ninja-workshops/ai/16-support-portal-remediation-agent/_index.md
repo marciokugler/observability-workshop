@@ -24,8 +24,8 @@ In this hands-on session, you will cover:
 - **Run the Lab Stack** - Start the collector and app services, then create a healthy baseline.
 - **Investigate Cache Pressure** - Trigger the `cache-disk-pressure` scenario and validate customer, APM, and infrastructure evidence.
 - **Govern Remediation** - Gather evidence, explain the incident, propose `clean_claims_knowledge_cache`, approve execution, and validate recovery.
-- **Observe the Agent** - Inspect remediation spans in Splunk and use Galileo showcase and experiment runs for agent monitoring.
 - **Troubleshoot the Lab** - Recover from common workshop-day failures without changing the story.
+- **Appendix: Galileo** - Optional agent monitoring showcase and experiments.
 
 {{% notice title="Workshop Scope" style="info" %}}
 This workshop demonstrates a separate remediation workflow that uses Splunk Observability Cloud as the evidence and investigation layer. It does not imply that Splunk directly invokes arbitrary external actions. The action is policy-checked, operator-approved, limited to the lab cache-cleanup scenario, and validated after execution.
@@ -52,7 +52,7 @@ flowchart LR
 - Docker Desktop or another Docker daemon if you want the local Splunk OpenTelemetry Collector or Docker Compose flow.
 - A Splunk Observability Cloud organization and access token for live telemetry export.
 - A browser RUM token if you want frontend RUM evidence.
-- Optional OpenAI and Galileo credentials for model-backed remediation and agent monitoring.
+- Optional OpenAI credentials for model-backed remediation.
 - A unique `INSTANCE` value for each student when sharing one Splunk Observability Cloud organization.
 
-You can run the local app without credentials. Missing Splunk, OpenAI, or Galileo credentials reduce the live evidence and monitoring paths, but the app and fallback remediation flow still run.
+You can run the local app without credentials. Missing Splunk or OpenAI credentials reduce the live evidence and model-backed paths, but the browser-driven lab flow still runs.

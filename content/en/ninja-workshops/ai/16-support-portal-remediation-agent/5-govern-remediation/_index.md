@@ -37,46 +37,6 @@ Expected evidence package:
 - Proposed action is `clean_claims_knowledge_cache`.
 - Policy mode is `approval_required`.
 
-## AI Assistant Fallback
-
-If Splunk MCP is unavailable, use Splunk AI Assistant or manual investigation notes as a fallback. Paste a concise summary into `Evidence Intake`.
-
-Use this prompt:
-
-```text
-Investigate the Cisco Live claims portal incident over the last 15 minutes.
-
-Scope the investigation to:
-- service.instance.id = $INSTANCE
-- deployment.environment = demo
-- affected journey or business transaction = AI Claim Status
-- likely service = claims-knowledge
-- cache mountpoint = /var/cache/claims-knowledge
-
-Use default Splunk Observability signals only: RUM or browser experience, APM service latency/error evidence, and host filesystem metrics. Do not use logs and do not invent custom metrics.
-
-Return a concise incident summary that includes:
-- whether AI Claim Status is degraded
-- whether Policy Coverage Lookup and Claims FAQ Search remain healthy
-- the likely affected service
-- the filesystem signal for the cache mount or student instance
-- the APM evidence that supports the finding
-- confidence level
-- one narrow recommended remediation action
-
-End with exactly this remediation recommendation if the evidence supports it:
-Recommended action: clean_claims_knowledge_cache.
-```
-
-Fallback text for a workshop-day recovery path:
-
-```text
-High confidence that claims-knowledge cache filesystem pressure degraded the AI Claim Status transaction.
-Host filesystem utilization for the student instance is above threshold, and APM shows elevated claims-knowledge request duration.
-Policy Coverage Lookup and Claims FAQ Search remain healthy comparison journeys.
-Recommended action: clean_claims_knowledge_cache.
-```
-
 ## Review Policy
 
 Before approving, answer:
@@ -110,16 +70,22 @@ Expected result:
 
 ## Validate Recovery
 
-Run:
+Validate from the browser first:
+
+1. Confirm the operator console shows the scenario returned to healthy.
+2. In the claims portal, run `AI Claim Status`.
+3. Run `Policy Coverage Lookup`.
+4. Run `Claims FAQ Search`.
+
+Then generate fresh customer browser traffic:
 
 ```bash
-curl -s http://127.0.0.1:18104/scenario/state
-SIMULATOR_SCENARIO=current SIMULATOR_DURATION_SECONDS=180 SIMULATOR_INTERVAL_MS=750 SIMULATOR_MIX=balanced npm run simulate:traffic
+RUM_SIMULATOR_USERS=4 RUM_SIMULATOR_ROUNDS=4 RUM_SIMULATOR_BROWSERS=chromium RUM_SIMULATOR_CONCURRENCY=2 npm run simulate:rum
 ```
 
 Then validate:
 
-- Scenario state is `healthy`.
+- The portal and operator console show the scenario is healthy.
 - `AI Claim Status` latency improves.
 - Operator console validation status is `validated`.
 - Filesystem utilization drops or stops rising.
