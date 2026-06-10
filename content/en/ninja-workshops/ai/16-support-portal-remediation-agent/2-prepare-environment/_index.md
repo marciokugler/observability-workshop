@@ -34,11 +34,29 @@ After installation, check your local tools:
 
 ```bash
 node --version
+```
+
+```bash
 npm --version
+```
+
+```bash
 python3 --version
+```
+
+```bash
 python3 -m pip --version
+```
+
+```bash
 docker --version
+```
+
+```bash
 docker compose version
+```
+
+```bash
 docker info
 ```
 
@@ -112,8 +130,17 @@ Create the remediation agent virtual environment:
 
 ```bash
 python3 -m venv apps/remediation-agent/.venv
+```
+
+```bash
 apps/remediation-agent/.venv/bin/python -m pip install --index-url https://pypi.org/simple --upgrade pip
+```
+
+```bash
 apps/remediation-agent/.venv/bin/python -m pip install --index-url https://pypi.org/simple -e apps/remediation-agent
+```
+
+```bash
 apps/remediation-agent/.venv/bin/python -m pip show ibobs-remediation-agent
 ```
 

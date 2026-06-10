@@ -40,8 +40,6 @@ unzip observability-workshop.zip
 cd observability-workshop-main/workshop/support-portal-remediation-agent
 ```
 
-GitHub does not support a normal `git clone` of only one folder. Advanced users can use Git sparse checkout to fetch only this app directory, but this quick start assumes the full repository.
-
 ## 3. Install and serve docs
 
 From the app directory:
@@ -80,9 +78,21 @@ Each student should use a different `INSTANCE`, such as `student-014`.
 
 ```bash
 npm install
+```
+
+```bash
 python3 -m venv apps/remediation-agent/.venv
+```
+
+```bash
 apps/remediation-agent/.venv/bin/python -m pip install --index-url https://pypi.org/simple --upgrade pip
+```
+
+```bash
 apps/remediation-agent/.venv/bin/python -m pip install --index-url https://pypi.org/simple -e apps/remediation-agent
+```
+
+```bash
 apps/remediation-agent/.venv/bin/python -m pip show ibobs-remediation-agent
 ```
 
@@ -96,9 +106,21 @@ Use this only when you are validating telemetry:
 
 ```bash
 docker compose version
+```
+
+```bash
 set -a
+```
+
+```bash
 source .env
+```
+
+```bash
 set +a
+```
+
+```bash
 npm run dev:collector
 ```
 
@@ -110,9 +132,21 @@ In another terminal:
 
 ```bash
 cd observability-workshop/workshop/support-portal-remediation-agent
+```
+
+```bash
 set -a
+```
+
+```bash
 source .env
+```
+
+```bash
 set +a
+```
+
+```bash
 npm run dev:all
 ```
 

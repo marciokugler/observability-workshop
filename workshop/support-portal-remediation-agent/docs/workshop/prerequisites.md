@@ -20,6 +20,9 @@ sudo apt install -y nodejs
 
 ```bash
 node --version
+```
+
+```bash
 npm --version
 ```
 
@@ -36,6 +39,9 @@ sudo apt install -y python3-pip
 
 ```bash
 python3 --version
+```
+
+```bash
 python3 -m pip --version
 ```
 
@@ -56,7 +62,13 @@ Close and reopen the terminal after adding your user to the `docker` group, or r
 
 ```bash
 docker --version
+```
+
+```bash
 docker compose version
+```
+
+```bash
 docker info
 ```
 

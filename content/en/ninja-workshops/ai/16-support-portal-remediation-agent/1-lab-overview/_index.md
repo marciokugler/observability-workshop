@@ -41,8 +41,6 @@ unzip observability-workshop.zip
 cd observability-workshop-main/workshop/support-portal-remediation-agent
 ```
 
-GitHub does not support a normal `git clone` of only one folder. Advanced users can use Git sparse checkout to fetch only this lab app, but the classroom path uses the full repository so the published docs, app source, shared packages, and lab files stay together.
-
 Run all app commands from `workshop/support-portal-remediation-agent` unless a step says otherwise.
 
 ## App Components

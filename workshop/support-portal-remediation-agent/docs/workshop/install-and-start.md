@@ -27,8 +27,17 @@ Expected result:
 
 ```bash
 python3 -m venv apps/remediation-agent/.venv
+```
+
+```bash
 apps/remediation-agent/.venv/bin/python -m pip install --index-url https://pypi.org/simple --upgrade pip
+```
+
+```bash
 apps/remediation-agent/.venv/bin/python -m pip install --index-url https://pypi.org/simple -e apps/remediation-agent
+```
+
+```bash
 apps/remediation-agent/.venv/bin/python -m pip show ibobs-remediation-agent
 ```
 
@@ -53,6 +62,9 @@ Make sure the Docker daemon is running, Docker Compose v2 is installed, and your
 
 ```bash
 docker info
+```
+
+```bash
 docker compose version
 ```
 

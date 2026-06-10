@@ -9,13 +9,13 @@ git clone https://github.com/marciokugler/observability-workshop.git
 cd observability-workshop
 ```
 
-GitHub does not support a normal `git clone` of only one folder. Advanced users can use Git sparse checkout to fetch only `workshop/support-portal-remediation-agent`, but the classroom instructions assume the full repository so the docs, app source, shared packages, and lab files stay together.
-
-Run app commands from this directory:
+Run app commands from this directory. From the cloned repository root, enter it with:
 
 ```bash
 cd workshop/support-portal-remediation-agent
 ```
+
+If your prompt already ends in `workshop/support-portal-remediation-agent`, stay there and run the app commands directly.
 
 ## Workspaces
 
@@ -49,10 +49,25 @@ One-time setup from this app directory:
 
 ```bash
 test -f .env || cp .env.example .env
+```
+
+```bash
 npm install
+```
+
+```bash
 python3 -m venv apps/remediation-agent/.venv
+```
+
+```bash
 apps/remediation-agent/.venv/bin/python -m pip install --index-url https://pypi.org/simple --upgrade pip
+```
+
+```bash
 apps/remediation-agent/.venv/bin/python -m pip install --index-url https://pypi.org/simple -e apps/remediation-agent
+```
+
+```bash
 apps/remediation-agent/.venv/bin/python -m pip show ibobs-remediation-agent
 ```
 

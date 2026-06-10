@@ -1,8 +1,29 @@
-import { start } from "@splunk/otel";
+import { createRequire } from "node:module";
 import { appVersion, deploymentEnvironment, serviceNamespace } from "./config";
 
 declare global {
   var __ibobsTelemetryStarted: boolean | undefined;
+}
+
+type SplunkNodeStartOptions = {
+  serviceName: string;
+  tracing: boolean;
+  metrics: boolean;
+  profiling: boolean;
+  logging: boolean;
+  endpoint?: string;
+  accessToken?: string;
+  realm?: string;
+};
+
+type SplunkOtelModule = {
+  start: (options: SplunkNodeStartOptions) => void;
+};
+
+const require = createRequire(import.meta.url);
+
+function loadSplunkOtel() {
+  return require("@splunk/otel") as SplunkOtelModule;
 }
 
 export function initSplunkNodeTelemetry(serviceName: string) {
@@ -36,7 +57,7 @@ export function initSplunkNodeTelemetry(serviceName: string) {
   process.env.SPLUNK_PROFILER_ENABLED = process.env.SPLUNK_PROFILER_ENABLED ?? "false";
   process.env.OTEL_METRIC_EXPORT_INTERVAL = process.env.OTEL_METRIC_EXPORT_INTERVAL ?? "5000";
 
-  const options: Parameters<typeof start>[0] = {
+  const options: SplunkNodeStartOptions = {
     serviceName,
     tracing: true,
     metrics: true,
@@ -64,7 +85,7 @@ export function initSplunkNodeTelemetry(serviceName: string) {
       delete process.env.SPLUNK_ACCESS_TOKEN;
     }
 
-    start(options);
+    loadSplunkOtel().start(options);
   } finally {
     if (originalSplunkRealm === undefined) {
       delete process.env.SPLUNK_REALM;

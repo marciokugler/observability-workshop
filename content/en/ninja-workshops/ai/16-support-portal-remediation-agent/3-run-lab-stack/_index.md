@@ -17,6 +17,8 @@ cd observability-workshop/workshop/support-portal-remediation-agent
 
 If you used the ZIP download, use `cd observability-workshop-main/workshop/support-portal-remediation-agent` instead.
 
+If your prompt already ends in `workshop/support-portal-remediation-agent`, stay there and run the commands directly.
+
 ## Start the Collector
 
 Use this when you want Splunk APM, RUM, and host metric export:

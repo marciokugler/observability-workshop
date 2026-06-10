@@ -49,9 +49,21 @@ Recreate the virtual environment only when you intend to replace it:
 
 ```bash
 rm -rf apps/remediation-agent/.venv
+```
+
+```bash
 python3 -m venv apps/remediation-agent/.venv
+```
+
+```bash
 apps/remediation-agent/.venv/bin/python -m pip install --index-url https://pypi.org/simple --upgrade pip
+```
+
+```bash
 apps/remediation-agent/.venv/bin/python -m pip install --index-url https://pypi.org/simple -e apps/remediation-agent
+```
+
+```bash
 apps/remediation-agent/.venv/bin/python -m pip show ibobs-remediation-agent
 ```
 
@@ -69,11 +81,29 @@ Action:
 
 ```bash
 sudo systemctl enable --now docker
+```
+
+```bash
 sudo usermod -aG docker "$USER"
+```
+
+```bash
 newgrp docker
+```
+
+```bash
 docker info
+```
+
+```bash
 docker compose version
+```
+
+```bash
 grep -E '^OTEL_EXPORTER_OTLP_ENDPOINT=' .env
+```
+
+```bash
 npm run dev:collector
 ```
 
