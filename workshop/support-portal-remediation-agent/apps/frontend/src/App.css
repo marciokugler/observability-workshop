@@ -16,7 +16,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background:
-    linear-gradient(180deg, rgba(28, 65, 102, 0.08), rgba(237, 241, 245, 0) 340px),
+    linear-gradient(180deg, rgba(30, 73, 94, 0.08), rgba(237, 241, 245, 0) 340px),
     #edf1f5;
 }
 
@@ -36,6 +36,31 @@ button {
   padding: 28px;
 }
 
+.portal-nav {
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 18px;
+  padding: 0 4px;
+  color: #20304a;
+}
+
+.portal-nav strong {
+  font-size: 18px;
+  letter-spacing: 0;
+}
+
+.portal-nav div {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  color: #536173;
+  font-size: 14px;
+  font-weight: 750;
+}
+
 .portal-hero {
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(360px, 0.75fr);
@@ -46,9 +71,7 @@ button {
 .hero-copy,
 .command-card,
 .workspace-primary,
-.compact-panel,
-.transaction-card,
-.result-panel {
+.compact-panel {
   border: 1px solid #d4dce7;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.92);
@@ -60,8 +83,7 @@ button {
   padding: 34px;
   color: #ffffff;
   background:
-    linear-gradient(120deg, rgba(12, 32, 54, 0.96), rgba(20, 68, 92, 0.9)),
-    radial-gradient(circle at 80% 18%, rgba(63, 183, 156, 0.32), transparent 36%),
+    linear-gradient(120deg, rgba(12, 32, 54, 0.96), rgba(20, 74, 85, 0.92)),
     #10233a;
   border-color: rgba(255, 255, 255, 0.16);
   display: flex;
@@ -86,8 +108,7 @@ button {
 }
 
 .eyebrow,
-.section-kicker,
-.mono-label {
+.section-kicker {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -111,8 +132,7 @@ button {
 }
 
 .command-card-header,
-.section-heading,
-.transaction-topline {
+.section-heading {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -128,8 +148,7 @@ button {
 
 .command-card p,
 .panel-copy,
-.compact-panel p,
-.transaction-card p {
+.compact-panel p {
   color: #5d6b80;
   line-height: 1.55;
 }
@@ -165,7 +184,7 @@ button {
 
 .command-actions {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 10px;
   margin-top: auto;
 }
@@ -226,63 +245,8 @@ button {
   border-color: #e48f70;
 }
 
-.signal-bar {
-  margin: 20px 0;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.signal-item,
-.request-state {
-  min-height: 84px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  border-radius: 8px;
-  background: #ffffff;
-  border: 1px solid #d4dce7;
-}
-
-.signal-item svg,
-.request-state svg {
-  flex: 0 0 auto;
-  color: #177b75;
-}
-
-.signal-item span {
-  display: block;
-  color: #657386;
-  font-size: 12px;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.signal-item strong,
-.request-state strong {
-  display: block;
-  margin-top: 4px;
-  color: #1f2d43;
-  line-height: 1.25;
-}
-
-.request-running {
-  border-color: #8bb8da;
-  background: #f1f7fc;
-}
-
-.request-success {
-  border-color: #a9ddcf;
-  background: #f0fbf7;
-}
-
-.request-error {
-  border-color: #efb199;
-  background: #fff4ef;
-}
-
 .workspace-grid {
+  margin-top: 20px;
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
   gap: 20px;
@@ -290,8 +254,7 @@ button {
 }
 
 .workspace-primary,
-.compact-panel,
-.result-panel {
+.compact-panel {
   padding: 24px;
 }
 
@@ -300,8 +263,7 @@ button {
 }
 
 .section-heading h2,
-.compact-title h3,
-.transaction-card h3 {
+.compact-title h3 {
   margin: 0;
   color: #18243a;
   letter-spacing: 0;
@@ -370,6 +332,45 @@ button {
   font-size: 13px;
 }
 
+.customer-response {
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid #d9e3ec;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.customer-response h3 {
+  margin: 8px 0 8px;
+  color: #18243a;
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.customer-response p {
+  margin: 0;
+  color: #4f5f73;
+  line-height: 1.55;
+}
+
+.customer-response small {
+  display: block;
+  margin-top: 10px;
+  color: #7d2d18;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.response-success {
+  border-color: #a9ddcf;
+  background: #f1fbf7;
+}
+
+.response-error {
+  border-color: #efb199;
+  background: #fff4ef;
+}
+
 .side-stack {
   display: grid;
   gap: 20px;
@@ -394,110 +395,26 @@ button {
   width: 100%;
 }
 
-.transaction-strip {
-  margin-top: 20px;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.transaction-card {
-  display: grid;
-  grid-template-columns: 42px minmax(0, 1fr);
-  gap: 14px;
-  min-height: 132px;
-  padding: 18px;
-}
-
-.transaction-icon {
-  width: 42px;
-  height: 42px;
-  display: grid;
-  place-items: center;
-  border-radius: 8px;
-  color: #176f69;
-  background: #e2f5f0;
-}
-
-.transaction-card h3 {
-  font-size: 16px;
-  line-height: 1.25;
-}
-
-.transaction-topline span {
-  flex: 0 0 auto;
-  border-radius: 8px;
-  padding: 5px 8px;
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.transaction-card p {
-  margin: 10px 0 0;
-  font-size: 14px;
-}
-
-.transaction-healthy .transaction-topline span {
-  color: #0c6a52;
-  background: #ddf7ee;
-}
-
-.transaction-risk {
-  border-color: #efb199;
-  background: #fffaf7;
-}
-
-.transaction-risk .transaction-icon {
-  color: #923b22;
-  background: #ffe5d8;
-}
-
-.transaction-risk .transaction-topline span {
-  color: #8f351c;
-  background: #ffe8dd;
-}
-
-.result-panel {
-  margin-top: 20px;
-}
-
-.mono-label {
-  color: #28425e;
-  background: #eef3f8;
-  border: 1px solid #cbd6e2;
-  border-radius: 8px;
-  padding: 7px 9px;
-  text-transform: none;
-}
-
-.result-panel pre {
-  min-height: 220px;
-  max-height: 460px;
-  margin: 18px 0 0;
-  padding: 18px;
-  overflow: auto;
-  color: #dce8f1;
-  background: #101d2c;
-  border-radius: 8px;
-  line-height: 1.5;
-  font-size: 13px;
-}
-
 @media (max-width: 1100px) {
   .portal-hero,
   .workspace-grid {
     grid-template-columns: 1fr;
-  }
-
-  .signal-bar,
-  .transaction-strip {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 720px) {
   .portal-shell {
     padding: 16px;
+  }
+
+  .portal-nav {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .portal-nav div {
+    flex-wrap: wrap;
+    gap: 12px 18px;
   }
 
   .hero-copy {
@@ -513,23 +430,19 @@ button {
     font-size: 16px;
   }
 
-  .command-actions,
-  .signal-bar,
-  .transaction-strip {
+  .command-actions {
     grid-template-columns: 1fr;
   }
 
   .command-card-header,
   .section-heading,
-  .transaction-topline,
   .panel-footer {
     align-items: flex-start;
     flex-direction: column;
   }
 
   .workspace-primary,
-  .compact-panel,
-  .result-panel {
+  .compact-panel {
     padding: 18px;
   }
 

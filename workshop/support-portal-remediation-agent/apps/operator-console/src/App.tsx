@@ -1,12 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Activity,
-  AlertTriangle,
   BadgeCheck,
   Bot,
-  CheckCircle2,
   ClipboardCheck,
-  Clock3,
   FileText,
   Gauge,
   HardDrive,
@@ -18,7 +15,6 @@ import {
   RotateCcw,
   ShieldCheck,
   Sparkles,
-  TerminalSquare,
   Zap
 } from "lucide-react";
 import { currentBrowserAppConfig } from "@ibobs/runtime-config/browser";
@@ -191,45 +187,12 @@ type WebhookReceipt = {
   detectorName?: string;
 };
 
-type AgentMonitoringStatus = {
-  status: "ready" | "not_ready" | string;
-  provider: string;
-  project: string;
-  logStream: string;
-  consoleUrl?: string;
-  apiKeyConfigured: boolean;
-  apiKeySource: "environment" | "file" | "missing" | string;
-  agent: {
-    status: string;
-    model?: string;
-    telemetry?: string;
-    agentMonitoring?: string;
-    error?: string;
-  };
-  remediationInstrumentation: Array<{
-    stage: string;
-    spanType: string;
-    spanName: string;
-    route: string;
-  }>;
-  showcaseInstrumentation?: Array<{
-    stage: string;
-    spanType: string;
-    spanName: string;
-    purpose: string;
-  }>;
-};
-
 type CommandAction =
   | "create"
   | "refresh"
   | "explain"
   | "propose"
   | "approve"
-  | "showcase"
-  | "pressure"
-  | "reset"
-  | "monitoring"
   | "resetFlow"
   | null;
 
@@ -241,15 +204,12 @@ function readResponse(value: string): OrchestratorResponse | null {
   }
 }
 
-function formatScenarioLabel(value: string) {
-  return value
-    .split("-")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-}
-
 function valueOrFallback(value: string | number | undefined | null, fallback = "n/a") {
   return value === undefined || value === null || value === "" ? fallback : String(value);
+}
+
+function displayLabel(value: string | number | undefined | null, fallback = "n/a") {
+  return valueOrFallback(value, fallback).replace(/[_-]+/g, " ");
 }
 
 function formatEvidenceValue(value: number | undefined, unit?: string) {
@@ -385,15 +345,13 @@ function EvidenceMetricGroup({
 }
 
 export function App() {
-  const { orchestratorBaseUrl, scenarioControllerBaseUrl } = currentBrowserAppConfig();
+  const { orchestratorBaseUrl } = currentBrowserAppConfig();
   const [assistantSummary, setAssistantSummary] = useState(exampleAssistantOutput);
   const [incidentId, setIncidentId] = useState("");
   const [result, setResult] = useState<string>("No incident loaded yet.");
-  const [scenarioState, setScenarioState] = useState("healthy");
   const [busyAction, setBusyAction] = useState<CommandAction>(null);
   const [commandMessage, setCommandMessage] = useState("Ready for incident intake.");
   const [lastUpdated, setLastUpdated] = useState("Not refreshed");
-  const [agentMonitoring, setAgentMonitoring] = useState<AgentMonitoringStatus | null>(null);
   const parsedResult = readResponse(result);
 
   async function runCommand(action: Exclude<CommandAction, null>, label: string, fn: () => Promise<void>) {
@@ -491,21 +449,11 @@ export function App() {
     });
   }
 
-  async function refreshAgentMonitoring() {
-    const response = await fetch(`${orchestratorBaseUrl}/remediation/agent-monitoring`);
-    const payload = (await response.json()) as AgentMonitoringStatus;
-    setAgentMonitoring(payload);
-  }
-
   useEffect(() => {
-    void refreshScenario().catch(handlePassiveRefreshError);
     void refreshIncidents().catch(handlePassiveRefreshError);
-    void refreshAgentMonitoring().catch(handlePassiveRefreshError);
 
     const intervalId = window.setInterval(() => {
-      void refreshScenario().catch(handlePassiveRefreshError);
       void refreshIncidents().catch(handlePassiveRefreshError);
-      void refreshAgentMonitoring().catch(handlePassiveRefreshError);
       setLastUpdated(new Date().toLocaleTimeString());
     }, 5000);
 
@@ -578,23 +526,6 @@ export function App() {
     });
   }
 
-  async function runGalileoShowcase() {
-    await runCommand("showcase", "Running Galileo showcase session", async () => {
-      const response = await fetch(`${orchestratorBaseUrl}/remediation/galileo/showcase`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          incidentId: `galileo-console-${Date.now()}`,
-          executeRemediation: true,
-          includeUnsafeOperatorNote: true
-        })
-      });
-      const payload = await response.json();
-      setIncidentId(payload.incidentId ?? incidentId);
-      setResult(JSON.stringify(payload, null, 2));
-    });
-  }
-
   async function resetRemediationFlow() {
     await runCommand("resetFlow", "Resetting remediation flow", async () => {
       const response = await fetch(`${orchestratorBaseUrl}/remediation/reset`, {
@@ -631,32 +562,6 @@ export function App() {
     });
   }
 
-  async function refreshScenario() {
-    const response = await fetch(`${scenarioControllerBaseUrl}/scenario/state`);
-    const payload = (await response.json()) as { activeScenario: string };
-    setScenarioState(payload.activeScenario);
-  }
-
-  async function activateScenario(scenarioId: string) {
-    await runCommand("pressure", "Activating cache pressure scenario", async () => {
-      const response = await fetch(`${scenarioControllerBaseUrl}/scenario/activate/${scenarioId}`, {
-        method: "POST"
-      });
-      const payload = (await response.json()) as { activeScenario: string };
-      setScenarioState(payload.activeScenario);
-    });
-  }
-
-  async function resetScenario() {
-    await runCommand("reset", "Resetting scenario", async () => {
-      const response = await fetch(`${scenarioControllerBaseUrl}/scenario/reset`, {
-        method: "POST"
-      });
-      const payload = (await response.json()) as { activeScenario: string };
-      setScenarioState(payload.activeScenario);
-    });
-  }
-
   const enrichmentWarnings =
     parsedResult?.evidence?.sourceNotes?.enrichmentWarnings ?? parsedResult?.enrichment?.warnings ?? [];
   const enrichmentSources =
@@ -667,15 +572,6 @@ export function App() {
     Boolean(incidentId && parsedResult?.proposedAction?.actionId) &&
     parsedResult?.proposedAction?.policyMode === "approval_required" &&
     parsedResult?.proposedAction?.status === "proposed";
-  const isScenarioHealthy = scenarioState === "healthy";
-  const isGalileoReady = agentMonitoring?.status === "ready";
-  const agentMonitoringLabel = agentMonitoring
-    ? isGalileoReady
-      ? "galileo ready"
-      : agentMonitoring.apiKeyConfigured
-        ? "not initialized"
-        : "key missing"
-    : "unknown";
   const lifecycle = useMemo(
     () => [
       {
@@ -732,64 +628,45 @@ export function App() {
             and audit review.
           </p>
         </div>
-
-        <aside className="status-panel">
-          <div className="status-header">
-            <span>Run state</span>
-            <span className={`status-pill ${isScenarioHealthy ? "status-healthy" : "status-risk"}`}>
-              {isScenarioHealthy ? <CheckCircle2 size={15} /> : <AlertTriangle size={15} />}
-              {formatScenarioLabel(scenarioState)}
-            </span>
-          </div>
-          <div className="command-message">
-            <Clock3 size={18} aria-hidden="true" />
-            <strong>{commandMessage}</strong>
-          </div>
-          <div className="status-grid">
-            <span>Incident</span>
-            <strong>{incidentId || parsedResult?.incident?.incidentId || "none"}</strong>
-            <span>Last refresh</span>
-            <strong>{lastUpdated}</strong>
-          </div>
-        </aside>
       </header>
 
       <section className="metric-grid" aria-label="Live incident summary">
         <MetricTile
           icon={Gauge}
           label="Status"
-          value={
+          value={displayLabel(
             parsedResult?.proposedAction?.status ??
             parsedResult?.incident?.status ??
-            parsedResult?.verifyResult?.status ??
+            parsedResult?.verifyResult?.status,
             "idle"
-          }
+          )}
           tone={parsedResult?.verifyResult?.status ? "healthy" : "neutral"}
         />
         <MetricTile
           icon={ShieldCheck}
           label="Policy"
-          value={parsedResult?.policy?.policyMode ?? parsedResult?.proposedAction?.policyMode ?? "not evaluated"}
+          value={displayLabel(parsedResult?.policy?.policyMode ?? parsedResult?.proposedAction?.policyMode, "not evaluated")}
           tone={canApprove ? "risk" : "neutral"}
         />
         <MetricTile
           icon={HardDrive}
           label="Suspect signal"
-          value={parsedResult?.evidence?.serviceImpact?.suspectService ?? parsedResult?.enrichment?.suspectService ?? "cache volume"}
+          value={displayLabel(parsedResult?.evidence?.serviceImpact?.suspectService ?? parsedResult?.enrichment?.suspectService, "cache volume")}
           tone={parsedResult?.evidence?.serviceImpact?.suspectService ? "action" : "neutral"}
         />
         <MetricTile
           icon={Bot}
           label="Action"
-          value={parsedResult?.proposedAction?.type ?? parsedResult?.actionId ?? "not proposed"}
+          value={displayLabel(parsedResult?.proposedAction?.type ?? parsedResult?.actionId, "not proposed")}
           tone={parsedResult?.proposedAction?.type ? "action" : "neutral"}
         />
-        <MetricTile
-          icon={Activity}
-          label="Agent monitor"
-          value={agentMonitoringLabel}
-          tone={isGalileoReady ? "healthy" : agentMonitoring?.apiKeyConfigured ? "risk" : "neutral"}
-        />
+      </section>
+
+      <section className="command-status" aria-label="Command status">
+        <Activity size={18} aria-hidden="true" />
+        <strong>{commandMessage}</strong>
+        <span>Incident {incidentId || parsedResult?.incident?.incidentId || "none"}</span>
+        <span>Last refresh {lastUpdated}</span>
       </section>
 
       <section className="lifecycle-panel" aria-label="Incident lifecycle">
@@ -854,103 +731,6 @@ export function App() {
             </CommandButton>
           </div>
         </article>
-
-        <aside className="panel control-panel">
-          <div className="panel-heading">
-            <div>
-              <span className="section-kicker">Demo control</span>
-              <h2>Scenario Controls</h2>
-            </div>
-          </div>
-          <p>Fill the claims-knowledge cache volume before incident intake, then clean it during remediation.</p>
-          <div className="control-actions">
-            <CommandButton
-              icon={Zap}
-              onClick={() => activateScenario("cache-disk-pressure")}
-              disabled={busyAction !== null}
-              variant="danger"
-            >
-              Trigger Cache Pressure
-            </CommandButton>
-            <CommandButton icon={RotateCcw} onClick={resetScenario} disabled={busyAction !== null}>
-              Reset Scenario
-            </CommandButton>
-            <CommandButton
-              icon={RefreshCw}
-              onClick={() => runCommand("refresh", "Refreshing scenario state", refreshScenario)}
-              disabled={busyAction !== null}
-            >
-              Refresh Status
-            </CommandButton>
-          </div>
-          <div className="monitoring-summary">
-            <div className="panel-heading">
-              <div>
-                <span className="section-kicker">Galileo</span>
-                <h2>Agent Monitoring</h2>
-              </div>
-              <span className={`mini-pill ${isGalileoReady ? "mini-pill-ready" : "mini-pill-risk"}`}>
-                {agentMonitoringLabel}
-              </span>
-            </div>
-            <dl className="definition-grid compact">
-              <div>
-                <dt>Key source</dt>
-                <dd>{agentMonitoring?.apiKeySource ?? "unknown"}</dd>
-              </div>
-              <div>
-                <dt>Project</dt>
-                <dd>{agentMonitoring?.project ?? "ciscolive26"}</dd>
-              </div>
-              <div>
-                <dt>Log stream</dt>
-                <dd>{agentMonitoring?.logStream ?? "remediation-agent"}</dd>
-              </div>
-              <div>
-                <dt>Agent</dt>
-                <dd>{agentMonitoring?.agent.agentMonitoring ?? agentMonitoring?.agent.status ?? "unknown"}</dd>
-              </div>
-              <div>
-                <dt>Session</dt>
-                <dd>{parsedResult?.sessionId ?? "not generated"}</dd>
-              </div>
-            </dl>
-            <div className="showcase-card">
-              <div>
-                <strong>Showcase Story</strong>
-                <span>{parsedResult?.postmortem?.auditOutcome ?? "ready"}</span>
-              </div>
-              <p>
-                {parsedResult?.postmortem?.summary ??
-                  "Generate a session with evidence retrieval, agent reasoning, guardrails, approval, action, and verification."}
-              </p>
-            </div>
-            <div className="instrumentation-list showcase-list">
-              <strong>Showcase traces</strong>
-              <ul>
-                {(agentMonitoring?.showcaseInstrumentation ?? []).map((span) => (
-                  <li key={span.spanName}>
-                    <span>{span.stage}</span>
-                    <b>{span.spanName}</b>
-                    <em>{span.spanType}</em>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="control-actions">
-              <CommandButton icon={Sparkles} onClick={runGalileoShowcase} disabled={!isGalileoReady || busyAction !== null} variant="primary">
-                Run Showcase
-              </CommandButton>
-              <CommandButton
-                icon={Activity}
-                onClick={() => runCommand("monitoring", "Refreshing Galileo monitoring", refreshAgentMonitoring)}
-                disabled={busyAction !== null}
-              >
-                Refresh Galileo
-              </CommandButton>
-            </div>
-          </div>
-        </aside>
       </section>
 
       <section className="detail-grid">
@@ -1148,20 +928,6 @@ export function App() {
             </ul>
           </div>
         </article>
-      </section>
-
-      <section className="raw-panel">
-        <div className="panel-heading">
-          <div>
-            <span className="section-kicker">Debug view</span>
-            <h2>
-              <TerminalSquare size={22} aria-hidden="true" />
-              Raw Response
-            </h2>
-          </div>
-          <span className="mini-pill">json</span>
-        </div>
-        <pre>{result}</pre>
       </section>
     </main>
   );

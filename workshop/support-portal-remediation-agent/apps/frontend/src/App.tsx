@@ -1,46 +1,20 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  Activity,
   AlertTriangle,
   ArrowRight,
   BookOpenText,
   CheckCircle2,
-  Clock3,
   FileSearch,
-  Gauge,
-  MessageSquareText,
   RefreshCw,
   RotateCcw,
   Search,
   Send,
-  ShieldCheck,
   Sparkles,
   Zap
 } from "lucide-react";
 import { currentBrowserAppConfig } from "@ibobs/runtime-config/browser";
 import { setJourneyContext, trackBusinessTransaction } from "./rum";
 import "./App.css";
-
-const transactionDefinitions = [
-  {
-    id: "claim_status_response",
-    name: "AI Claim Status",
-    detail: "AI-generated claim status response backed by the claims knowledge service.",
-    icon: MessageSquareText
-  },
-  {
-    id: "policy_coverage_lookup",
-    name: "Policy Coverage Lookup",
-    detail: "Independent transaction kept healthy during the primary incident.",
-    icon: FileSearch
-  },
-  {
-    id: "claims_faq_search",
-    name: "Claims FAQ Search",
-    detail: "FAQ search remains available while the claim status path absorbs the cache pressure incident.",
-    icon: BookOpenText
-  }
-];
 
 type ActionKey =
   | "support"
@@ -51,9 +25,11 @@ type ActionKey =
   | "refresh"
   | null;
 
-type RequestState = {
-  label: string;
-  tone: "idle" | "running" | "success" | "error";
+type CustomerResult = {
+  title: string;
+  body: string;
+  detail?: string;
+  tone: "idle" | "success" | "error";
 };
 
 function formatScenarioLabel(value: string) {
@@ -102,29 +78,16 @@ export function App() {
   );
   const [caseId, setCaseId] = useState("POL-4821");
   const [articleQuery, setArticleQuery] = useState("rental reimbursement deductible");
-  const [result, setResult] = useState("Choose a transaction to see live API output.");
+  const [customerResult, setCustomerResult] = useState<CustomerResult>({
+    title: "Claims support response",
+    body: "Submit a claim question, policy lookup, or FAQ search to see customer-ready guidance here.",
+    tone: "idle"
+  });
   const [activeScenario, setActiveScenario] = useState("healthy");
   const [scenarioMessage, setScenarioMessage] = useState("No scenario active.");
   const [busyAction, setBusyAction] = useState<ActionKey>(null);
-  const [requestState, setRequestState] = useState<RequestState>({
-    label: "Ready for customer traffic.",
-    tone: "idle"
-  });
 
   const isIncidentActive = activeScenario !== "healthy";
-  const transactionHealth = useMemo(
-    () =>
-      transactionDefinitions.map((transaction) => {
-        const isPrimary = transaction.id === "claim_status_response";
-        const status = isPrimary && isIncidentActive ? "At risk" : "Healthy";
-        return {
-          ...transaction,
-          status,
-          tone: status === "At risk" ? "risk" : "healthy"
-        };
-      }),
-    [isIncidentActive]
-  );
 
   useEffect(() => {
     setJourneyContext({
@@ -136,18 +99,21 @@ export function App() {
     void refreshScenario();
   }, []);
 
-  async function runAction(action: Exclude<ActionKey, null>, label: string, fn: () => Promise<void>) {
+  async function runAction(action: Exclude<ActionKey, null>, fn: () => Promise<void>) {
     setBusyAction(action);
-    setRequestState({ label, tone: "running" });
 
     try {
       await fn();
-      setRequestState({ label: `${label} complete.`, tone: "success" });
     } catch (error) {
       const message = formatActionError(error, action);
-      setRequestState({ label: message, tone: "error" });
       if (action === "support" || action === "case" || action === "article") {
-        setResult(JSON.stringify({ error: message }, null, 2));
+        setCustomerResult({
+          title: "Request unavailable",
+          body: message,
+          tone: "error"
+        });
+      } else {
+        setScenarioMessage(message);
       }
     } finally {
       setBusyAction(null);
@@ -155,7 +121,7 @@ export function App() {
   }
 
   async function callSupportResponse() {
-    await runAction("support", "Submitting AI claim status transaction", async () => {
+    await runAction("support", async () => {
       const payload = await trackBusinessTransaction(
         "claim_status_response",
         "claim_status_submit",
@@ -178,14 +144,19 @@ export function App() {
 
           return response.json();
         }
-      );
+      ) as { response?: string; dependency?: { answer?: string; error?: string } };
 
-      setResult(JSON.stringify(payload, null, 2));
+      setCustomerResult({
+        title: "Claim status guidance",
+        body: payload.response ?? payload.dependency?.answer ?? "Your claim status request was received.",
+        detail: payload.dependency?.error,
+        tone: payload.dependency?.error ? "error" : "success"
+      });
     });
   }
 
   async function callCaseLookup() {
-    await runAction("case", "Checking policy coverage transaction", async () => {
+    await runAction("case", async () => {
       const payload = await trackBusinessTransaction(
         "policy_coverage_lookup",
         "policy_coverage_lookup",
@@ -202,14 +173,19 @@ export function App() {
           }
           return response.json();
         }
-      );
+      ) as { coverageStatus?: string; nextStep?: string; policyId?: string };
 
-      setResult(JSON.stringify(payload, null, 2));
+      setCustomerResult({
+        title: `Policy ${payload.policyId ?? caseId}`,
+        body: payload.coverageStatus ?? "Coverage information is available for this policy.",
+        detail: payload.nextStep,
+        tone: "success"
+      });
     });
   }
 
   async function callArticleSearch() {
-    await runAction("article", "Searching claims FAQ transaction", async () => {
+    await runAction("article", async () => {
       const payload = await trackBusinessTransaction(
         "claims_faq_search",
         "claims_faq_search",
@@ -226,14 +202,19 @@ export function App() {
           }
           return response.json();
         }
-      );
+      ) as { answer?: string; error?: string };
 
-      setResult(JSON.stringify(payload, null, 2));
+      setCustomerResult({
+        title: "Claims help center",
+        body: payload.answer ?? "Claims FAQ lookup completed.",
+        detail: payload.error,
+        tone: payload.error ? "error" : "success"
+      });
     });
   }
 
   async function refreshScenario() {
-    await runAction("refresh", "Refreshing scenario state", async () => {
+    try {
       const response = await fetch(`${scenarioControllerBaseUrl}/scenario/state`);
       const payload = (await response.json()) as { activeScenario: string };
       setActiveScenario(payload.activeScenario);
@@ -242,11 +223,13 @@ export function App() {
           ? "No scenario active."
           : `Scenario active: ${formatScenarioLabel(payload.activeScenario)}`
       );
-    });
+    } catch (error) {
+      setScenarioMessage(formatActionError(error, "refresh"));
+    }
   }
 
   async function activateScenario(scenarioId: string) {
-    await runAction("pressure", "Activating cache pressure scenario", async () => {
+    await runAction("pressure", async () => {
       const response = await fetch(`${scenarioControllerBaseUrl}/scenario/activate/${scenarioId}`, {
         method: "POST"
       });
@@ -257,7 +240,7 @@ export function App() {
   }
 
   async function resetScenario() {
-    await runAction("reset", "Resetting scenario", async () => {
+    await runAction("reset", async () => {
       const response = await fetch(`${scenarioControllerBaseUrl}/scenario/reset`, {
         method: "POST"
       });
@@ -269,16 +252,25 @@ export function App() {
 
   return (
     <main className="portal-shell">
+      <nav className="portal-nav" aria-label="Claims portal">
+        <strong>Northstar Mutual Insurance</strong>
+        <div>
+          <span>Claims</span>
+          <span>Coverage</span>
+          <span>Support</span>
+        </div>
+      </nav>
+
       <header className="portal-hero">
         <div className="hero-copy">
           <span className="eyebrow">
             <Sparkles size={16} aria-hidden="true" />
-            Cisco Live demo environment
+            Customer claims support
           </span>
           <h1>AI Claims Portal</h1>
           <p>
-            Customer-facing insurance workflow for demonstrating claim status impact, transaction isolation, and
-            observable recovery during a live incident.
+            Check claim progress, confirm policy coverage, and search claims guidance from one insurance service
+            portal.
           </p>
         </div>
 
@@ -310,34 +302,6 @@ export function App() {
         </div>
       </header>
 
-      <section className="signal-bar" aria-label="Demo status">
-        <div className="signal-item">
-          <Gauge size={20} aria-hidden="true" />
-          <div>
-            <span>Transaction posture</span>
-            <strong>{isIncidentActive ? "1 at risk, 2 contained" : "All journeys healthy"}</strong>
-          </div>
-        </div>
-        <div className="signal-item">
-          <Activity size={20} aria-hidden="true" />
-          <div>
-            <span>Telemetry surface</span>
-            <strong>RUM, APM, host filesystem</strong>
-          </div>
-        </div>
-        <div className="signal-item">
-          <ShieldCheck size={20} aria-hidden="true" />
-          <div>
-            <span>Demo control</span>
-            <strong>Deterministic scenario reset</strong>
-          </div>
-        </div>
-        <div className={`request-state request-${requestState.tone}`}>
-          <Clock3 size={19} aria-hidden="true" />
-          <strong>{requestState.label}</strong>
-        </div>
-      </section>
-
       <section className="workspace-grid">
         <article className="workspace-primary">
           <div className="section-heading">
@@ -350,8 +314,8 @@ export function App() {
             </span>
           </div>
           <p className="panel-copy">
-            Ask the AI assistant about a claim. When the cache pressure scenario is active, this transaction
-            demonstrates the degraded journey while adjacent workflows continue to respond.
+            Ask for a payment update, claim milestone, document requirement, or next step. This journey represents the
+            customer-facing claim status experience.
           </p>
           <label className="field-label" htmlFor="support-prompt">
             Claim question
@@ -372,7 +336,13 @@ export function App() {
             >
               Submit Claim Status
             </IconButton>
-            <span>Trace attribute: claim_status_response</span>
+            <span>Secure claim assistance</span>
+          </div>
+          <div className={`customer-response response-${customerResult.tone}`} role="status">
+            <span className="section-kicker">Latest response</span>
+            <h3>{customerResult.title}</h3>
+            <p>{customerResult.body}</p>
+            {customerResult.detail ? <small>{customerResult.detail}</small> : null}
           </div>
         </article>
 
@@ -382,7 +352,7 @@ export function App() {
               <FileSearch size={20} aria-hidden="true" />
               <h3>Policy Coverage Lookup</h3>
             </div>
-            <p>Validate a separate customer journey while the claim status response is degraded.</p>
+            <p>Confirm active coverage and next steps for a policy tied to an open claim.</p>
             <label className="field-label" htmlFor="case-id">
               Policy ID
             </label>
@@ -402,7 +372,7 @@ export function App() {
               <BookOpenText size={20} aria-hidden="true" />
               <h3>Claims FAQ Search</h3>
             </div>
-            <p>Confirm FAQ search is still callable while the primary claim status workflow slows down.</p>
+            <p>Search common claim questions such as rental reimbursement, deductibles, and repair timelines.</p>
             <label className="field-label" htmlFor="article-query">
               Search query
             </label>
@@ -417,37 +387,6 @@ export function App() {
             </IconButton>
           </article>
         </aside>
-      </section>
-
-      <section className="transaction-strip" aria-label="Business transactions">
-        {transactionHealth.map((transaction) => {
-          const Icon = transaction.icon;
-          return (
-            <article className={`transaction-card transaction-${transaction.tone}`} key={transaction.name}>
-              <div className="transaction-icon">
-                <Icon size={20} aria-hidden="true" />
-              </div>
-              <div>
-                <div className="transaction-topline">
-                  <h3>{transaction.name}</h3>
-                  <span>{transaction.status}</span>
-                </div>
-                <p>{transaction.detail}</p>
-              </div>
-            </article>
-          );
-        })}
-      </section>
-
-      <section className="result-panel">
-        <div className="section-heading">
-          <div>
-            <span className="section-kicker">Inspectable response</span>
-            <h2>Live API Result</h2>
-          </div>
-          <span className="mono-label">json</span>
-        </div>
-        <pre>{result}</pre>
       </section>
     </main>
   );

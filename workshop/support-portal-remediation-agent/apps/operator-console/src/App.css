@@ -36,18 +36,14 @@ button {
 }
 
 .console-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(360px, 0.6fr);
-  gap: 20px;
-  align-items: stretch;
+  display: block;
 }
 
 .hero-panel,
-.status-panel,
 .metric-tile,
 .lifecycle-panel,
 .panel,
-.raw-panel {
+.command-status {
   border: 1px solid #d4dce7;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.94);
@@ -60,7 +56,6 @@ button {
   color: #ffffff;
   background:
     linear-gradient(120deg, rgba(15, 30, 50, 0.98), rgba(31, 69, 83, 0.94)),
-    radial-gradient(circle at 78% 16%, rgba(199, 159, 72, 0.28), transparent 34%),
     #111e31;
   border-color: rgba(255, 255, 255, 0.16);
   display: flex;
@@ -101,14 +96,6 @@ button {
   color: #f3cf7b;
 }
 
-.status-panel {
-  padding: 22px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.status-header,
 .panel-heading {
   display: flex;
   align-items: flex-start;
@@ -116,14 +103,6 @@ button {
   gap: 14px;
 }
 
-.status-header > span:first-child {
-  color: #5d6b80;
-  font-size: 12px;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.status-pill,
 .mini-pill {
   display: inline-flex;
   align-items: center;
@@ -137,76 +116,43 @@ button {
   white-space: nowrap;
 }
 
-.status-healthy {
-  color: #0c6a52;
-  background: #ddf7ee;
-  border: 1px solid #a9ddcf;
-}
-
-.status-risk {
-  color: #8f351c;
-  background: #ffe8dd;
-  border: 1px solid #f0b49d;
-}
-
 .mini-pill {
   color: #28425e;
   background: #eef3f8;
   border: 1px solid #cbd6e2;
 }
 
-.mini-pill-ready {
-  color: #0c6a52;
-  background: #ddf7ee;
-  border-color: #a9ddcf;
-}
-
-.mini-pill-risk {
-  color: #8f351c;
-  background: #ffe8dd;
-  border-color: #f0b49d;
-}
-
-.command-message {
-  min-height: 64px;
+.command-status {
+  min-height: 58px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  margin-bottom: 20px;
+  padding: 14px 16px;
   color: #24324a;
-  background: #f5f8fb;
-  border: 1px solid #d5dfeb;
-  border-radius: 8px;
-  padding: 14px;
 }
 
-.command-message svg {
+.command-status svg {
   color: #1c7a73;
   flex: 0 0 auto;
 }
 
-.status-grid {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 10px 14px;
-  padding-top: 10px;
-  border-top: 1px solid #e1e7ee;
+.command-status strong {
+  min-width: 0;
+  flex: 1 1 280px;
+  overflow-wrap: anywhere;
 }
 
-.status-grid span {
+.command-status span {
   color: #627186;
   font-size: 13px;
   font-weight: 800;
 }
 
-.status-grid strong {
-  min-width: 0;
-  color: #16233a;
-  overflow-wrap: anywhere;
-}
-
 .metric-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
   margin: 20px 0;
 }
@@ -324,13 +270,12 @@ button {
 .command-grid {
   margin-top: 20px;
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(340px, 0.65fr);
+  grid-template-columns: 1fr;
   gap: 20px;
   align-items: stretch;
 }
 
-.panel,
-.raw-panel {
+.panel {
   padding: 24px;
 }
 
@@ -369,17 +314,11 @@ button {
   box-shadow: 0 0 0 3px rgba(18, 125, 119, 0.15);
 }
 
-.button-row,
-.control-actions {
+.button-row {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   margin-top: 16px;
-}
-
-.control-actions {
-  display: grid;
-  grid-template-columns: 1fr;
 }
 
 .button {
@@ -449,65 +388,6 @@ button {
   border-color: #cda949;
 }
 
-.control-panel p {
-  margin: 18px 0 0;
-  color: #5d6b80;
-  line-height: 1.55;
-}
-
-.monitoring-summary {
-  margin-top: 22px;
-  padding-top: 20px;
-  border-top: 1px solid #e1e7ee;
-}
-
-.monitoring-summary .panel-heading h2 {
-  font-size: 20px;
-}
-
-.showcase-card {
-  display: grid;
-  gap: 10px;
-  margin-top: 16px;
-  padding: 14px;
-  border: 1px solid #cfe2dd;
-  border-radius: 8px;
-  background: #f3fbf8;
-}
-
-.showcase-card > div {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.showcase-card strong {
-  color: #18384a;
-  font-size: 14px;
-}
-
-.showcase-card span {
-  min-height: 26px;
-  display: inline-flex;
-  align-items: center;
-  padding: 0 8px;
-  color: #0c6a52;
-  background: #ddf7ee;
-  border: 1px solid #a9ddcf;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.showcase-card p {
-  margin: 0;
-  color: #43536a;
-  font-size: 13px;
-  line-height: 1.45;
-}
-
 .panel-copy {
   margin: 16px 0 0;
   color: #5d6b80;
@@ -559,16 +439,14 @@ button {
 
 .warning-list,
 .resource-list,
-.validation-list,
-.instrumentation-list {
+.validation-list {
   margin-top: 18px;
   color: #4e5e74;
 }
 
 .warning-list strong,
 .resource-list strong,
-.validation-list strong,
-.instrumentation-list strong {
+.validation-list strong {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -577,21 +455,18 @@ button {
 
 .warning-list ul,
 .resource-list ul,
-.validation-list ul,
-.instrumentation-list ul {
+.validation-list ul {
   margin: 10px 0 0;
   padding-left: 18px;
   color: #5d6b80;
   line-height: 1.5;
 }
 
-.resource-list li,
-.instrumentation-list li {
+.resource-list li {
   margin-top: 8px;
 }
 
-.resource-list span,
-.instrumentation-list span {
+.resource-list span {
   display: inline-flex;
   min-width: 74px;
   margin-right: 8px;
@@ -601,18 +476,12 @@ button {
   text-transform: uppercase;
 }
 
-.resource-list b,
-.instrumentation-list b {
+.resource-list b {
   color: #1c2b41;
   overflow-wrap: anywhere;
 }
 
-.showcase-list li b {
-  font-size: 12px;
-}
-
-.resource-list em,
-.instrumentation-list em {
+.resource-list em {
   display: block;
   margin-top: 2px;
   font-style: normal;
@@ -792,25 +661,7 @@ button {
   overflow-wrap: anywhere;
 }
 
-.raw-panel {
-  margin-top: 20px;
-}
-
-.raw-panel pre {
-  min-height: 250px;
-  max-height: 520px;
-  margin: 18px 0 0;
-  padding: 18px;
-  overflow: auto;
-  color: #dce8f1;
-  background: #101d2c;
-  border-radius: 8px;
-  line-height: 1.5;
-  font-size: 13px;
-}
-
 @media (max-width: 1200px) {
-  .console-hero,
   .command-grid,
   .detail-grid,
   .evidence-proof-grid {
@@ -860,14 +711,12 @@ button {
     grid-template-columns: 1fr;
   }
 
-  .status-header,
   .panel-heading {
     align-items: flex-start;
     flex-direction: column;
   }
 
-  .panel,
-  .raw-panel {
+  .panel {
     padding: 18px;
   }
 
