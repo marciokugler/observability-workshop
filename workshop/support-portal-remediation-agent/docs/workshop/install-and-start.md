@@ -2,6 +2,12 @@
 
 This page is the full bring-up runbook.
 
+Run commands from the app directory:
+
+```bash
+cd observability-workshop/workshop/support-portal-remediation-agent
+```
+
 ## Phase 1: install dependencies
 
 ### 1. Install Node workspace dependencies
@@ -51,6 +57,8 @@ docker compose version
 ```
 
 ### 4. Start the Splunk OTel Collector
+
+`npm run dev:collector` is an npm wrapper around Docker Compose. It starts only the `splunk-otel-collector` service from `infra/docker/docker-compose.yml` and reads `.env` through Compose.
 
 ```bash
 set -a

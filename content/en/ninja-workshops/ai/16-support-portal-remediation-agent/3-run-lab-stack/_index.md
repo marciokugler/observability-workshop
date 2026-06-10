@@ -9,9 +9,19 @@ description: Start the collector and application stack, verify local endpoints, 
 
 Create a healthy baseline before introducing the failure. Confirm the portal, backend services, telemetry path, and operator console all work.
 
+All commands on this page run from the app directory:
+
+```bash
+cd observability-workshop/workshop/support-portal-remediation-agent
+```
+
+If you used the ZIP download, use `cd observability-workshop-main/workshop/support-portal-remediation-agent` instead.
+
 ## Start the Collector
 
 Use this when you want Splunk APM, RUM, and host metric export:
+
+`npm run dev:collector` is a shortcut defined in this app's `package.json`. It checks for Docker Compose, then starts only the `splunk-otel-collector` service from `infra/docker/docker-compose.yml` with values from `.env`. It does not start the portal or backend services.
 
 ```bash
 set -a
@@ -33,7 +43,7 @@ Leave the collector running in its terminal.
 Open a second terminal:
 
 ```bash
-cd workshop/support-portal-remediation-agent
+cd observability-workshop/workshop/support-portal-remediation-agent
 set -a
 source .env
 set +a

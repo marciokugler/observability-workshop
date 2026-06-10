@@ -25,13 +25,25 @@ The goal is not full autonomous remediation. The goal is a governed workflow:
 
 ## Local Source Copy
 
-The workshop app is copied into this repository:
+The runnable app lives inside the full workshop repository. Standard workshop instructions assume you clone the repository, then run app commands from the app directory:
 
 ```bash
+git clone https://github.com/marciokugler/observability-workshop.git
+cd observability-workshop
 cd workshop/support-portal-remediation-agent
 ```
 
-Run all app commands from that directory unless a step says otherwise.
+If Git is not available, download the repository ZIP instead:
+
+```bash
+curl -L https://github.com/marciokugler/observability-workshop/archive/refs/heads/main.zip -o observability-workshop.zip
+unzip observability-workshop.zip
+cd observability-workshop-main/workshop/support-portal-remediation-agent
+```
+
+GitHub does not support a normal `git clone` of only one folder. Advanced users can use Git sparse checkout to fetch only this lab app, but the classroom path uses the full repository so the published docs, app source, shared packages, and lab files stay together.
+
+Run all app commands from `workshop/support-portal-remediation-agent` unless a step says otherwise.
 
 ## App Components
 

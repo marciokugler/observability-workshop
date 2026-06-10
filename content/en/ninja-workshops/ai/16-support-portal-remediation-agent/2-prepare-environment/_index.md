@@ -46,6 +46,14 @@ Docker is required for the local collector and Docker Compose path. `cloudflared
 
 ## Configure the App Copy
 
+The remaining commands on this page assume your terminal is in the app directory:
+
+```bash
+cd observability-workshop/workshop/support-portal-remediation-agent
+```
+
+If you used the ZIP download, use `cd observability-workshop-main/workshop/support-portal-remediation-agent` instead.
+
 Create a local environment file:
 
 ```bash

@@ -19,7 +19,7 @@ The runnable lab app is included in this repository at `workshop/support-portal-
 
 In this hands-on session, you will cover:
 
-- **Lab Overview** - Understand the support portal, operator console, service topology, and remediation boundary.
+- **Lab Overview** - Understand the support portal, operator console, service topology, and governed remediation path.
 - **Install Required Software** - Install local prerequisites, configure credentials, student identity, and port checks.
 - **Run the Lab Stack** - Start the collector and app services, then create a healthy baseline.
 - **Investigate Cache Pressure** - Trigger the `cache-disk-pressure` scenario and validate customer, APM, and infrastructure evidence.

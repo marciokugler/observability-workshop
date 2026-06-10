@@ -2,6 +2,15 @@
 
 This directory is the local workshop copy of the `IBOBS-2002` Cisco Live demo app and supporting Splunk Observability automation.
 
+Standard workshop setup clones the full workshop repository:
+
+```bash
+git clone https://github.com/marciokugler/observability-workshop.git
+cd observability-workshop
+```
+
+GitHub does not support a normal `git clone` of only one folder. Advanced users can use Git sparse checkout to fetch only `workshop/support-portal-remediation-agent`, but the classroom instructions assume the full repository so the docs, app source, shared packages, and lab files stay together.
+
 Run app commands from this directory:
 
 ```bash
@@ -137,7 +146,7 @@ The repo includes a development compose file at [infra/docker/docker-compose.yml
 npm run dev:collector
 ```
 
-The npm command uses `docker compose` when Compose v2 is installed and falls back to `docker-compose` when only the legacy standalone binary is available.
+The npm command is a wrapper around Docker Compose. It uses `docker compose` when Compose v2 is installed and falls back to `docker-compose` when only the legacy standalone binary is available. The collector command starts only the `splunk-otel-collector` service and reads `.env` through Compose.
 
 The compose path mounts a shared 128 MiB tmpfs at `/var/cache/claims-knowledge` for the knowledge service and the collector. The cache-pressure scenario fills that tmpfs, which gives the collector a real filesystem signal without risking the host disk.
 

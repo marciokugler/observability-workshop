@@ -40,9 +40,11 @@ The last attribute appears when Galileo is configured.
 Use this path when Galileo credentials are configured:
 
 ```bash
-cd workshop/support-portal-remediation-agent
+cd observability-workshop/workshop/support-portal-remediation-agent
 npm run simulate:galileo
 ```
+
+If you used the ZIP download, use `cd observability-workshop-main/workshop/support-portal-remediation-agent` instead.
 
 You can also run it from the operator console by selecting `Run Showcase` in the Galileo Agent Monitoring area.
 

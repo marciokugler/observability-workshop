@@ -23,9 +23,28 @@ You need:
 - Docker Desktop or another local Docker daemon if you want the collector
 - Splunk and OpenAI credentials if you want live telemetry and model-backed remediation
 
-## 2. Install and serve docs
+## 2. Get the source
 
-From the repo root:
+Standard workshop setup clones the full workshop repository:
+
+```bash
+git clone https://github.com/marciokugler/observability-workshop.git
+cd observability-workshop/workshop/support-portal-remediation-agent
+```
+
+If Git is not available, download and unzip the repository:
+
+```bash
+curl -L https://github.com/marciokugler/observability-workshop/archive/refs/heads/main.zip -o observability-workshop.zip
+unzip observability-workshop.zip
+cd observability-workshop-main/workshop/support-portal-remediation-agent
+```
+
+GitHub does not support a normal `git clone` of only one folder. Advanced users can use Git sparse checkout to fetch only this app directory, but this quick start assumes the full repository.
+
+## 3. Install and serve docs
+
+From the app directory:
 
 ```bash
 python3 -m pip install -r requirements-docs.txt
@@ -34,9 +53,9 @@ python3 -m mkdocs serve -a 127.0.0.1:18082
 
 Open `http://127.0.0.1:18082/`.
 
-## 3. Create `.env`
+## 4. Create `.env`
 
-From the repo root:
+From the app directory:
 
 ```bash
 cp .env.example .env
@@ -57,7 +76,7 @@ Each student should use a different `INSTANCE`, such as `student-014`.
 
 `SPLUNK_ACCESS_TOKEN` and `SPLUNK_REALM` enable Splunk export and evidence lookup. `VITE_SPLUNK_RUM_TOKEN` enables browser RUM. `OPENAI_API_KEY` enables model-backed remediation. `GALILEO_API_KEY_FILE` or `GALILEO_API_KEY` enables agent monitoring.
 
-## 4. Install dependencies
+## 5. Install dependencies
 
 ```bash
 npm install
@@ -69,9 +88,11 @@ apps/remediation-agent/.venv/bin/python -m pip show ibobs-remediation-agent
 
 If the venv command reports that `ensurepip` is missing on Debian or Ubuntu, run `sudo apt update`, `sudo apt install -y python3-venv`, and `sudo apt install -y python3-pip`, then rerun the venv commands.
 
-## 5. Start the collector
+## 6. Start the collector
 
 Use this only when you are validating telemetry:
+
+`npm run dev:collector` is an npm wrapper around Docker Compose. It starts only the `splunk-otel-collector` service from `infra/docker/docker-compose.yml` and reads `.env` through Compose.
 
 ```bash
 docker compose version
@@ -83,16 +104,19 @@ npm run dev:collector
 
 The collector listens on host OTLP ports `14317` and `14318`. Inside Docker it still listens on standard collector ports `4317` and `4318`.
 
-## 6. Start the app stack
+## 7. Start the app stack
 
 In another terminal:
 
 ```bash
+cd observability-workshop/workshop/support-portal-remediation-agent
 set -a
 source .env
 set +a
 npm run dev:all
 ```
+
+If you used the ZIP download, use `cd observability-workshop-main/workshop/support-portal-remediation-agent` instead.
 
 Expected result:
 
@@ -101,12 +125,12 @@ Expected result:
 - Vite starts the portal on `18080`
 - Vite starts the operator console on `18081`
 
-## 7. Open the two main UIs
+## 8. Open the two main UIs
 
 - claims portal: `http://127.0.0.1:18080`
 - operator console: `http://127.0.0.1:18081`
 
-## 8. Establish a healthy baseline
+## 9. Establish a healthy baseline
 
 Before showing a fault:
 
@@ -115,7 +139,7 @@ Before showing a fault:
 3. Run `Claims FAQ Search`.
 4. Confirm the operator console has no stale incident blocking the flow.
 
-## 9. Trigger the incident
+## 10. Trigger the incident
 
 Use `Trigger Cache Pressure` from the portal or operator console.
 
@@ -131,7 +155,7 @@ Then:
 8. Click `Explain`.
 9. Click `Propose`.
 
-## 10. Complete the remediation story
+## 11. Complete the remediation story
 
 The intended live sequence is:
 
