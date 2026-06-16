@@ -1,11 +1,11 @@
 ---
-title: 2. Measure Local Model Economics
-weight: 2
+title: 3. Measure Local and Cloud Model Economics
+weight: 3
 ---
 
-This is the core lab. You will run a local model, measure prompt and completion
-throughput, and convert that throughput into an internal token rate card. No Kubernetes
-cluster is required.
+This lab measures local model throughput and converts that throughput into an internal
+token rate card. You will then compare that local economics model with a public cloud
+GPU-hour proxy. No Kubernetes cluster is required.
 
 ## Why Local Throughput Matters
 
@@ -59,7 +59,7 @@ Use one of these models during the lab:
 
 | Cost model | Formula | When to use |
 | --- | --- | --- |
-| Market proxy | Public GPU endpoint hourly price | Fast workshop estimate across mixed laptops |
+| Market proxy | Public GPU endpoint hourly price | Local-vs-cloud comparison across mixed laptops |
 | Hardware amortization | `((purchase_price * gpu_allocation_ratio) - residual_value) / useful_life_hours` | Owned laptop or workstation |
 | Energy-only | `watts / 1000 * electricity_rate` | Demonstrating the absolute lower bound |
 | Fully loaded platform | Hardware + energy + support + license + platform overhead | Production showback or chargeback |

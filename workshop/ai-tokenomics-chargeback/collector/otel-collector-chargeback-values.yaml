@@ -3,9 +3,9 @@
 # metrics, traces, and logs. Do not create a second OTLP metrics pipeline unless you
 # first disable the chart's default OTLP metrics pipeline.
 #
-# Add attributes/chargeback to the existing metrics, traces, and logs pipelines if you
-# want the collector to remove user/session identifiers. Add ai.tokens.* and
-# ai.request.* metrics to any custom metric allowlist you operate.
+# Add attributes/chargeback to the existing traces and logs pipelines if you want the
+# collector to remove user/session identifiers. Use the metric filter below only when
+# you deliberately create optional fallback metrics for a local or unsupported workload.
 agent:
   config:
     processors:
@@ -23,7 +23,7 @@ agent:
           - key: ai.chargeback.rate_card.version
             value: workshop-2026-06
             action: upsert
-      filter/chargeback_metrics:
+      filter/optional_chargeback_metrics:
         metrics:
           include:
             match_type: strict

@@ -19,7 +19,7 @@ different names, but the pattern is the same.
 ## Required Dimensions
 
 Use low-cardinality, stable dimensions. Do not put prompt text, user email addresses,
-session IDs, request IDs, or raw account names on metrics.
+session IDs, request IDs, or raw account names on metric dimensions or span attributes.
 
 | Dimension | Purpose | Example |
 | --- | --- | --- |
@@ -120,7 +120,7 @@ Then decide which attribution dimensions are mandatory for your lab:
 **Why not use `user.id` as the main chargeback dimension?**
 {{% /tab %}}
 {{% tab title="Answer" %}}
-**It usually creates high-cardinality metrics and weak finance ownership. Use stable
+**It usually creates high-cardinality telemetry and weak finance ownership. Use stable
 team, tenant, workload, and cost center dimensions for chargeback.**
 {{% /tab %}}
 {{< /tabs >}}

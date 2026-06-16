@@ -19,9 +19,12 @@ class UsageEvent:
     timestamp: str
     scenario: str
     ai_team: str
+    ai_business_unit: str
     ai_cost_center: str
     ai_tenant_id: str
+    ai_user_id: str
     ai_workload_name: str
+    ai_outcome_category: str
     gen_ai_request_model: str
     prompt_tokens: int
     completion_tokens: int
@@ -79,15 +82,26 @@ def main() -> int:
 def generate_events(args: argparse.Namespace) -> Iterable[UsageEvent]:
     start = datetime.now(timezone.utc).replace(second=0, microsecond=0)
     teams = [
-        ("support-ai", "cc-ml-1200", "tenant-enterprise", "support-rag"),
-        ("commerce-ai", "cc-ml-2200", "tenant-retail", "product-agent"),
-        ("field-ai", "cc-ml-3100", "tenant-field", "proposal-assistant"),
+        ("support-ai", "customer-success", "cc-ml-1200", "tenant-enterprise", "support-rag"),
+        ("commerce-ai", "commerce", "cc-ml-2200", "tenant-retail", "product-agent"),
+        ("field-ai", "sales", "cc-ml-3100", "tenant-field", "proposal-assistant"),
     ]
+    users_by_bu = {
+        "customer-success": ["user-1042", "user-1077", "user-1188"],
+        "commerce": ["user-2042", "user-2077", "user-2199"],
+        "sales": ["user-3042", "user-3077", "user-3199"],
+    }
 
     for minute in range(args.minutes):
         for _ in range(args.requests_per_minute):
-            team, cost_center, tenant, workload = random.choice(teams)
+            team, business_unit, cost_center, tenant, workload = random.choice(teams)
+            user_id = random.choice(users_by_bu[business_unit])
             scenario = "baseline"
+            outcome = random.choices(
+                ["accepted", "needs-review", "draft-created"],
+                weights=[0.70, 0.20, 0.10],
+                k=1,
+            )[0]
             model = "llama3.2:1b"
             prompt_tokens = max(50, int(random.gauss(650, 110)))
             completion_tokens = max(30, int(random.gauss(180, 45)))
@@ -95,6 +109,7 @@ def generate_events(args: argparse.Namespace) -> Iterable[UsageEvent]:
             if args.scenario in ("all", "surge") and 20 <= minute < 35:
                 if team == "support-ai":
                     scenario = "token_surge"
+                    outcome = "needs-review"
                     prompt_tokens = max(1000, int(random.gauss(5200, 700)))
                     completion_tokens = max(120, int(random.gauss(520, 90)))
 
@@ -102,9 +117,12 @@ def generate_events(args: argparse.Namespace) -> Iterable[UsageEvent]:
                 if random.random() < 0.55:
                     scenario = "tenant_misuse"
                     team = "field-ai"
+                    business_unit = "sales"
                     cost_center = "cc-ml-3100"
                     tenant = "tenant-field-lab"
+                    user_id = "user-rogue-agent"
                     workload = "proposal-assistant"
+                    outcome = "draft-created"
                     model = "llama3.2:1b"
                     prompt_tokens = max(2000, int(random.gauss(2900, 500)))
                     completion_tokens = max(800, int(random.gauss(1700, 320)))
@@ -113,9 +131,12 @@ def generate_events(args: argparse.Namespace) -> Iterable[UsageEvent]:
                 if random.random() < 0.18:
                     scenario = "unknown_attribution"
                     team = "unknown"
+                    business_unit = "unknown"
                     cost_center = "unknown"
                     tenant = "tenant-unmapped"
+                    user_id = "unknown"
                     workload = "unmapped-local-test"
+                    outcome = "unknown"
                     prompt_tokens = max(700, int(random.gauss(1800, 350)))
                     completion_tokens = max(300, int(random.gauss(900, 220)))
 
@@ -131,9 +152,12 @@ def generate_events(args: argparse.Namespace) -> Iterable[UsageEvent]:
                 timestamp=(start + timedelta(minutes=minute)).isoformat(),
                 scenario=scenario,
                 ai_team=team,
+                ai_business_unit=business_unit,
                 ai_cost_center=cost_center,
                 ai_tenant_id=tenant,
+                ai_user_id=user_id,
                 ai_workload_name=workload,
+                ai_outcome_category=outcome,
                 gen_ai_request_model=model,
                 prompt_tokens=prompt_tokens,
                 completion_tokens=completion_tokens,
@@ -170,6 +194,27 @@ def summarize(events: list[UsageEvent]) -> dict[str, object]:
             "estimated_cost_usd": 0.0,
         }
     )
+    by_business_unit: dict[str, dict[str, float]] = defaultdict(
+        lambda: {
+            "requests": 0,
+            "total_tokens": 0,
+            "estimated_cost_usd": 0.0,
+        }
+    )
+    by_user: dict[str, dict[str, float]] = defaultdict(
+        lambda: {
+            "requests": 0,
+            "total_tokens": 0,
+            "estimated_cost_usd": 0.0,
+        }
+    )
+    by_outcome: dict[str, dict[str, float]] = defaultdict(
+        lambda: {
+            "requests": 0,
+            "total_tokens": 0,
+            "estimated_cost_usd": 0.0,
+        }
+    )
     by_scenario: dict[str, dict[str, float]] = defaultdict(
         lambda: {
             "requests": 0,
@@ -179,7 +224,13 @@ def summarize(events: list[UsageEvent]) -> dict[str, object]:
     )
 
     for event in events:
-        for bucket in (by_team[event.ai_team], by_scenario[event.scenario]):
+        for bucket in (
+            by_team[event.ai_team],
+            by_business_unit[event.ai_business_unit],
+            by_user[event.ai_user_id],
+            by_outcome[event.ai_outcome_category],
+            by_scenario[event.scenario],
+        ):
             bucket["requests"] += 1
             bucket["total_tokens"] += event.total_tokens
             bucket["estimated_cost_usd"] += event.estimated_cost_usd
@@ -187,6 +238,11 @@ def summarize(events: list[UsageEvent]) -> dict[str, object]:
     return {
         "totals": round_costs(totals),
         "by_team": {key: round_costs(value) for key, value in by_team.items()},
+        "by_business_unit": {
+            key: round_costs(value) for key, value in by_business_unit.items()
+        },
+        "by_user": {key: round_costs(value) for key, value in by_user.items()},
+        "by_outcome": {key: round_costs(value) for key, value in by_outcome.items()},
         "by_scenario": {key: round_costs(value) for key, value in by_scenario.items()},
     }
 
@@ -230,10 +286,40 @@ def evaluate_alarms(events: list[UsageEvent]) -> list[dict[str, object]]:
             )
         )
 
+    user_cost: dict[str, float] = defaultdict(float)
+    for event in events:
+        user_cost[event.ai_user_id] += event.estimated_cost_usd
+    top_user, top_user_cost = max(user_cost.items(), key=lambda item: item[1])
+    if top_user_cost > total_cost * 0.20:
+        alarms.append(
+            alarm(
+                "warning",
+                "User token misuse",
+                f"{top_user} consumed {top_user_cost / total_cost:.0%} of simulated cost.",
+            )
+        )
+
+    accepted_events = [event for event in events if event.ai_outcome_category == "accepted"]
+    accepted_cost = sum(event.estimated_cost_usd for event in accepted_events)
+    accepted_count = len(accepted_events)
+    if accepted_count:
+        cost_per_accepted = accepted_cost / accepted_count
+        all_cost_per_request = total_cost / len(events)
+        if cost_per_accepted > all_cost_per_request * 2:
+            alarms.append(
+                alarm(
+                    "warning",
+                    "Poor value ratio",
+                    f"Cost per accepted answer is {cost_per_accepted / all_cost_per_request:.1f}x average request cost.",
+                )
+            )
+
     unknown_cost = sum(
         event.estimated_cost_usd
         for event in events
-        if event.ai_team == "unknown" or event.ai_cost_center == "unknown"
+        if event.ai_team == "unknown"
+        or event.ai_business_unit == "unknown"
+        or event.ai_cost_center == "unknown"
     )
     if unknown_cost > 0:
         alarms.append(
@@ -261,6 +347,8 @@ def recommended_action(name: str) -> str:
         "Budget burn spike": "Throttle the workload, reduce max context, and notify the application owner.",
         "Context window explosion": "Inspect prompt construction and retrieval chunking before the next release.",
         "Tenant misuse": "Apply tenant-level rate limits or require approval for bulk jobs.",
+        "User token misuse": "Review the user's workflow and apply user-level quota or approval controls.",
+        "Poor value ratio": "Review prompts, model choice, and outcome quality before scaling the workload.",
         "Unknown chargeback attribution": "Block promotion until ai.team and ai.cost_center are populated.",
     }
     return actions.get(name, "Review dashboard and notify the owner.")

@@ -6,17 +6,19 @@ These files support the workshop at:
 content/en/ninja-workshops/ai/14-ai-tokenomics-chargeback
 ```
 
-The assets are intentionally small. They show the telemetry contract and local
-throughput benchmark needed for chargeback without requiring a Kubernetes cluster.
-The Cisco AI Pods path remains useful when you have shared GPU infrastructure
-telemetry.
+The assets are intentionally small. They show an out-of-the-box-first telemetry flow:
+use Splunk AI Agent Monitoring for AI request traces, token usage, and estimated cost,
+then add only the business context needed for chargeback. The local throughput
+benchmark helps derive an internal rate card without requiring a Kubernetes cluster.
+The Cisco AI Pods path remains useful when you have shared GPU infrastructure telemetry.
 
 ## Files
 
-* `instrumentation/tokenomics_instrumentation.py` - Python helper for custom
-  OpenTelemetry token and cost metrics.
-* `local-llm-app/` - Runnable Flask app that calls local Ollama and emits tokenomics
-  traces and metrics.
+* `instrumentation/tokenomics_instrumentation.py` - Python helper that enriches the
+  active AI span with business context, token usage, and an internal cost estimate.
+* `clean-llm-app/` - Starter Flask/Ollama app with no tokenomics instrumentation.
+* `local-llm-app/` - Runnable Flask app that calls local Ollama and emits AI spans with
+  chargeback attributes.
 * `k8s/llm-app-chargeback-patch.yaml` - Kubernetes patch that adds default owner
   metadata to the sample `llm-app` deployment.
 * `collector/otel-collector-chargeback-values.yaml` - Collector processor additions
@@ -34,23 +36,26 @@ telemetry.
 
 ### Local Model Path
 
-1. Install Ollama and pull a small model, for example `ollama pull llama3.2:1b`.
+1. Start with `clean-llm-app/` and confirm the app can answer questions.
 2. Run `scripts/benchmark_ollama.py` against the local model.
 3. Choose an hourly cost model: market proxy, hardware amortization, or energy-only.
 4. Use the derived token rates as the workshop rate card.
-5. Run `local-llm-app/` to send instrumented local model traffic.
-6. Run `scripts/simulate_token_cost_risk.py` to practice proactive cost alarms.
+5. Manually add OpenTelemetry packages to the clean app.
+6. Add the span-enrichment helper and owner/outcome dimensions.
+7. Compare your result with `local-llm-app/`.
+8. Run `scripts/simulate_token_cost_risk.py` to practice proactive cost alarms.
 
 ### Shared GPU Path
 
 1. Deploy the Cisco AI Pods workshop collector and LLM application.
-2. Confirm DCGM, NIM, Kubernetes, and APM data in Splunk Observability Cloud.
+2. Confirm AI Agent Monitoring, DCGM, NIM, Kubernetes, and APM data in Splunk
+   Observability Cloud.
 3. Add the attribution defaults from `k8s/llm-app-chargeback-patch.yaml`.
-4. Add the custom instrumentation helper to the application.
-5. If your collector has custom filters, merge the chargeback metric names from
-   `collector/otel-collector-chargeback-values.yaml`.
-6. Confirm the `ai.tokens.*`, `ai.request.count`, and
-   `ai.request.estimated_cost_usd` metrics in Metric Finder.
+4. Add business attribution attributes to the application spans.
+5. Confirm the built-in AI token usage and estimated-cost signals in AI monitoring and
+   Metric Finder.
+6. If a local or unsupported workload has a metric gap, review the optional fallback
+   examples in `collector/otel-collector-chargeback-values.yaml`.
 7. Build dashboards and detectors with the SignalFlow examples.
 
 The rate card values in these files are fictional workshop values. Replace them with an

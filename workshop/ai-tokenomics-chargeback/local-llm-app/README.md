@@ -1,8 +1,10 @@
 # Local LLM Tokenomics App
 
 This is the runnable app for the AI Tokenomics and GPU Chargeback workshop. It calls a
-local Ollama model, records OpenTelemetry traces and metrics, and emits chargeback
-attributes for team, tenant, cost center, workload, and model.
+local Ollama model, records OpenTelemetry traces, and adds chargeback attributes for
+team, tenant, cost center, workload, outcome, and model. Use Splunk AI Agent Monitoring
+for built-in token and cost views where supported; this local app adds the business
+context and an internal cost estimate for the lab.
 
 ## Prerequisites
 
@@ -38,8 +40,11 @@ python app.py
 curl -s http://localhost:8080/ask \
   -H "content-type: application/json" \
   -H "x-ai-team: support-ai" \
+  -H "x-ai-business-unit: customer-success" \
   -H "x-ai-cost-center: cc-ml-1200" \
   -H "x-ai-tenant-id: tenant-local" \
+  -H "x-ai-user-id: user-1042" \
+  -H "x-ai-outcome-category: accepted" \
   -d '{"question":"How should we explain AI chargeback to app teams?"}' | jq
 ```
 
@@ -49,8 +54,11 @@ curl -s http://localhost:8080/ask \
 curl -s http://localhost:8080/ask \
   -H "content-type: application/json" \
   -H "x-ai-team: support-ai" \
+  -H "x-ai-business-unit: customer-success" \
   -H "x-ai-cost-center: cc-ml-1200" \
   -H "x-ai-tenant-id: tenant-local" \
+  -H "x-ai-user-id: user-1042" \
+  -H "x-ai-outcome-category: needs-review" \
   -d '{"question":"Summarize the customer context and produce a detailed plan.","scenario":"surge","num_predict":240}' | jq
 ```
 
@@ -60,8 +68,11 @@ curl -s http://localhost:8080/ask \
 curl -s http://localhost:8080/ask \
   -H "content-type: application/json" \
   -H "x-ai-team: field-ai" \
+  -H "x-ai-business-unit: sales" \
   -H "x-ai-cost-center: cc-ml-3100" \
   -H "x-ai-tenant-id: tenant-field-lab" \
+  -H "x-ai-user-id: user-2048" \
+  -H "x-ai-outcome-category: draft-created" \
   -d '{"question":"Generate a complete customer proposal with pricing and implementation details.","scenario":"misuse","num_predict":400}' | jq
 ```
 
@@ -73,10 +84,17 @@ curl -s http://localhost:8080/ask \
   -d '{"question":"Run this request without team or cost-center headers.","scenario":"unknown","num_predict":120}' | jq
 ```
 
-The app records these custom metrics:
+The app enriches the active AI span with these attributes:
 
-* `ai.tokens.input`
-* `ai.tokens.output`
-* `ai.tokens.total`
-* `ai.request.count`
+* `ai.team`
+* `ai.business_unit`
+* `ai.cost_center`
+* `ai.tenant.id`
+* `ai.user.id`
+* `ai.workload.name`
+* `ai.outcome.category`
+* `gen_ai.request.model`
+* `gen_ai.usage.prompt_tokens`
+* `gen_ai.usage.completion_tokens`
+* `gen_ai.usage.total_tokens`
 * `ai.request.estimated_cost_usd`

@@ -1,6 +1,6 @@
 ---
-title: 9. Operationalize Tokenomics
-weight: 9
+title: 10. Operationalize Tokenomics
+weight: 10
 ---
 
 The workshop pattern is useful only if teams can repeat it across models, applications,
@@ -11,10 +11,13 @@ clusters, and tenants. Operationalization turns the dashboard into a standard.
 Before using tokenomics for real chargeback, confirm:
 
 * A finance-approved rate card exists and has an owner.
-* The instrumentation standard is documented and reviewed with application teams.
+* The AI monitoring and attribution standard is documented and reviewed with
+  application teams.
 * Required dimensions are enforced in CI, deployment templates, or service onboarding.
 * Unknown attribution is monitored.
 * Dashboards separate token cost, GPU allocation, and platform overhead.
+* Dashboards answer cost by BU, user, tenant, team, workload, model, and outcome.
+* Placement decisions compare local, on-prem, and cloud on cost and health.
 * Detectors have owners and runbooks.
 * Sensitive data policy covers prompt, response, tenant, and user metadata.
 * The team has decided whether idle GPU capacity is platform overhead or charged to
@@ -24,9 +27,9 @@ Before using tokenomics for real chargeback, confirm:
 
 Use these controls before broad rollout:
 
-* **Sampling policy** - Do not sample away the metrics needed for chargeback. Trace
-  sampling can be separate from metric recording.
-* **Dimension allowlist** - Keep chargeback metric dimensions bounded and documented.
+* **Sampling policy** - Do not sample away the trace data needed to explain high-cost
+  AI requests. Metric retention can be governed separately.
+* **Dimension allowlist** - Keep chargeback attributes bounded and documented.
 * **Rate card versioning** - Add a version dimension or dashboard note so historical
   charts are explainable.
 * **Access model** - Finance can view cost dashboards; application teams can view their
@@ -39,7 +42,7 @@ Use these controls before broad rollout:
 Write the operational handoff:
 
 1. Identify the owner of the rate card.
-2. Identify the owner of the instrumentation contract.
+2. Identify the owner of the AI monitoring and attribution contract.
 3. Identify the owner of the dashboard group.
 4. Identify the owner of GPU allocation policy.
 5. Choose the weekly review questions:
@@ -57,7 +60,9 @@ You now have a practical model for AI tokenomics and GPU chargeback:
 
 * Out-of-the-box AI and GPU monitoring provides the operational baseline.
 * Custom OpenTelemetry attributes provide the owner context.
-* Custom token and cost metrics provide chargeback-ready data.
+* Built-in token and cost views provide the first chargeback-ready data.
+* Optional custom metrics fill gaps for local models, internal GPU-rate allocation, or
+  synthetic lab data.
 * GPU allocation formulas turn shared capacity into explainable cost views.
 * Dashboards and detectors make the model actionable for platform, finance, and
   application teams.

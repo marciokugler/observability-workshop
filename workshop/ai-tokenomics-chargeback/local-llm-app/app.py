@@ -9,13 +9,10 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
-from flask import Flask, jsonify, request
+from flask import Flask, request
 from opentelemetry import trace
-from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
-from opentelemetry.sdk.metrics import MeterProvider
-from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
@@ -130,16 +127,6 @@ def configure_otel() -> None:
     )
     trace.set_tracer_provider(tracer_provider)
 
-    metric_reader = PeriodicExportingMetricReader(
-        OTLPMetricExporter(endpoint=endpoint, insecure=insecure),
-        export_interval_millis=5000,
-    )
-    meter_provider = MeterProvider(resource=resource, metric_readers=[metric_reader])
-
-    from opentelemetry import metrics
-
-    metrics.set_meter_provider(meter_provider)
-
 
 def call_ollama(model: str, prompt: str, num_predict: int) -> dict[str, Any]:
     payload = {
@@ -184,17 +171,23 @@ def build_prompt(question: str, scenario: str) -> str:
 def default_dimensions(scenario: str = "normal") -> dict[str, str]:
     dimensions = {
         "ai.team": os.getenv("AI_TEAM_DEFAULT", "support-ai"),
+        "ai.business_unit": os.getenv("AI_BUSINESS_UNIT_DEFAULT", "customer-success"),
         "ai.cost_center": os.getenv("AI_COST_CENTER_DEFAULT", "cc-ml-1200"),
         "ai.tenant.id": os.getenv("AI_TENANT_ID_DEFAULT", "tenant-local"),
+        "ai.user.id": os.getenv("AI_USER_ID_DEFAULT", "workshop-user-1"),
         "ai.workload.name": os.getenv("AI_WORKLOAD_NAME", "local-ollama-chat"),
         "ai.product_area": os.getenv("AI_PRODUCT_AREA", "ai-platform"),
+        "ai.outcome.category": os.getenv("AI_OUTCOME_CATEGORY_DEFAULT", "answered"),
         "deployment.environment": DEPLOYMENT_ENVIRONMENT,
     }
     if scenario == "unknown":
         dimensions["ai.team"] = "unknown"
+        dimensions["ai.business_unit"] = "unknown"
         dimensions["ai.cost_center"] = "unknown"
         dimensions["ai.tenant.id"] = "tenant-unmapped"
+        dimensions["ai.user.id"] = "unknown"
         dimensions["ai.workload.name"] = "unmapped-local-test"
+        dimensions["ai.outcome.category"] = "unknown"
     return dimensions
 
 
