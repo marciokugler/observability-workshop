@@ -36,13 +36,11 @@ If your prompt already ends in `workshop/support-portal-remediation-agent`, stay
 - `infra/splunk`: spec-driven Splunk dashboard and detector authoring
 - `infra/terraform`: Terraform-managed Splunk Observability objects
 
-## Local Development
+## Run The Lab
 
 Prerequisites:
 
-- Node.js 22 and npm
-- Python 3.11 or newer, including venv support
-- Docker Desktop or another Docker daemon, only if you want the local Splunk OTel Collector or Docker Compose flow
+- Docker Desktop or another Docker daemon with Docker Compose v2
 - `cloudflared`, only if you want to test the optional live Splunk webhook delivery path
 
 One-time setup from this app directory:
@@ -51,37 +49,28 @@ One-time setup from this app directory:
 test -f .env || cp .env.example .env
 ```
 
+Build and check the code inside Docker:
+
 ```bash
-npm install
+docker compose run --rm build-node
 ```
 
 ```bash
-python3 -m venv apps/remediation-agent/.venv
+docker compose run --rm build-agent
 ```
+
+Start the full lab stack and wait for health checks:
 
 ```bash
-apps/remediation-agent/.venv/bin/python -m pip install --index-url https://pypi.org/simple --upgrade pip
+docker compose up --wait
 ```
 
-```bash
-apps/remediation-agent/.venv/bin/python -m pip install --index-url https://pypi.org/simple -e apps/remediation-agent
-```
+The Compose stack installs npm dependencies into a named Docker volume, installs the Python remediation agent into a named Docker volume, starts the Splunk OTel Collector, and starts each app service in its own container.
 
-```bash
-apps/remediation-agent/.venv/bin/python -m pip show ibobs-remediation-agent
-```
-
-If `npm` or Python venv support is missing on an Ubuntu or Debian workshop VM, install the required packages before running setup:
+If Docker is missing on an Ubuntu or Debian workshop VM, install it before running Compose:
 
 ```bash
 sudo apt update
-sudo apt install -y curl
-sudo apt install -y ca-certificates
-curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-sudo apt install -y nodejs
-sudo apt install -y python3
-sudo apt install -y python3-venv
-sudo apt install -y python3-pip
 sudo apt install -y docker.io
 sudo apt install -y docker-compose-v2
 sudo systemctl enable --now docker
@@ -92,28 +81,22 @@ Close and reopen the terminal after adding your user to the `docker` group, or r
 
 The app stack can run without credentials. Add `OPENAI_API_KEY`, `GALILEO_API_KEY` or `GALILEO_API_KEY_FILE`, `SPLUNK_ACCESS_TOKEN`, `SPLUNK_REALM`, and `VITE_SPLUNK_RUM_TOKEN` when you want model-backed remediation, Galileo agent monitoring, live Splunk export, and browser RUM.
 
-Start everything locally:
+Follow logs when needed:
 
 ```bash
-npm run dev
+docker compose logs -f
 ```
 
-Useful alternatives:
-
-- `npm run dev:backend`: start only backend services and the remediation agent
-- `npm run dev:collector`: start the local Splunk OTel Collector container
-- `npm run dev:tunnel`: expose the orchestrator for optional Splunk webhook delivery
-- `npm test`: run TypeScript unit tests
-- `npm run test:python`: run Splunk object sync tests
-- `npm run build`: build npm workspaces that define a build script
-
-When running with telemetry locally, load `.env` before starting the stack:
+Stop the lab:
 
 ```bash
-set -a
-source .env
-set +a
-npm run dev
+docker compose down
+```
+
+Delete the lab containers, networks, volumes, and service images:
+
+```bash
+docker compose down --volumes --remove-orphans --rmi all
 ```
 
 Key local URLs:
@@ -155,13 +138,19 @@ Dashboards and detectors filter by `deployment.environment` plus `service.instan
 
 ## Docker Compose
 
-The repo includes a development compose file at [infra/docker/docker-compose.yml](infra/docker/docker-compose.yml).
+The repo includes a root Compose file at [compose.yaml](compose.yaml). This is the recommended workshop runtime.
 
 ```bash
-npm run dev:collector
+docker compose up --wait
 ```
 
-The npm command is a wrapper around Docker Compose. It uses `docker compose` when Compose v2 is installed and falls back to `docker-compose` when only the legacy standalone binary is available. The collector command starts only the `splunk-otel-collector` service and reads `.env` through Compose.
+Each major app component runs in a separate container. Compose reads `.env`, overrides service-to-service URLs to Docker DNS names, and keeps browser-facing URLs on `127.0.0.1`.
+
+Stop the stack without deleting dependency/cache volumes:
+
+```bash
+docker compose down
+```
 
 The compose path mounts a shared 128 MiB tmpfs at `/var/cache/claims-knowledge` for the knowledge service and the collector. The cache-pressure scenario fills that tmpfs, which gives the collector a real filesystem signal without risking the host disk.
 
@@ -170,8 +159,8 @@ The compose path mounts a shared 128 MiB tmpfs at `/var/cache/claims-knowledge` 
 The preferred authoring path is [infra/splunk](infra/splunk):
 
 ```bash
-npm run splunk:render
-npm run splunk:apply
+python3 infra/splunk/sync_splunk_objects.py
+python3 infra/splunk/sync_splunk_objects.py --apply
 ```
 
 Terraform remains available in [infra/terraform](infra/terraform). Current detectors are based on out-of-the-box signals:

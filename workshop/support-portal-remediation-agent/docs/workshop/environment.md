@@ -104,20 +104,14 @@ The knowledge service emits `CLAIMS_KNOWLEDGE_CACHE_UTILIZATION_METRIC` from the
 - `ORCHESTRATOR_PUBLIC_WEBHOOK_URL`
 - `SPLUNK_WEBHOOK_SHARED_SECRET`
 
-## 8. Load `.env`
+## 8. Compose environment loading
 
-```bash
-set -a
-source .env
-set +a
-```
-
-Do this before starting collector, backend, or frontend processes.
+Docker Compose reads `.env` automatically from the app directory.
 
 ## 9. Optional public webhook
 
 The primary lab flow uses copied Splunk evidence and does not require a public webhook. Start a tunnel only if you explicitly want Splunk detector delivery into the local orchestrator:
 
 ```bash
-npm run dev:tunnel
+cloudflared tunnel --url http://127.0.0.1:${ORCHESTRATOR_PORT:-18110}
 ```

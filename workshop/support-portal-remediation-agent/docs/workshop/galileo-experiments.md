@@ -30,13 +30,13 @@ The important MCP tools are the same tools referenced by `apps/remediation-orche
 ## Run The MCP Experiment
 
 ```bash
-npm run experiment:galileo
+docker compose run --rm galileo-experiment
 ```
 
 or:
 
 ```bash
-npm run experiment:galileo:mcp
+GALILEO_EXPERIMENT_SUITE=mcp docker compose run --rm galileo-experiment
 ```
 
 This creates a run named like:
@@ -115,7 +115,7 @@ Then open `mcp-cache-signalflow-empty`:
 ## Run The Tool-Flow Experiment
 
 ```bash
-npm run experiment:galileo:tools
+GALILEO_EXPERIMENT_SUITE=tools docker compose run --rm galileo-experiment
 ```
 
 This creates a run named like:
@@ -160,11 +160,11 @@ Say this clearly if asked:
 ## Run All App-Aligned Experiments
 
 ```bash
-npm run experiment:galileo:all
+GALILEO_EXPERIMENT_SUITE=all docker compose run --rm galileo-experiment
 ```
 
 Use a stable name for rehearsal:
 
 ```bash
-npm run experiment:galileo:mcp -- --name cl26-rehearsal-mcp-handoff
+GALILEO_EXPERIMENT_SUITE=mcp GALILEO_EXPERIMENT_NAME=cl26-rehearsal-mcp-handoff docker compose run --rm galileo-experiment
 ```

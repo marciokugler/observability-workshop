@@ -4,50 +4,9 @@ Use this pre-flight checklist before debugging application code.
 
 ## Required software
 
-### Node.js 22 and npm
-
-Install Node.js 22 and npm before checking versions. Ubuntu's default `nodejs` package can install Node 18, which is too old for this app.
-
-Ubuntu or Debian workshop VM:
-
-```bash
-sudo apt update
-sudo apt install -y curl
-sudo apt install -y ca-certificates
-curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-sudo apt install -y nodejs
-```
-
-```bash
-node --version
-```
-
-```bash
-npm --version
-```
-
-### Python 3
-
-Install Python and venv support before checking versions on Ubuntu or Debian:
-
-```bash
-sudo apt update
-sudo apt install -y python3
-sudo apt install -y python3-venv
-sudo apt install -y python3-pip
-```
-
-```bash
-python3 --version
-```
-
-```bash
-python3 -m pip --version
-```
-
 ### Docker
 
-Required for the local collector and Docker Compose flow.
+Required for the recommended Docker Compose flow.
 
 Ubuntu or Debian workshop VM:
 
@@ -126,7 +85,6 @@ lsof -i :18080 -i :18081 -i :18082 -i :18100 -i :18101 -i :18102 -i :18103 -i :1
 
 - repo checked out locally
 - `.env` if using real credentials
-- `apps/remediation-agent/.venv` after Python setup
 
 ## Presenter setup
 
@@ -135,15 +93,13 @@ Recommended windows:
 - claims portal
 - operator console
 - Splunk Observability Cloud
-- terminal running the app stack
-- terminal running the collector, if telemetry export is enabled
+- terminal running `docker compose up --wait`
 
 ## Final go/no-go checklist
 
-- Node and npm work
-- Python 3 and venv support work
-- Docker is running if collector is needed
-- dependencies are installed
-- remediation agent virtual environment exists
+- Docker is running
+- Docker Compose v2 works
+- `docker compose run --rm build-node` passes
+- `docker compose run --rm build-agent` passes
 - each student has a unique `INSTANCE`
 - intended local ports are free

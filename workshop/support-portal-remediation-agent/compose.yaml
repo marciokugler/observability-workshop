@@ -1,0 +1,406 @@
+name: support-portal-remediation-agent
+
+x-node-service: &node-service
+  image: node:22
+  working_dir: /workspace
+  env_file:
+    - .env
+  volumes:
+    - ./:/workspace
+    - node_modules:/workspace/node_modules
+
+x-node-healthcheck: &node-healthcheck
+  interval: 10s
+  timeout: 5s
+  retries: 12
+  start_period: 20s
+
+x-node-deps: &node-deps
+  node-deps:
+    condition: service_completed_successfully
+
+x-collector-started: &collector-started
+  splunk-otel-collector:
+    condition: service_started
+
+services:
+  node-deps:
+    image: node:22
+    working_dir: /workspace
+    command: sh -lc "npm ci"
+    volumes:
+      - ./:/workspace
+      - node_modules:/workspace/node_modules
+
+  build-node:
+    <<: *node-service
+    profiles:
+      - tools
+    command: sh -lc "npm run build"
+    depends_on:
+      <<: *node-deps
+
+  build-agent:
+    image: python:3.12
+    working_dir: /workspace
+    profiles:
+      - tools
+    env_file:
+      - .env
+    command: >
+      sh -lc "python -m venv /opt/venv &&
+      . /opt/venv/bin/activate &&
+      pip install -e /workspace/apps/remediation-agent &&
+      python -m compileall /workspace/apps/remediation-agent/app"
+    volumes:
+      - ./:/workspace
+      - python_venv:/opt/venv
+
+  splunk-otel-collector:
+    image: quay.io/signalfx/splunk-otel-collector:0.147.1
+    user: "0:0"
+    env_file:
+      - .env
+    environment:
+      SPLUNK_REALM: ${SPLUNK_REALM:-us1}
+      DEPLOYMENT_ENVIRONMENT: ${DEPLOYMENT_ENVIRONMENT:-demo}
+      INSTANCE: ${INSTANCE:-student-001}
+      OTEL_RESOURCE_ATTRIBUTES: ${OTEL_RESOURCE_ATTRIBUTES:-lab.name=ciscolive26,lab.student.id=student-001,service.instance.id=student-001,host.name=student-001,deployment.environment=demo}
+    command:
+      - "--config=/etc/otel/config.yaml"
+    volumes:
+      - ./infra/otel-collector/config.yaml:/etc/otel/config.yaml:ro
+      - ./:/workspace:ro
+      - /:/hostfs:ro
+      - claims_knowledge_cache:/var/cache/claims-knowledge:ro
+    ports:
+      - "14317:4317"
+      - "14318:4318"
+
+  knowledge-service:
+    <<: *node-service
+    environment:
+      KNOWLEDGE_SERVICE_PORT: 18103
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://splunk-otel-collector:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_PROPAGATORS: tracecontext,baggage,b3
+      CLAIMS_KNOWLEDGE_CACHE_DIR: /var/cache/claims-knowledge
+      CLAIMS_KNOWLEDGE_CACHE_FILL_PERCENT: ${CLAIMS_KNOWLEDGE_CACHE_FILL_PERCENT:-${SUPPORT_KNOWLEDGE_CACHE_FILL_PERCENT:-92}}
+      CLAIMS_KNOWLEDGE_CACHE_QUOTA_BYTES: ${CLAIMS_KNOWLEDGE_CACHE_QUOTA_BYTES:-${SUPPORT_KNOWLEDGE_CACHE_QUOTA_BYTES:-134217728}}
+    command: sh -lc "npm run dev --workspace @ibobs/knowledge-service"
+    volumes:
+      - ./:/workspace
+      - node_modules:/workspace/node_modules
+      - claims_knowledge_cache:/var/cache/claims-knowledge
+    ports:
+      - "18103:18103"
+    depends_on:
+      <<: [*node-deps, *collector-started]
+    healthcheck:
+      <<: *node-healthcheck
+      test:
+        - CMD-SHELL
+        - node -e "fetch('http://127.0.0.1:18103/knowledge/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+
+  assistant-service:
+    <<: *node-service
+    environment:
+      ASSISTANT_SERVICE_PORT: 18101
+      KNOWLEDGE_SERVICE_BASE_URL: http://knowledge-service:18103
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://splunk-otel-collector:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_PROPAGATORS: tracecontext,baggage,b3
+    command: sh -lc "npm run dev --workspace @ibobs/assistant-service"
+    ports:
+      - "18101:18101"
+    depends_on:
+      node-deps:
+        condition: service_completed_successfully
+      splunk-otel-collector:
+        condition: service_started
+      knowledge-service:
+        condition: service_healthy
+    healthcheck:
+      <<: *node-healthcheck
+      test:
+        - CMD-SHELL
+        - node -e "fetch('http://127.0.0.1:18101/assistant/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+
+  case-service:
+    <<: *node-service
+    environment:
+      CASE_SERVICE_PORT: 18102
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://splunk-otel-collector:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_PROPAGATORS: tracecontext,baggage,b3
+    command: sh -lc "npm run dev --workspace @ibobs/case-service"
+    ports:
+      - "18102:18102"
+    depends_on:
+      <<: [*node-deps, *collector-started]
+    healthcheck:
+      <<: *node-healthcheck
+      test:
+        - CMD-SHELL
+        - node -e "fetch('http://127.0.0.1:18102/cases/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+
+  scenario-controller:
+    <<: *node-service
+    environment:
+      SCENARIO_CONTROLLER_PORT: 18104
+      KNOWLEDGE_SERVICE_BASE_URL: http://knowledge-service:18103
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://splunk-otel-collector:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_PROPAGATORS: tracecontext,baggage,b3
+    command: sh -lc "npm run dev --workspace @ibobs/scenario-controller"
+    ports:
+      - "18104:18104"
+    depends_on:
+      node-deps:
+        condition: service_completed_successfully
+      splunk-otel-collector:
+        condition: service_started
+      knowledge-service:
+        condition: service_healthy
+    healthcheck:
+      <<: *node-healthcheck
+      test:
+        - CMD-SHELL
+        - node -e "fetch('http://127.0.0.1:18104/scenario/state').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+
+  api-gateway:
+    <<: *node-service
+    environment:
+      API_GATEWAY_PORT: 18100
+      ASSISTANT_SERVICE_BASE_URL: http://assistant-service:18101
+      CASE_SERVICE_BASE_URL: http://case-service:18102
+      KNOWLEDGE_SERVICE_BASE_URL: http://knowledge-service:18103
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://splunk-otel-collector:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_PROPAGATORS: tracecontext,baggage,b3
+    command: sh -lc "npm run dev --workspace @ibobs/api-gateway"
+    ports:
+      - "18100:18100"
+    depends_on:
+      node-deps:
+        condition: service_completed_successfully
+      splunk-otel-collector:
+        condition: service_started
+      assistant-service:
+        condition: service_healthy
+      case-service:
+        condition: service_healthy
+      knowledge-service:
+        condition: service_healthy
+    healthcheck:
+      <<: *node-healthcheck
+      test:
+        - CMD-SHELL
+        - node -e "fetch('http://127.0.0.1:18100/api/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+
+  remediation-agent:
+    image: python:3.12
+    working_dir: /workspace
+    env_file:
+      - .env
+    environment:
+      REMEDIATION_AGENT_PORT: 18800
+      OTEL_SERVICE_NAME: remediation-agent
+      SCENARIO_CONTROLLER_BASE_URL: http://scenario-controller:18104
+      API_GATEWAY_BASE_URL: http://api-gateway:18100
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://splunk-otel-collector:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_PROPAGATORS: tracecontext,baggage,b3
+    command: >
+      sh -lc "python -m venv /opt/venv &&
+      . /opt/venv/bin/activate &&
+      pip install -e /workspace/apps/remediation-agent &&
+      uvicorn app.main:app --app-dir /workspace/apps/remediation-agent --host 0.0.0.0 --port 18800"
+    volumes:
+      - ./:/workspace
+      - python_venv:/opt/venv
+    ports:
+      - "18800:18800"
+    depends_on:
+      splunk-otel-collector:
+        condition: service_started
+      api-gateway:
+        condition: service_healthy
+      scenario-controller:
+        condition: service_healthy
+    healthcheck:
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+      test:
+        - CMD-SHELL
+        - python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:18800/agent/health', timeout=2)"
+
+  remediation-orchestrator:
+    <<: *node-service
+    environment:
+      ORCHESTRATOR_PORT: 18110
+      REMEDIATION_AGENT_BASE_URL: http://remediation-agent:18800
+      SPLUNK_API_BASE_URL: ${SPLUNK_API_BASE_URL:-https://api.us1.signalfx.com}
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://splunk-otel-collector:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_PROPAGATORS: tracecontext,baggage,b3
+    command: sh -lc "npm run dev --workspace @ibobs/remediation-orchestrator"
+    ports:
+      - "18110:18110"
+    depends_on:
+      node-deps:
+        condition: service_completed_successfully
+      splunk-otel-collector:
+        condition: service_started
+      remediation-agent:
+        condition: service_healthy
+    healthcheck:
+      <<: *node-healthcheck
+      test:
+        - CMD-SHELL
+        - node -e "fetch('http://127.0.0.1:18110/remediation/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+
+  frontend:
+    <<: *node-service
+    environment:
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://127.0.0.1:18100}
+      VITE_ORCHESTRATOR_BASE_URL: ${VITE_ORCHESTRATOR_BASE_URL:-http://127.0.0.1:18110}
+      VITE_SCENARIO_CONTROLLER_BASE_URL: ${VITE_SCENARIO_CONTROLLER_BASE_URL:-http://127.0.0.1:18104}
+      VITE_DEPLOYMENT_ENVIRONMENT: ${VITE_DEPLOYMENT_ENVIRONMENT:-${DEPLOYMENT_ENVIRONMENT:-demo}}
+      VITE_SPLUNK_REALM: ${VITE_SPLUNK_REALM:-${SPLUNK_REALM:-us1}}
+      VITE_SPLUNK_RUM_TOKEN: ${VITE_SPLUNK_RUM_TOKEN:-}
+      VITE_SPLUNK_SESSION_REPLAY_ENABLED: ${VITE_SPLUNK_SESSION_REPLAY_ENABLED:-true}
+    command: sh -lc "npm run dev --workspace @ibobs/frontend -- --host 0.0.0.0 --port 18080"
+    ports:
+      - "18080:18080"
+    depends_on:
+      node-deps:
+        condition: service_completed_successfully
+      api-gateway:
+        condition: service_healthy
+      remediation-orchestrator:
+        condition: service_healthy
+      scenario-controller:
+        condition: service_healthy
+    healthcheck:
+      <<: *node-healthcheck
+      test:
+        - CMD-SHELL
+        - node -e "fetch('http://127.0.0.1:18080/').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+
+  operator-console:
+    <<: *node-service
+    environment:
+      VITE_ORCHESTRATOR_BASE_URL: ${VITE_ORCHESTRATOR_BASE_URL:-http://127.0.0.1:18110}
+      VITE_SCENARIO_CONTROLLER_BASE_URL: ${VITE_SCENARIO_CONTROLLER_BASE_URL:-http://127.0.0.1:18104}
+    command: sh -lc "npm run dev --workspace @ibobs/operator-console -- --host 0.0.0.0 --port 18081"
+    ports:
+      - "18081:18081"
+    depends_on:
+      node-deps:
+        condition: service_completed_successfully
+      remediation-orchestrator:
+        condition: service_healthy
+      scenario-controller:
+        condition: service_healthy
+    healthcheck:
+      <<: *node-healthcheck
+      test:
+        - CMD-SHELL
+        - node -e "fetch('http://127.0.0.1:18081/').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+
+  traffic-simulator:
+    <<: *node-service
+    profiles:
+      - tools
+    environment:
+      SIMULATOR_BASE_URL: ${SIMULATOR_BASE_URL:-http://api-gateway:18100}
+      SIMULATOR_SCENARIO_CONTROLLER_URL: ${SIMULATOR_SCENARIO_CONTROLLER_URL:-http://scenario-controller:18104}
+      SIMULATOR_SCENARIO: ${SIMULATOR_SCENARIO:-current}
+      SIMULATOR_RESET_AFTER_RUN: ${SIMULATOR_RESET_AFTER_RUN:-false}
+      SIMULATOR_DURATION_SECONDS: ${SIMULATOR_DURATION_SECONDS:-120}
+      SIMULATOR_INTERVAL_MS: ${SIMULATOR_INTERVAL_MS:-500}
+      SIMULATOR_MIX: ${SIMULATOR_MIX:-claim-heavy}
+    command: sh -lc "node scripts/traffic-simulator.mjs"
+    depends_on:
+      node-deps:
+        condition: service_completed_successfully
+      api-gateway:
+        condition: service_healthy
+      scenario-controller:
+        condition: service_healthy
+
+  rum-simulator:
+    <<: *node-service
+    profiles:
+      - tools
+    environment:
+      RUM_SIMULATOR_URL: ${RUM_SIMULATOR_URL:-http://frontend:18080}
+      RUM_SIMULATOR_USERS: ${RUM_SIMULATOR_USERS:-5}
+      RUM_SIMULATOR_ROUNDS: ${RUM_SIMULATOR_ROUNDS:-6}
+      RUM_SIMULATOR_THINK_TIME_MS: ${RUM_SIMULATOR_THINK_TIME_MS:-7000}
+      RUM_SIMULATOR_STAGGER_MS: ${RUM_SIMULATOR_STAGGER_MS:-1200}
+      RUM_SIMULATOR_SETTLE_MS: ${RUM_SIMULATOR_SETTLE_MS:-15000}
+      RUM_SIMULATOR_SESSION_TARGET_MS: ${RUM_SIMULATOR_SESSION_TARGET_MS:-28000}
+      RUM_SIMULATOR_COOLDOWN_MS: ${RUM_SIMULATOR_COOLDOWN_MS:-12000}
+      RUM_SIMULATOR_CONCURRENCY: ${RUM_SIMULATOR_CONCURRENCY:-1}
+      RUM_SIMULATOR_BROWSERS: ${RUM_SIMULATOR_BROWSERS:-chromium,firefox,webkit}
+    command: sh -lc "npx playwright install --with-deps chromium && node scripts/rum-simulator.mjs"
+    volumes:
+      - ./:/workspace
+      - node_modules:/workspace/node_modules
+      - playwright_cache:/root/.cache/ms-playwright
+    depends_on:
+      node-deps:
+        condition: service_completed_successfully
+      frontend:
+        condition: service_healthy
+
+  galileo-showcase:
+    <<: *node-service
+    profiles:
+      - tools
+    environment:
+      - GALILEO_SHOWCASE_ORCHESTRATOR_URL=${GALILEO_SHOWCASE_ORCHESTRATOR_URL:-http://remediation-orchestrator:18110}
+      - GALILEO_SHOWCASE_INCIDENT_ID
+      - GALILEO_SHOWCASE_EXECUTE_REMEDIATION=${GALILEO_SHOWCASE_EXECUTE_REMEDIATION:-true}
+      - GALILEO_SHOWCASE_UNSAFE_NOTE=${GALILEO_SHOWCASE_UNSAFE_NOTE:-true}
+    command: sh -lc "node scripts/galileo-showcase.mjs"
+    depends_on:
+      node-deps:
+        condition: service_completed_successfully
+      remediation-orchestrator:
+        condition: service_healthy
+
+  galileo-experiment:
+    image: python:3.12
+    working_dir: /workspace
+    profiles:
+      - tools
+    env_file:
+      - .env
+    environment:
+      - GALILEO_EXPERIMENT_SUITE=${GALILEO_EXPERIMENT_SUITE:-mcp}
+      - GALILEO_EXPERIMENT_NAME
+      - GALILEO_EXPERIMENT_GROUP
+    command: >
+      sh -lc "python -m venv /opt/venv &&
+      . /opt/venv/bin/activate &&
+      pip install -e /workspace/apps/remediation-agent &&
+      python scripts/galileo-remediation-experiment.py --suite \"$${GALILEO_EXPERIMENT_SUITE}\""
+    volumes:
+      - ./:/workspace
+      - python_venv:/opt/venv
+
+volumes:
+  node_modules:
+  python_venv:
+  playwright_cache:
+  claims_knowledge_cache:
+    driver: local
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+      o: size=128m

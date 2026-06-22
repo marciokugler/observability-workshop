@@ -8,17 +8,14 @@ Target outcome:
 
 - dependencies installed
 - `.env` prepared with a unique `INSTANCE`
-- collector decision made
 - app stack starts cleanly
 
 Checklist:
 
 1. verify Node, Python, and Docker
 2. populate `.env`
-3. run `npm install`
-4. create the remediation agent virtual environment
-5. start `npm run dev:all`
-6. confirm the portal and operator console load
+3. start `docker compose up --wait`
+4. confirm the portal and operator console load
 
 ## Hour 2: technical validation
 
@@ -69,8 +66,7 @@ Checklist:
 1. restart only if necessary
 2. clear stale browser tabs
 3. keep one terminal on the app stack
-4. keep another terminal on the collector if telemetry is part of the rehearsal
-5. bookmark the fallback story if live signals drift
+4. bookmark the fallback story if live signals drift
 
 ## Final 15-minute checklist
 

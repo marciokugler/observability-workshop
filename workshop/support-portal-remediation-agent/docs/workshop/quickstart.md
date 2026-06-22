@@ -7,8 +7,8 @@ This is the shortest reliable path to a working workshop run.
 At the end of this flow you should have:
 
 - the docs site running locally
-- the app stack running locally
-- optional collector telemetry running
+- the app stack running in Docker Compose
+- collector telemetry running in the same Compose stack
 - the claims portal and operator console reachable
 - a healthy starting state
 - a deterministic cache-pressure incident
@@ -18,9 +18,7 @@ At the end of this flow you should have:
 
 You need:
 
-- Node.js 22 and `npm`
-- Python 3 with venv support
-- Docker Desktop or another local Docker daemon if you want the collector
+- Docker Desktop or another local Docker daemon with Docker Compose v2
 - Splunk and OpenAI credentials if you want live telemetry and model-backed remediation
 
 ## 2. Get the source
@@ -74,90 +72,55 @@ Each student should use a different `INSTANCE`, such as `student-014`.
 
 `SPLUNK_ACCESS_TOKEN` and `SPLUNK_REALM` enable Splunk export and evidence lookup. `VITE_SPLUNK_RUM_TOKEN` enables browser RUM. `OPENAI_API_KEY` enables model-backed remediation. `GALILEO_API_KEY_FILE` or `GALILEO_API_KEY` enables agent monitoring.
 
-## 5. Install dependencies
+## 5. Build and check the code
+
+The recommended lab path uses the root [compose.yaml](../../compose.yaml). Compose installs app dependencies inside named Docker volumes, so no host Node or Python setup is needed for a normal workshop run.
 
 ```bash
-npm install
+docker compose run --rm build-node
 ```
 
 ```bash
-python3 -m venv apps/remediation-agent/.venv
+docker compose run --rm build-agent
 ```
 
-```bash
-apps/remediation-agent/.venv/bin/python -m pip install --index-url https://pypi.org/simple --upgrade pip
-```
+## 6. Start the full stack
 
 ```bash
-apps/remediation-agent/.venv/bin/python -m pip install --index-url https://pypi.org/simple -e apps/remediation-agent
-```
-
-```bash
-apps/remediation-agent/.venv/bin/python -m pip show ibobs-remediation-agent
-```
-
-If the venv command reports that `ensurepip` is missing on Debian or Ubuntu, run `sudo apt update`, `sudo apt install -y python3-venv`, and `sudo apt install -y python3-pip`, then rerun the venv commands.
-
-## 6. Start the collector
-
-Use this only when you are validating telemetry:
-
-`npm run dev:collector` is an npm wrapper around Docker Compose. It starts only the `splunk-otel-collector` service from `infra/docker/docker-compose.yml` and reads `.env` through Compose.
-
-```bash
-docker compose version
-```
-
-```bash
-set -a
-```
-
-```bash
-source .env
-```
-
-```bash
-set +a
-```
-
-```bash
-npm run dev:collector
+docker compose up --wait
 ```
 
 The collector listens on host OTLP ports `14317` and `14318`. Inside Docker it still listens on standard collector ports `4317` and `4318`.
 
-## 7. Start the app stack
-
-In another terminal:
-
-```bash
-cd observability-workshop/workshop/support-portal-remediation-agent
-```
-
-```bash
-set -a
-```
-
-```bash
-source .env
-```
-
-```bash
-set +a
-```
-
-```bash
-npm run dev:all
-```
-
-If you used the ZIP download, use `cd observability-workshop-main/workshop/support-portal-remediation-agent` instead.
-
 Expected result:
 
+- the Splunk OTel Collector starts
 - backend services bind to high local ports
 - the Python remediation agent starts on `18800`
 - Vite starts the portal on `18080`
 - Vite starts the operator console on `18081`
+
+If you used the ZIP download, run the command from `observability-workshop-main/workshop/support-portal-remediation-agent`.
+
+## 7. Inspect or stop the stack
+
+Follow logs:
+
+```bash
+docker compose logs -f
+```
+
+Stop containers without deleting volumes:
+
+```bash
+docker compose down
+```
+
+Delete containers, networks, volumes, and service images:
+
+```bash
+docker compose down --volumes --remove-orphans --rmi all
+```
 
 ## 8. Open the two main UIs
 

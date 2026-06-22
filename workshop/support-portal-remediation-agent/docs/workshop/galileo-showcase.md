@@ -8,7 +8,7 @@ guardrails, human approval, action, and verification in Galileo.
 From the repository root, with the app stack and credentials loaded:
 
 ```bash
-npm run simulate:galileo
+docker compose run --rm galileo-showcase
 ```
 
 You can also use the operator console:
@@ -60,11 +60,11 @@ it rejected, who approved it, what action ran, and whether recovery was verified
 
 ```bash
 # Generate traces without executing cleanup or validation.
-GALILEO_SHOWCASE_EXECUTE_REMEDIATION=false npm run simulate:galileo
+GALILEO_SHOWCASE_EXECUTE_REMEDIATION=false docker compose run --rm galileo-showcase
 
 # Generate a cleaner path without the unsafe synthetic operator note.
-GALILEO_SHOWCASE_UNSAFE_NOTE=false npm run simulate:galileo
+GALILEO_SHOWCASE_UNSAFE_NOTE=false docker compose run --rm galileo-showcase
 
 # Use a presenter-friendly incident id.
-GALILEO_SHOWCASE_INCIDENT_ID=cl26-galileo-demo npm run simulate:galileo
+GALILEO_SHOWCASE_INCIDENT_ID=cl26-galileo-demo docker compose run --rm galileo-showcase
 ```

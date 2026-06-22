@@ -25,6 +25,7 @@ override.tf.json
 /site/
 /node_modules/
 package-lock.json
+!workshop/support-portal-remediation-agent/package-lock.json
 # Temporary lock file while building
 .hugo_build.lock
 /resources

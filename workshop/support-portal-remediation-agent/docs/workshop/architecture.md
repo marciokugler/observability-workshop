@@ -97,7 +97,7 @@ The incident does not require custom app metrics or log analysis.
 
 ## Infrastructure
 
-### `infra/docker`
+### `compose.yaml`
 
 Docker Compose development stack. The knowledge service gets a bounded tmpfs cache volume in this path.
 

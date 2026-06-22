@@ -2,72 +2,44 @@
 
 This page is optimized for workshop-day failures.
 
-## `npm install` fails
+## Build checks fail
 
 Check:
 
-- Node version compatibility. If `npm install` prints `EBADENGINE` with current Node `v18.x`, Ubuntu installed an older Node package.
+- Docker daemon is running
+- Docker Compose v2 is installed
 - internet access or package registry access
-- whether a previous partial install left a corrupted `node_modules`
+- whether a previous partial install left a corrupted `node_modules` or `python_venv` Docker volume
 
 Action:
 
-1. install Node.js 22 if needed
-2. re-run `npm install`
+1. rerun the failing build check
+2. if it still fails, remove Compose volumes and rerun
 3. capture the first real error
 4. resolve that root issue before changing application code
 
-Ubuntu or Debian Node 22 install:
-
 ```bash
-sudo apt update
-sudo apt install -y curl
-sudo apt install -y ca-certificates
-curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-sudo apt install -y nodejs
-```
-
-## Python agent setup fails
-
-If `apps/remediation-agent/.venv` does not exist, the virtual environment creation failed. On Debian or Ubuntu, install Python venv support first:
-
-```bash
-sudo apt update
-sudo apt install -y python3-venv
-sudo apt install -y python3-pip
-```
-
-Use the delete step only when you intend to recreate the virtual environment:
-
-```bash
-rm -rf apps/remediation-agent/.venv
+docker compose run --rm build-node
 ```
 
 ```bash
-python3 -m venv apps/remediation-agent/.venv
+docker compose run --rm build-agent
 ```
 
 ```bash
-apps/remediation-agent/.venv/bin/python -m pip install --index-url https://pypi.org/simple --upgrade pip
+docker compose down --volumes --remove-orphans
 ```
 
-```bash
-apps/remediation-agent/.venv/bin/python -m pip install --index-url https://pypi.org/simple -e apps/remediation-agent
-```
-
-```bash
-apps/remediation-agent/.venv/bin/python -m pip show ibobs-remediation-agent
-```
-
-## Collector will not start
+## Compose stack will not start
 
 Check:
 
 - Docker daemon is running
 - your user can access `/var/run/docker.sock`
 - Docker Compose v2 is installed
-- `.env` is loaded
+- `.env` exists in the app directory
 - host port `14318` is free
+- app ports `18080`, `18081`, `18100` through `18104`, `18110`, and `18800` are free
 
 Action:
 
@@ -96,7 +68,7 @@ grep -E '^OTEL_EXPORTER_OTLP_ENDPOINT=' .env
 ```
 
 ```bash
-npm run dev:collector
+docker compose up --wait
 ```
 
 If `docker compose version` is not available on Ubuntu:
@@ -118,13 +90,15 @@ OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:14318
 
 Check:
 
-- `npm run dev:all` is still running
+- the Compose stack is running
 - Vite did not fail due to port conflict
 - browser is pointed at the high-port URLs
 
 Action:
 
 ```bash
+docker compose ps
+docker compose logs frontend operator-console
 lsof -i :18080 -i :18081
 ```
 
@@ -164,7 +138,7 @@ curl -s http://127.0.0.1:18103/knowledge/cache/status
 Check locally first:
 
 1. collector is running
-2. app processes started with `.env` loaded
+2. `.env` has the expected Splunk and RUM values
 3. fresh traffic was generated after collector startup
 4. `INSTANCE` and `OTEL_RESOURCE_ATTRIBUTES` match the student lab
 
@@ -194,7 +168,7 @@ If RUM sessions are missing:
 Useful check:
 
 ```bash
-docker compose --env-file .env -f infra/docker/docker-compose.yml exec -T frontend env | grep VITE_SPLUNK
+docker compose exec -T frontend env | grep VITE_SPLUNK
 ```
 
 ## Remediation recommendation or execution is missing
@@ -223,6 +197,22 @@ If testing webhooks:
 2. start the tunnel
 3. update `ORCHESTRATOR_PUBLIC_WEBHOOK_URL`
 4. verify any shared secret values match
+
+## Full cleanup does not remove everything
+
+Use this when a student needs to leave no lab containers, networks, volumes, or service images behind:
+
+```bash
+docker compose down --volumes --remove-orphans --rmi all
+```
+
+Confirm the Compose project has no remaining Docker objects:
+
+```bash
+docker container ls -a --filter label=com.docker.compose.project=support-portal-remediation-agent
+docker volume ls --filter label=com.docker.compose.project=support-portal-remediation-agent
+docker network ls --filter label=com.docker.compose.project=support-portal-remediation-agent
+```
 
 ## Safe fallback
 

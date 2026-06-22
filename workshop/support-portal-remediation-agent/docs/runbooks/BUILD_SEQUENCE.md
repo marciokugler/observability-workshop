@@ -2,17 +2,18 @@
 
 ## Current local build order
 
-1. Install workspace dependencies with `npm install`.
-2. Create the remediation-agent virtual environment and install it with `pip install --index-url https://pypi.org/simple -e .`.
-3. Copy `.env.example` to `.env`.
-4. Set a unique `INSTANCE`.
-5. Start Docker so the local Splunk Collector can run.
-6. Start the collector with `npm run dev:collector`.
-7. Start the full stack with `npm run dev:all`.
-8. Open the portal and operator console.
-9. Trigger `cache-disk-pressure`.
-10. Reproduce the incident in the portal.
-11. Use the operator console to create the incident, explain evidence, propose action, approve, and validate.
+1. Copy `.env.example` to `.env`.
+2. Set a unique `INSTANCE`.
+3. Start Docker.
+4. Build/check Node workspaces with `docker compose run --rm build-node`.
+5. Build/check the Python remediation agent with `docker compose run --rm build-agent`.
+6. Start the full lab stack with `docker compose up --wait`.
+7. Open the portal and operator console.
+8. Trigger `cache-disk-pressure`.
+9. Reproduce the incident in the portal.
+10. Use the operator console to create the incident, explain evidence, propose action, approve, and validate.
+11. Stop with `docker compose down`.
+12. Fully remove lab containers, networks, volumes, and service images with `docker compose down --volumes --remove-orphans --rmi all`.
 
 ## Verification order
 

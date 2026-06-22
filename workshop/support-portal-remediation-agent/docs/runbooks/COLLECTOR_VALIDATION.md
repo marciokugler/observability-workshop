@@ -13,17 +13,13 @@ Prove that traces, APM service metrics, RUM data, and host filesystem metrics le
    - `INSTANCE`
    - `OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:14318`
    - `OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf`
-3. Workspace dependencies and the remediation-agent virtual environment are installed.
+3. Docker Compose v2 is available.
 
 ## Start order
 
-1. Start the collector:
+1. Start the full Compose stack:
    ```bash
-   npm run dev:collector
-   ```
-2. In another terminal, start the app stack:
-   ```bash
-   npm run dev:all
+   docker compose up --wait
    ```
 
 ## Generate traffic
@@ -70,7 +66,7 @@ Browser:
 
 1. Check APM service views.
 2. Check Infrastructure Monitoring filesystem utilization.
-3. Render Splunk objects with `npm run splunk:render`.
+3. Render Splunk objects with `python3 infra/splunk/sync_splunk_objects.py`.
 4. Apply dashboards and detectors only after the live signals exist.
 
 ## Related Infrastructure validation
@@ -80,7 +76,7 @@ The collector sends service-to-host related-content updates through the SignalFx
 Use these checks before trusting the UI:
 
 ```bash
-docker logs --since 10m docker-splunk-otel-collector-1 2>&1 \
+docker compose logs --since 10m splunk-otel-collector 2>&1 \
   | grep -E 'Updated dimension.*claims-knowledge.*PUT|Detected host resource ID'
 ```
 

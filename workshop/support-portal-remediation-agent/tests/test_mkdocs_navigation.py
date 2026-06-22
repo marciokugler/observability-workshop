@@ -25,8 +25,8 @@ class MkdocsNavigationTest(unittest.TestCase):
             "clean_claims_knowledge_cache",
             "remediation.evaluate",
             "showcase.guardrail_pre_action_check",
-            "npm run simulate:traffic",
-            "npm run simulate:rum",
+            "docker compose run --rm traffic-simulator",
+            "docker compose run --rm rum-simulator",
         ]:
             with self.subTest(required_text=required_text):
                 self.assertIn(required_text, content)

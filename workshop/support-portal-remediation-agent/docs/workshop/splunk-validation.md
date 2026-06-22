@@ -46,13 +46,13 @@ Open:
 Run balanced backend traffic long enough for APM service metrics:
 
 ```bash
-SIMULATOR_SCENARIO=healthy SIMULATOR_DURATION_SECONDS=300 SIMULATOR_INTERVAL_MS=750 SIMULATOR_MIX=balanced npm run simulate:traffic
+SIMULATOR_SCENARIO=healthy SIMULATOR_DURATION_SECONDS=300 SIMULATOR_INTERVAL_MS=750 SIMULATOR_MIX=balanced docker compose run --rm traffic-simulator
 ```
 
 Generate browser traffic when RUM is configured:
 
 ```bash
-RUM_SIMULATOR_USERS=3 RUM_SIMULATOR_ROUNDS=4 RUM_SIMULATOR_BROWSERS=chromium npm run simulate:rum
+RUM_SIMULATOR_USERS=3 RUM_SIMULATOR_ROUNDS=4 RUM_SIMULATOR_BROWSERS=chromium docker compose run --rm rum-simulator
 ```
 
 In Splunk APM, confirm these services appear:
@@ -102,13 +102,13 @@ curl -X POST http://127.0.0.1:18104/scenario/activate/cache-disk-pressure
 Drive degraded claim-status traffic:
 
 ```bash
-SIMULATOR_SCENARIO=current SIMULATOR_DURATION_SECONDS=300 SIMULATOR_INTERVAL_MS=750 SIMULATOR_MIX=claim-heavy npm run simulate:traffic
+SIMULATOR_SCENARIO=current SIMULATOR_DURATION_SECONDS=300 SIMULATOR_INTERVAL_MS=750 SIMULATOR_MIX=claim-heavy docker compose run --rm traffic-simulator
 ```
 
 Keep comparison traffic visible:
 
 ```bash
-SIMULATOR_SCENARIO=current SIMULATOR_DURATION_SECONDS=180 SIMULATOR_INTERVAL_MS=1000 SIMULATOR_MIX=balanced npm run simulate:traffic
+SIMULATOR_SCENARIO=current SIMULATOR_DURATION_SECONDS=180 SIMULATOR_INTERVAL_MS=1000 SIMULATOR_MIX=balanced docker compose run --rm traffic-simulator
 ```
 
 ## 5. Validate the incident in Splunk
@@ -180,7 +180,7 @@ curl -s http://127.0.0.1:18110/remediation/agent-monitoring
 Run the Galileo showcase:
 
 ```bash
-npm run simulate:galileo
+docker compose run --rm galileo-showcase
 ```
 
 In Galileo, open project `ciscolive26` and log stream `remediation-agent`.
@@ -206,7 +206,7 @@ After approval, run:
 
 ```bash
 curl -s http://127.0.0.1:18104/scenario/state
-SIMULATOR_SCENARIO=current SIMULATOR_DURATION_SECONDS=180 SIMULATOR_INTERVAL_MS=750 SIMULATOR_MIX=balanced npm run simulate:traffic
+SIMULATOR_SCENARIO=current SIMULATOR_DURATION_SECONDS=180 SIMULATOR_INTERVAL_MS=750 SIMULATOR_MIX=balanced docker compose run --rm traffic-simulator
 ```
 
 Expected recovery:
