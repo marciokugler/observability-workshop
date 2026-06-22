@@ -43,16 +43,11 @@ The lab uses real Kubernetes, GPU, NIM, application, and OpenTelemetry signals
 where practical. Cisco UCS, Nexus, and storage behavior may be simulated or
 represented conceptually unless those integrations are explicitly deployed.
 
-## Local Preview
+## Local Guide
 
-Main workshop:
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements-docs.txt
-mkdocs serve
-```
+The attendee guide source lives in `workshop/`. Start with
+`workshop/index.md`; supporting lab manifests and snippets are in
+`workshop/lab-files/`.
 
 ## More Detail
 

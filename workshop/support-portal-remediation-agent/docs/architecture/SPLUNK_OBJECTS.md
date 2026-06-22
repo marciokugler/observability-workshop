@@ -7,7 +7,6 @@
 - Digital Experience
 - Service Health
 - Remediation Operations
-- Galileo remediation-agent companion view, configured outside Splunk
 
 ## Detectors to provision as code
 

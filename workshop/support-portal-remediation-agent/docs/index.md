@@ -8,7 +8,7 @@ The goal is to get the environment running reliably, explain the architecture cl
 
 - a customer-facing AI claims portal
 - one degraded customer journey and two healthy comparison journeys
-- Splunk RUM, APM, host filesystem metrics, and Galileo remediation-agent instrumentation
+- Splunk RUM, APM, host filesystem metrics, and remediation-agent spans
 - a remediation orchestrator that turns investigation evidence into structured policy input
 - a bounded remediation agent with approval and validation
 - a repeatable cache-pressure scenario that does not depend on logs or custom app metrics
@@ -23,16 +23,10 @@ The goal is to get the environment running reliably, explain the architecture cl
 6. [Live Demo Flow](workshop/live-demo-flow.md)
 7. [Troubleshooting](workshop/troubleshooting.md)
 
-## Serve the docs locally
+## Read the docs locally
 
-From the repo root:
-
-```bash
-python3 -m pip install -r requirements-docs.txt
-python3 -m mkdocs serve -a 127.0.0.1:18082
-```
-
-Then open `http://127.0.0.1:18082/`.
+From this directory, start with [Quick Start](workshop/quickstart.md). No
+documentation server is required.
 
 ## Core customer story
 

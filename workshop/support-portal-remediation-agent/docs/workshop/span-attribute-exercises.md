@@ -10,7 +10,7 @@ Students should be able to:
 - identify the claims portal journey in RUM/APM
 - find `claims-knowledge` latency in APM
 - find cache pressure through host filesystem metrics
-- inspect remediation service spans in Splunk and agent/model traces in Galileo
+- inspect remediation service spans in Splunk
 
 ## Exercise 1: Set student identity
 
@@ -111,11 +111,10 @@ In the operator console:
 3. request a proposed action
 4. approve `clean_claims_knowledge_cache`
 
-In Splunk APM and Galileo, inspect:
+In Splunk APM, inspect:
 
 - `remediation-orchestrator`
 - `remediation-agent`
-- Galileo model provider call metadata, when `OPENAI_API_KEY` and `GALILEO_API_KEY_FILE` or `GALILEO_API_KEY` are set
 - action attributes such as `action.type=clean_claims_knowledge_cache`
 
 Discussion prompt:

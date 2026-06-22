@@ -112,6 +112,6 @@ Use Splunk UI, detectors, and dashboards for default signals:
 - APM service request metrics such as `service.request` and `service.request.duration.ns`
 - host filesystem metrics such as `disk.utilization`
 - RUM and browser spans for the claims portal
-- remediation service spans in Splunk APM, with agent/model visibility in Galileo
+- remediation service spans in Splunk APM
 
 The MCP and API integrations remain lightweight enrichment hooks. They enrich context, but policy evaluation and remediation execution still use the bounded `EvidenceBundle` contract.

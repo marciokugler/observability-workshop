@@ -131,39 +131,6 @@ type OrchestratorResponse = {
     target?: string;
     notes?: string[];
   };
-  sessionId?: string;
-  project?: string;
-  logStream?: string;
-  story?: string[];
-  showcaseTraces?: Array<{
-    name: string;
-    type: string;
-    includesProtectSpan?: boolean;
-    enabled?: boolean;
-  }>;
-  guardrail?: {
-    status?: string;
-    unsafeRestartInstruction?: boolean;
-    syntheticPiiDetected?: boolean;
-    nextAction?: string;
-  };
-  plan?: {
-    recommendedAction?: string;
-    target?: string;
-    needsApproval?: boolean;
-    reasoningSummary?: string;
-  };
-  verification?: {
-    status?: string;
-    measuredLatencyMs?: number;
-    latencyThresholdMs?: number;
-  };
-  postmortem?: {
-    summary?: string;
-    auditOutcome?: string;
-    governanceHighlights?: string[];
-  };
-  demoGuide?: string[];
 };
 
 type StoredIncident = {

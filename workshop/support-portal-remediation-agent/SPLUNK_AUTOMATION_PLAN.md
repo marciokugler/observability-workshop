@@ -34,7 +34,6 @@ Automate:
 - business transactions dashboard
 - service health dashboard
 - remediation dashboard
-- Galileo agent monitoring companion view
 
 Dashboard requirements:
 

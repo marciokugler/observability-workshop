@@ -34,7 +34,7 @@ This file captures the main external references and research conclusions used to
   [Cisco AI POD for Enterprise Training and Fine-Tuning Design Guide](https://www.cisco.com/c/en/us/td/docs/unified_computing/ucs/UCS_CVDs/cisco_ai_pod_for_training_design.html)
 - Cisco AI Defense reference architecture:
   [AI Defense on Cisco AI PODs Reference Architecture](https://www.cisco.com/c/en/us/td/docs/unified_computing/ucs/UCS_CVDs/AI_defense_on_Cisco_AI_PODs_reference_architecture.html)
-- MkDocs student-facing AI POD hardware appendix and visuals:
+- Student-facing AI POD hardware appendix and visuals:
   [`workshop/appendix-ai-pod-hardware.md`](/Users/mkuglerr/code2/codex_projects/ai-pods/workshop/appendix-ai-pod-hardware.md)
 
 ---

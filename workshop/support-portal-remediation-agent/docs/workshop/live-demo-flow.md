@@ -71,7 +71,7 @@ Keep this simple for students:
 5. Inspect filesystem utilization for `/var/cache/claims-knowledge`.
 6. Use APM and Infrastructure as the required proof path; keep `Policy Coverage Lookup` and `Claims FAQ Search` visible as healthy comparisons.
 
-Use [Splunk Validation](splunk-validation.md) during rehearsal for the full checklist of expected RUM, APM, infrastructure, MCP, remediation, and Galileo evidence.
+Use [Splunk Validation](splunk-validation.md) during rehearsal for the full checklist of expected RUM, APM, infrastructure, MCP, and remediation evidence.
 
 Narrate:
 
