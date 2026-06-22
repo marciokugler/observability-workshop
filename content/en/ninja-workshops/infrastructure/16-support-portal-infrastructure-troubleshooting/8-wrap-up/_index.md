@@ -1,7 +1,7 @@
 ---
 title: Workshop Wrap-up
-linkTitle: 8. Workshop Wrap-up
-weight: 8
+linkTitle: 9. Workshop Wrap-up
+weight: 9
 archetype: chapter
 time: 5 minutes
 description: Review the infrastructure troubleshooting workflow and clean up local resources.
@@ -49,10 +49,9 @@ Infrastructure troubleshooting is strongest when customer impact, slow traces, a
 
 Stop the lab before leaving the workshop environment.
 
-1. In the terminal running `npm run dev`, press `Ctrl+C`.
-2. In the terminal running `docker compose up --wait`, press `Ctrl+C`.
-3. In any terminal running browser traffic, press `Ctrl+C`.
-4. Close the support portal and operator console browser tabs.
+1. In the terminal running `docker compose up --wait`, press `Ctrl+C`.
+2. In any terminal running browser traffic, press `Ctrl+C`.
+3. Close the support portal and operator console browser tabs.
 
 From the app directory:
 
@@ -95,9 +94,5 @@ rm -rf "$SUPPORT_KNOWLEDGE_CACHE_DIR"
 Optional storage cleanup:
 
 ```bash
-rm -rf apps/remediation-agent/.venv
-```
-
-```bash
-rm -rf node_modules apps/*/node_modules packages/*/node_modules
+docker compose down --volumes --remove-orphans
 ```

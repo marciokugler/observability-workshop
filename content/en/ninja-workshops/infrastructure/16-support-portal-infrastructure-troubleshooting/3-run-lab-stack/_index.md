@@ -1,7 +1,7 @@
 ---
 title: Run the Lab Stack
-linkTitle: 3. Run the Lab Stack
-weight: 3
+linkTitle: 4. Run the Lab Stack
+weight: 4
 archetype: chapter
 time: 25 minutes
 description: Start the collector and application stack, verify local endpoints, and create a healthy observability baseline.

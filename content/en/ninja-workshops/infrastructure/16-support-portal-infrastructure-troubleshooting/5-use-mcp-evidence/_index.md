@@ -1,7 +1,7 @@
 ---
 title: Use MCP Evidence and Resolve
-linkTitle: 6. MCP Evidence and Resolve
-weight: 6
+linkTitle: 7. MCP Evidence and Resolve
+weight: 7
 archetype: chapter
 time: 25 minutes
 description: Gather MCP evidence, compare it to the manual Splunk UI investigation, run the controlled cleanup, and validate recovery.
@@ -98,7 +98,7 @@ Validate from the browser first:
 Then generate fresh customer browser traffic:
 
 ```bash
-RUM_SIMULATOR_USERS=4 RUM_SIMULATOR_ROUNDS=4 RUM_SIMULATOR_BROWSERS=chromium RUM_SIMULATOR_CONCURRENCY=2 npm run simulate:rum
+RUM_SIMULATOR_USERS=4 RUM_SIMULATOR_ROUNDS=4 RUM_SIMULATOR_BROWSERS=chromium RUM_SIMULATOR_CONCURRENCY=2 docker compose run --rm rum-simulator
 ```
 
 Then validate in Splunk:

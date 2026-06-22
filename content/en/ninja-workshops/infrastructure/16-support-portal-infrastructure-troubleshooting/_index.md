@@ -20,7 +20,8 @@ In this workshop, you will troubleshoot a realistic infrastructure failure that 
 In this hands-on session, you will:
 
 - **Understand the Lab** - Review the support portal, service topology, filesystem failure, and evidence path.
-- **Install Required Software** - Install local prerequisites, configure Splunk credentials, student identity, RUM, and MCP settings.
+- **Install Required Software** - Install Docker and confirm the host can run Docker Compose.
+- **Generate Splunk Lab Tokens** - Create the Splunk Observability Cloud tokens needed for collector ingest, MCP evidence, and browser RUM.
 - **Run the Lab Stack** - Start the Splunk OpenTelemetry Collector and app services, then create a healthy baseline.
 - **Investigate Filesystem Pressure** - Trigger the incident and navigate from RUM to APM traces to infrastructure metrics.
 - **Configure Splunk MCP Communication** - Configure and verify the local app's MCP path to Splunk Observability Cloud.

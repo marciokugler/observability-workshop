@@ -1,7 +1,7 @@
 ---
 title: Investigate Filesystem Pressure
-linkTitle: 4. Investigate Filesystem Pressure
-weight: 4
+linkTitle: 5. Investigate Filesystem Pressure
+weight: 5
 archetype: chapter
 time: 30 minutes
 description: Trigger the cache filesystem incident and prove the root cause from RUM, APM traces, and Infrastructure metrics.
@@ -40,7 +40,7 @@ Expected result:
 Use browser traffic to create more RUM and APM data points. The simulator clicks the portal journeys instead of calling backend APIs directly.
 
 ```bash
-RUM_SIMULATOR_USERS=8 RUM_SIMULATOR_ROUNDS=8 RUM_SIMULATOR_BROWSERS=chromium RUM_SIMULATOR_CONCURRENCY=2 npm run simulate:rum
+RUM_SIMULATOR_USERS=8 RUM_SIMULATOR_ROUNDS=8 RUM_SIMULATOR_BROWSERS=chromium RUM_SIMULATOR_CONCURRENCY=2 docker compose run --rm rum-simulator
 ```
 
 ## Start in Splunk RUM

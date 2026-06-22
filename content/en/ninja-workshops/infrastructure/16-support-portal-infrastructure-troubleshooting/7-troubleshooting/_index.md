@@ -1,7 +1,7 @@
 ---
 title: Troubleshooting
-linkTitle: 7. Troubleshooting
-weight: 7
+linkTitle: 8. Troubleshooting
+weight: 8
 archetype: chapter
 time: 10 minutes
 description: Recover from common local setup, telemetry, MCP, and filesystem monitoring issues during the workshop.
@@ -11,81 +11,43 @@ aliases:
 
 Recover common setup, telemetry, MCP, and local app issues without changing the learning objective.
 
-## `npm install` Fails
+## Compose Dependency Install Fails
 
 Check:
 
-- If the shell says `npm: command not found`, install Node.js 22 first:
-
-```bash
-sudo apt update
-```
-
-```bash
-sudo apt install -y curl
-```
-
-```bash
-sudo apt install -y ca-certificates
-```
-
-```bash
-curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-```
-
-```bash
-sudo apt install -y nodejs
-```
-
-- Internet access or package registry access.
-- Node version compatibility. If `npm install` prints `EBADENGINE` with current Node `v18.x`, Ubuntu installed an older Node package. Install Node 22, then rerun `npm install`.
-- Whether a previous partial install left a corrupted `node_modules`.
+- Docker daemon is running.
+- Docker Compose v2 is installed.
+- Internet access or package registry access is available from containers.
+- A previous partial install did not leave a corrupted Docker volume.
 
 Action:
 
 ```bash
-npm install
+docker compose run --rm node-deps
+```
+
+If dependency state still looks corrupted, remove the Compose-managed dependency volume and reinstall:
+
+```bash
+docker compose down --volumes
+```
+
+```bash
+docker compose run --rm node-deps
 ```
 
 Capture the first real error and fix that root issue before changing application code.
 
-## Python Cleanup Worker Setup Fails
+## Remediation Agent Container Fails
 
-If `apps/remediation-agent/.venv` does not exist, the virtual environment creation failed. On Debian or Ubuntu, install Python venv support first:
-
-```bash
-sudo apt update
-```
+Check the agent build path inside Compose:
 
 ```bash
-sudo apt install -y python3-venv
+docker compose run --rm build-agent
 ```
 
-```bash
-sudo apt install -y python3-pip
-```
+If it fails, capture the first Python package or compile error from the container output. Do not create a host virtual environment for the lab path.
 
-Recreate the virtual environment only when you intend to replace it:
-
-```bash
-rm -rf apps/remediation-agent/.venv
-```
-
-```bash
-python3 -m venv apps/remediation-agent/.venv
-```
-
-```bash
-apps/remediation-agent/.venv/bin/python -m pip install --index-url https://pypi.org/simple --upgrade pip
-```
-
-```bash
-apps/remediation-agent/.venv/bin/python -m pip install --index-url https://pypi.org/simple -e apps/remediation-agent
-```
-
-```bash
-apps/remediation-agent/.venv/bin/python -m pip show support-portal-agent
-```
 
 ## Collector Will Not Start
 
@@ -149,7 +111,7 @@ OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:14318
 
 Check:
 
-- `npm run dev` is still running.
+- `docker compose up --wait` completed successfully.
 - Vite did not fail because of a port conflict.
 - Browser is pointed at the high-port URLs.
 
@@ -171,7 +133,7 @@ Action:
 
 1. Confirm the portal or operator console shows cache pressure as active.
 2. Rerun `AI Support Response` from the support portal.
-3. Generate fresh browser traffic with `npm run simulate:rum`.
+3. Generate fresh browser traffic with `docker compose run --rm rum-simulator`.
 4. Compare `AI Support Response` to `Account Status Lookup` and `Help Article Search`.
 
 ## Filesystem Metrics Are Missing
@@ -237,4 +199,8 @@ Action:
 2. Click `Gather MCP Evidence`.
 3. Click `Explain`.
 4. Click `Propose`.
-5. If evidence is still missing, inspect the terminal running `npm run dev` for the first failing service.
+5. If evidence is still missing, inspect Compose logs for the first failing service:
+
+```bash
+docker compose logs remediation-orchestrator splunk-otel-collector
+```

@@ -1,7 +1,7 @@
 ---
 title: Configure Splunk MCP Communication
-linkTitle: 5. Configure Splunk MCP
-weight: 5
+linkTitle: 6. Configure Splunk MCP
+weight: 6
 archetype: chapter
 time: 20 minutes
 description: Configure and verify the MCP path from the local remediation orchestrator to Splunk Observability Cloud.
@@ -27,7 +27,7 @@ The direct Observability Cloud MCP endpoint is:
 https://api.<realm>.signalfx.com/v2/mcp
 ```
 
-For this lab, `SPLUNK_REALM=us1` and `SPLUNK_ACCESS_TOKEN=<token>` are required values. The app builds the endpoint from the realm when `SPLUNK_MCP_URL` is blank.
+For this lab, `SPLUNK_REALM=us1` and `SPLUNK_ACCESS_TOKEN=<token>` are required values. You generated these values in session 3. The app builds the endpoint from the realm when `SPLUNK_MCP_URL` is blank.
 
 ## Configure `.env`
 
