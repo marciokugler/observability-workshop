@@ -1,7 +1,7 @@
 ---
 title: Workshop Wrap-up
-linkTitle: 7. Workshop Wrap-up
-weight: 7
+linkTitle: 8. Workshop Wrap-up
+weight: 8
 archetype: chapter
 time: 5 minutes
 description: Review the infrastructure troubleshooting workflow and clean up local resources.
@@ -50,7 +50,7 @@ Infrastructure troubleshooting is strongest when customer impact, slow traces, a
 Stop the lab before leaving the workshop environment.
 
 1. In the terminal running `npm run dev`, press `Ctrl+C`.
-2. In the terminal running `npm run dev:collector`, press `Ctrl+C`.
+2. In the terminal running `docker compose up --wait`, press `Ctrl+C`.
 3. In any terminal running browser traffic, press `Ctrl+C`.
 4. Close the support portal and operator console browser tabs.
 
@@ -69,7 +69,7 @@ cd observability-workshop-main/workshop/support-portal
 Stop any collector containers left by Docker Compose:
 
 ```bash
-docker compose --env-file .env -f infra/docker/docker-compose.yml down
+docker compose down
 ```
 
 Load the lab environment file:

@@ -1,7 +1,7 @@
 ---
 title: Use MCP Evidence and Resolve
-linkTitle: 5. MCP Evidence and Resolve
-weight: 5
+linkTitle: 6. MCP Evidence and Resolve
+weight: 6
 archetype: chapter
 time: 25 minutes
 description: Gather MCP evidence, compare it to the manual Splunk UI investigation, run the controlled cleanup, and validate recovery.
@@ -9,7 +9,7 @@ aliases:
   - /ninja-workshops/infrastructure/16-support-portal-infrastructure-troubleshooting/5-govern-remediation/
 ---
 
-Use MCP after you have manually followed the incident in Splunk. The goal is to show how the same observability evidence can be collected programmatically and used to support a controlled infrastructure cleanup workflow.
+Use MCP after you have manually followed the incident in Splunk and configured MCP communication. The goal is to show how the same observability evidence can be collected programmatically and used to support a controlled infrastructure cleanup workflow.
 
 ## Gather MCP Evidence
 

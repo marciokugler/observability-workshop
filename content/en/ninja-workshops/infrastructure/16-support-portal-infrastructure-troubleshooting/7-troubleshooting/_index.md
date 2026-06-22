@@ -1,7 +1,7 @@
 ---
 title: Troubleshooting
-linkTitle: 6. Troubleshooting
-weight: 6
+linkTitle: 7. Troubleshooting
+weight: 7
 archetype: chapter
 time: 10 minutes
 description: Recover from common local setup, telemetry, MCP, and filesystem monitoring issues during the workshop.
@@ -124,7 +124,7 @@ grep -E '^OTEL_EXPORTER_OTLP_ENDPOINT=' .env
 ```
 
 ```bash
-npm run dev:collector
+docker compose up --wait
 ```
 
 If `docker compose version` is not available on Ubuntu, install the Compose package used by your Docker installation:
@@ -179,7 +179,7 @@ Action:
 Check:
 
 - The collector is running.
-- `infra/otel-collector/config.yaml` includes `hostmetrics/cache_volume`.
+- `observability/otel-collector/config.yaml` includes `hostmetrics/cache_volume`.
 - The `metrics/cache_volume` pipeline includes `hostmetrics/cache_volume`.
 - `.env` has the expected `INSTANCE` value.
 - The cache mountpoint is `/var/cache/support-knowledge`.
@@ -195,7 +195,7 @@ service.instance.id=<INSTANCE>
 If the metric is missing, restart the collector after confirming the configuration:
 
 ```bash
-npm run dev:collector
+docker compose restart splunk-otel-collector
 ```
 
 ## Telemetry Is Not Visible in Splunk
@@ -228,7 +228,7 @@ Check:
 - `SPLUNK_ACCESS_TOKEN` is set.
 - `SPLUNK_REALM` is correct.
 - `SPLUNK_MCP_ENABLED=true`.
-- `tools/list` works from the setup page.
+- `tools/list` works from the MCP communication session.
 - The operator console can reach `remediation-orchestrator`.
 
 Action:

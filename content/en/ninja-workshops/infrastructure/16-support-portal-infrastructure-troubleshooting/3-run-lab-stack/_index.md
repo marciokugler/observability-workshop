@@ -16,7 +16,7 @@ Create a healthy baseline before introducing the failure. Confirm the portal, ba
 Before starting the collector, open:
 
 ```text
-infra/otel-collector/config.yaml
+observability/otel-collector/config.yaml
 ```
 
 This file controls how the local Splunk OpenTelemetry Collector receives telemetry, adds workshop identity, collects host metrics, and sends the data to Splunk Observability Cloud.
@@ -115,67 +115,25 @@ This pipeline says:
 
 Also confirm `resource/lab_identity` appears in the `traces`, `metrics`, and `metrics/infrastructure` pipelines. That keeps browser, APM, application metrics, and infrastructure metrics filterable by the same student identity.
 
-## Start the Collector
+## Start the Lab Stack
 
-`npm run dev:collector` is a shortcut defined in this app's `package.json`. It checks for Docker Compose, then starts only the `splunk-otel-collector` service from `infra/docker/docker-compose.yml` with values from `.env`. It does not start the portal or backend services.
-
-Load `.env`:
-
-```bash
-set -a
-```
-
-```bash
-source .env
-```
-
-```bash
-set +a
-```
-
-Start the collector:
-
-```bash
-npm run dev:collector
-```
-
-The host OTLP HTTP endpoint is:
-
-```text
-http://127.0.0.1:14318
-```
-
-Leave the collector running in its terminal.
-
-## Start the Application
-
-Open a second terminal and return to the app directory:
+Return to the app directory:
 
 ```bash
 cd observability-workshop/workshop/support-portal
 ```
 
-Load `.env`:
+Start the full Compose stack:
 
 ```bash
-set -a
+docker compose up --wait
 ```
 
-```bash
-source .env
+This starts the Splunk OpenTelemetry Collector, backend services, cleanup worker, support portal, and operator console. The host OTLP HTTP endpoint is:
+
+```text
+http://127.0.0.1:14318
 ```
-
-```bash
-set +a
-```
-
-Start the app stack:
-
-```bash
-npm run dev
-```
-
-This starts the backend services, cleanup worker, support portal, and operator console.
 
 ## Verify Local Endpoints
 
@@ -208,7 +166,7 @@ Confirm:
 Run browser traffic before moving on. This simulates many customers using the portal during the winter storm and keeps the lab evidence grounded in real browser journeys.
 
 ```bash
-RUM_SIMULATOR_USERS=6 RUM_SIMULATOR_ROUNDS=6 RUM_SIMULATOR_BROWSERS=chromium RUM_SIMULATOR_CONCURRENCY=2 npm run simulate:rum
+RUM_SIMULATOR_USERS=6 RUM_SIMULATOR_ROUNDS=6 RUM_SIMULATOR_BROWSERS=chromium RUM_SIMULATOR_CONCURRENCY=2 docker compose run --rm rum-simulator
 ```
 
 Expected result:
@@ -220,7 +178,7 @@ Expected result:
 For longer demos, keep browser sessions running in a separate terminal:
 
 ```bash
-RUM_SIMULATOR_USERS=4 RUM_SIMULATOR_ROUNDS=60 RUM_SIMULATOR_BROWSERS=chromium RUM_SIMULATOR_CONCURRENCY=2 npm run simulate:rum
+RUM_SIMULATOR_USERS=4 RUM_SIMULATOR_ROUNDS=60 RUM_SIMULATOR_BROWSERS=chromium RUM_SIMULATOR_CONCURRENCY=2 docker compose run --rm rum-simulator
 ```
 
 ## Baseline Splunk Checks

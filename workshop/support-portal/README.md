@@ -1,6 +1,6 @@
 # Support Portal Workshop App
 
-This directory contains the generic support portal workshop app and supporting Splunk Observability automation.
+This directory contains the generic support portal workshop app and supporting Splunk Observability telemetry.
 
 Standard workshop setup clones the full workshop repository:
 
@@ -33,7 +33,6 @@ If your prompt already ends in `workshop/support-portal`, stay there and run the
 - `packages/evidence-parser`: optional operator-note and AI Assistant text parsing into normalized evidence
 - `packages/telemetry`: shared Splunk telemetry helpers
 - `packages/runtime-config`: shared local URL and port helpers
-- `infra/splunk`: spec-driven Splunk dashboard and detector authoring
 
 ## Run The Lab
 
@@ -133,7 +132,7 @@ INSTANCE=student-001
 OTEL_RESOURCE_ATTRIBUTES=lab.name=support-portal,lab.student.id=student-001,service.instance.id=student-001,host.name=student-001,deployment.environment=demo
 ```
 
-Dashboards and detectors filter by `deployment.environment` plus `service.instance.id` so multiple students can share one Splunk Observability Cloud account.
+Splunk views can filter by `deployment.environment` plus `service.instance.id` so multiple students can share one Splunk Observability Cloud account.
 
 ## Docker Compose
 
@@ -152,21 +151,6 @@ docker compose down
 ```
 
 The compose path mounts a shared 128 MiB tmpfs at `/var/cache/support-knowledge` for the knowledge service and the collector. The cache-pressure scenario fills that tmpfs, which gives the collector a real filesystem signal without risking the host disk.
-
-## Splunk Objects
-
-Splunk dashboards and detectors are authored from JSON specs in [infra/splunk](infra/splunk):
-
-```bash
-python3 infra/splunk/sync_splunk_objects.py
-python3 infra/splunk/sync_splunk_objects.py --apply
-```
-
-Current detector specs are based on out-of-the-box signals:
-
-- `Support Knowledge Cache Filesystem Pressure`
-- `Support Knowledge APM Latency`
-- `Support Knowledge APM Error Rate`
 
 ## Primary Lab Flow
 

@@ -66,8 +66,6 @@ Browser:
 
 1. Check APM service views.
 2. Check Infrastructure Monitoring filesystem utilization.
-3. Render Splunk objects with `python3 infra/splunk/sync_splunk_objects.py`.
-4. Apply dashboards and detectors only after the live signals exist.
 
 ## Related Infrastructure validation
 

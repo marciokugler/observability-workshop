@@ -71,8 +71,8 @@ services:
     command:
       - "--config=${OTEL_COLLECTOR_CONFIG:-/etc/otel/config-local.yaml}"
     volumes:
-      - ./infra/otel-collector/config.yaml:/etc/otel/config.yaml:ro
-      - ./infra/otel-collector/config-local.yaml:/etc/otel/config-local.yaml:ro
+      - ./observability/otel-collector/config.yaml:/etc/otel/config.yaml:ro
+      - ./observability/otel-collector/config-local.yaml:/etc/otel/config-local.yaml:ro
       - ./:/workspace:ro
       - /:/hostfs:ro
       - support_knowledge_cache:/var/cache/support-knowledge:ro

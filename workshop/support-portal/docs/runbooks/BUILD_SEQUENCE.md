@@ -25,10 +25,8 @@
 7. MCP evidence intake produces a policy result.
 8. Agent evaluation produces `clean_support_knowledge_cache`.
 9. Approval executes and validates.
-10. Splunk object specs render with `make splunk-render`.
 
 ## Remaining integration work
 
 1. Validate SignalFlow queries against the target Splunk tenant.
-2. Apply dashboards and detectors against live default signals.
-3. Rehearse the shared-account `INSTANCE` filtering path with multiple student values.
+2. Rehearse the shared-account `INSTANCE` filtering path with multiple student values.

@@ -13,8 +13,6 @@
     "test": "npm run test:ts",
     "test:ts": "tsx --test tests/unit/*.test.ts",
     "test:python": "python3 -m unittest discover -s tests -p 'test_*.py'",
-    "splunk:render": "python3 infra/splunk/sync_splunk_objects.py",
-    "splunk:apply": "python3 infra/splunk/sync_splunk_objects.py --apply",
     "lint": "npm run lint --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present"
   },

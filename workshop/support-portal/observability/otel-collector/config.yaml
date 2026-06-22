@@ -91,7 +91,7 @@ exporters:
     root_path: /hostfs
     sync_host_metadata: true
     correlation:
-      # The demo walkthrough often pauses on a trace before navigating to infra.
+      # The demo walkthrough often pauses on a trace before navigating to Infrastructure Monitoring.
       # Keep the service-to-host relation alive for the full presentation window.
       stale_service_timeout: 2h
       log_updates: true

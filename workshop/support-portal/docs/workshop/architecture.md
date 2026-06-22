@@ -95,19 +95,15 @@ The workshop path is driven by default signals:
 
 The incident does not require custom app metrics or log analysis.
 
-## Infrastructure
+## Observability Configuration
 
 ### `compose.yaml`
 
 Docker Compose development stack. The knowledge service gets a bounded tmpfs cache volume in this path.
 
-### `infra/otel-collector`
+### `observability/otel-collector`
 
 Local collector configuration for OTLP, hostmetrics, traces, and infrastructure metrics.
-
-### `infra/splunk`
-
-Spec-driven authoring path for Splunk dashboards and detectors.
 
 ## Architecture story to tell live
 

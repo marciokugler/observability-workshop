@@ -34,11 +34,10 @@ These tests are intentionally offline and avoid Splunk, OpenAI, Docker, and Clou
 - Mock webhook delivery instead of relying on a live Cloudflare tunnel.
 - Keep scenario-controller interactions local and deterministic.
 
-## Repo and Infra Changes That Make Testing Easier
+## Repo Changes That Make Testing Easier
 
 - Treat the public webhook endpoint as a stable integration boundary, not a mutable local dev URL.
-- Keep Splunk object definitions in versioned JSON specs and test those payload builders offline.
-- Stop committing generated assets, local object ID manifests, local logs, and build output.
+- Stop committing generated assets, local logs, and build output.
 
 ## Cloudflare URL Recommendation
 
@@ -57,18 +56,3 @@ Recommended flow:
 4. In tests, the ingress payloads are replayed from fixtures without any tunnel dependency.
 
 That separates “public endpoint identity” from “where my laptop is today,” which is the main source of friction now.
-
-## Splunk Object Automation Recommendation
-
-Use this flow for dashboards and detector tuning:
-
-- `infra/splunk/specs/*.json` or `*.yaml` as the source of truth for dashboards and detectors
-- Python scripts that upsert those specs through the Splunk API
-- fixture-based tests that snapshot the generated API payloads
-
-That gives you:
-
-- easier iteration
-- smaller diffs
-- better local validation
-- no local state churn for dashboard edits

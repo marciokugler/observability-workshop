@@ -23,5 +23,5 @@ In this hands-on session, you will:
 - **Install Required Software** - Install local prerequisites, configure Splunk credentials, student identity, RUM, and MCP settings.
 - **Run the Lab Stack** - Start the Splunk OpenTelemetry Collector and app services, then create a healthy baseline.
 - **Investigate Filesystem Pressure** - Trigger the incident and navigate from RUM to APM traces to infrastructure metrics.
-- **Use MCP Evidence and Resolve** - Configure the app as an MCP client, gather Splunk evidence, compare it with the UI investigation, and execute a controlled cache cleanup.
-
+- **Configure Splunk MCP Communication** - Configure and verify the local app's MCP path to Splunk Observability Cloud.
+- **Use MCP Evidence and Resolve** - Gather Splunk evidence, compare it with the UI investigation, and execute a controlled cache cleanup.
