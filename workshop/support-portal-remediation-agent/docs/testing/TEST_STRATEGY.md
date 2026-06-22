@@ -37,13 +37,12 @@ These tests are intentionally offline and avoid Splunk, OpenAI, Docker, and Clou
 ## Repo and Infra Changes That Make Testing Easier
 
 - Treat the public webhook endpoint as a stable integration boundary, not a mutable local dev URL.
-- Move Splunk object definitions to versioned JSON or Python templates and test those payload builders offline.
-- Keep Terraform only for long-lived primitives if you still need it.
-- Stop committing generated assets, Terraform state, local logs, and build output.
+- Keep Splunk object definitions in versioned JSON specs and test those payload builders offline.
+- Stop committing generated assets, local object ID manifests, local logs, and build output.
 
 ## Cloudflare URL Recommendation
 
-The current `trycloudflare.com` flow is fragile because the URL rotates and then leaks into `.env`, detector runbook URLs, and Terraform state.
+The current `trycloudflare.com` flow is fragile because the URL rotates and then leaks into `.env`, detector runbook URLs, and local config.
 
 Better options:
 
@@ -59,11 +58,9 @@ Recommended flow:
 
 That separates “public endpoint identity” from “where my laptop is today,” which is the main source of friction now.
 
-## Terraform Recommendation
+## Splunk Object Automation Recommendation
 
-Terraform is acceptable for stable, low-churn infrastructure objects, but it is a poor authoring loop for dashboards and detector tuning.
-
-I would change this to:
+Use this flow for dashboards and detector tuning:
 
 - `infra/splunk/specs/*.json` or `*.yaml` as the source of truth for dashboards and detectors
 - Python scripts that upsert those specs through the Splunk API
@@ -74,4 +71,4 @@ That gives you:
 - easier iteration
 - smaller diffs
 - better local validation
-- no local Terraform state churn for dashboard edits
+- no local state churn for dashboard edits

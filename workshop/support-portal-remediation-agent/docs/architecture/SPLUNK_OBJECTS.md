@@ -26,4 +26,4 @@ Use default Splunk Observability signals:
 
 ## Provisioning direction
 
-Use `infra/splunk/specs` for iterative dashboard and detector authoring. Use Terraform when you need managed state and controlled rollout.
+Use `infra/splunk/specs` as the source of truth for dashboard and detector authoring. Render and apply those specs with `infra/splunk/sync_splunk_objects.py`.

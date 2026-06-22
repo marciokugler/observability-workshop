@@ -107,11 +107,7 @@ Local collector configuration for OTLP, hostmetrics, traces, and infrastructure 
 
 ### `infra/splunk`
 
-Spec-driven authoring path for dashboards and detectors.
-
-### `infra/terraform`
-
-Terraform-managed Splunk dashboards, detectors, webhooks, and related objects.
+Spec-driven authoring path for Splunk dashboards and detectors.
 
 ## Architecture story to tell live
 

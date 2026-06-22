@@ -316,13 +316,13 @@ Use code for all supported Splunk objects.
 
 Preferred automation:
 
-- dashboards: Terraform `signalfx` provider or direct API-backed tooling
-- dashboard groups: Terraform `signalfx` provider
-- detectors: Terraform `signalfx` provider or detector API
+- dashboards: `infra/splunk/specs/dashboards.json` rendered through API-backed tooling
+- dashboard groups: `infra/splunk/specs/dashboard-group.json` rendered through API-backed tooling
+- detectors: `infra/splunk/specs/detectors.json` rendered through API-backed tooling
 - webhook integration and detector recipient configuration: automate if supported in the chosen approach
 
 Known caution:
 
 - current public docs clearly document UI flows for business transaction rules and endpoint grouping
-- I did not find a similarly clear public API/Terraform path for those APM rule objects
+- I did not find a similarly clear public API path for those APM rule objects
 - treat them as a likely manual or pre-provisioning exception unless tenant-specific validation proves otherwise

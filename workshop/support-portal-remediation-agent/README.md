@@ -34,7 +34,6 @@ If your prompt already ends in `workshop/support-portal-remediation-agent`, stay
 - `packages/telemetry`: shared Splunk telemetry helpers
 - `packages/runtime-config`: shared local URL and port helpers
 - `infra/splunk`: spec-driven Splunk dashboard and detector authoring
-- `infra/terraform`: Terraform-managed Splunk Observability objects
 
 ## Run The Lab
 
@@ -156,14 +155,14 @@ The compose path mounts a shared 128 MiB tmpfs at `/var/cache/claims-knowledge` 
 
 ## Splunk Objects
 
-The preferred authoring path is [infra/splunk](infra/splunk):
+Splunk dashboards and detectors are authored from JSON specs in [infra/splunk](infra/splunk):
 
 ```bash
 python3 infra/splunk/sync_splunk_objects.py
 python3 infra/splunk/sync_splunk_objects.py --apply
 ```
 
-Terraform remains available in [infra/terraform](infra/terraform). Current detectors are based on out-of-the-box signals:
+Current detector specs are based on out-of-the-box signals:
 
 - `IBOBS Claims Knowledge Cache Filesystem Pressure`
 - `IBOBS Claims Knowledge APM Latency`

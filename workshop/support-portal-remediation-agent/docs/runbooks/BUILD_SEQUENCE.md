@@ -25,7 +25,7 @@
 7. MCP evidence intake produces a policy result.
 8. Agent evaluation produces `clean_claims_knowledge_cache`.
 9. Approval executes and validates.
-10. Terraform validates with `terraform -chdir=infra/terraform validate`.
+10. Splunk object specs render with `make splunk-render`.
 
 ## Remaining integration work
 

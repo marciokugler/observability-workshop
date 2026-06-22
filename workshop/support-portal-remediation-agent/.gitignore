@@ -16,9 +16,6 @@ test-results/
 *.egg-info/
 apps/*/dist/
 apps/*/.vite/
-.terraform/
-*.tfstate
-*.tfstate.*
 *.out
 infra/splunk/.object-ids.json
 codex-archive/_raw-jsonl/

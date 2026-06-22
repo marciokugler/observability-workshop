@@ -1,10 +1,9 @@
 # Splunk Object Workflow
 
-This directory is the new authoring path for demo dashboards and detectors.
+This directory is the authoring path for demo dashboards and detectors.
 
 ## Why This Exists
 
-- Terraform is still available under `infra/terraform` for the current deployed estate.
 - Dashboard and detector changes now have a simpler spec-driven workflow that is easier to diff, test, and review.
 - The Cloudflare tunnel remains unchanged for now. The rendered detector runbook URL still reads `ORCHESTRATOR_PUBLIC_WEBHOOK_URL`.
 
