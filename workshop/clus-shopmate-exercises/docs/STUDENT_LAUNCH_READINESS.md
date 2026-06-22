@@ -6,9 +6,8 @@ Last validated: June 2, 2026.
 
 Local student docs are ready:
 
-- MkDocs strict build passes.
-- Playwright student walkthrough passes against `http://127.0.0.1:8001/`.
-- Student lab files are served by MkDocs:
+- Student Markdown guide source is ready.
+- Student lab files are available in the source tree:
   - `workshop/lab-files/collector-observability-snippet.yaml`
   - `workshop/lab-files/student-collector-values-gpu-nim-reference.yaml`
 - YAML validation passes for the collector snippet and student collector values files.
@@ -27,8 +26,8 @@ The lab is student-ready only when all gates pass.
 
 | Gate | Status | Validation |
 | --- | --- | --- |
-| Student docs build | Passing | `.venv/bin/mkdocs build --strict` |
-| Student docs walkthrough | Passing | `.venv/bin/python scripts/student_mkdocs_walkthrough.py --base-url http://127.0.0.1:8001/` |
+| Student guide source | Passing | `workshop/index.md` and `workshop/*.md` |
+| Student lab files | Passing | `workshop/lab-files/*.yaml` |
 | Student namespaces exist | Passing | `kubectl get ns student-01 ... student-20` |
 | Splunk token Secret exists per namespace | Passing | `for ns in $(seq -f 'student-%02g' 1 20); do kubectl get secret splunk-observability-token -n "$ns"; done` |
 | Student service port-forward RBAC | Passing | `for ns in $(seq -f 'student-%02g' 1 20); do kubectl auth can-i create pods/portforward --as=system:serviceaccount:workshop-access:workshop-students -n "$ns"; done` |
@@ -183,7 +182,7 @@ Run this sequence before opening the room or publishing the lab URL.
 
 Students can start when:
 
-1. The MkDocs site is reachable.
+1. The student guide source is available.
 2. Student namespaces and kubeconfigs are verified.
 3. The preloaded `splunk-observability-token` Secret exists in each namespace.
 4. One test student can deploy the collector from the documented values file.
@@ -209,8 +208,7 @@ kubectl rollout status deploy/shopmate-ai -n "$STUDENT_NAMESPACE"
 Run these before publishing or handing the URL to students:
 
 ```bash
-.venv/bin/mkdocs build --strict
-.venv/bin/python scripts/student_mkdocs_walkthrough.py --base-url http://127.0.0.1:8001/
+python -m pytest tests/test_workshop_quality.py -k 'student_pages or internal_workshop_links or source_yaml'
 ruby -e 'require "yaml"; YAML.load_file("workshop/lab-files/collector-observability-snippet.yaml"); puts "YAML ok"'
 ruby -e 'require "yaml"; YAML.load_file("workshop/lab-files/student-collector-values-gpu-nim-reference.yaml"); puts "YAML ok"'
 ```

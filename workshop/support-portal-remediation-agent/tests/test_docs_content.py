@@ -5,11 +5,9 @@ import unittest
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
-class MkdocsNavigationTest(unittest.TestCase):
-    def test_splunk_validation_page_is_linked_and_actionable(self) -> None:
-        mkdocs = (REPO_ROOT / "mkdocs.yml").read_text(encoding="utf-8")
+class DocsContentTest(unittest.TestCase):
+    def test_splunk_validation_page_is_actionable(self) -> None:
         page = REPO_ROOT / "docs" / "workshop" / "splunk-validation.md"
-        self.assertIn("Splunk Validation: workshop/splunk-validation.md", mkdocs)
         self.assertTrue(page.exists())
 
         content = page.read_text(encoding="utf-8")
@@ -24,7 +22,6 @@ class MkdocsNavigationTest(unittest.TestCase):
             "Gather MCP Evidence",
             "clean_claims_knowledge_cache",
             "remediation.evaluate",
-            "showcase.guardrail_pre_action_check",
             "docker compose run --rm traffic-simulator",
             "docker compose run --rm rum-simulator",
         ]:

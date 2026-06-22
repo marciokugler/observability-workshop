@@ -12,7 +12,6 @@ DEPLOYMENT_ENVIRONMENT=demo
 SPLUNK_REALM=us1
 SPLUNK_ACCESS_TOKEN=...
 VITE_SPLUNK_RUM_TOKEN=...
-GALILEO_API_KEY_FILE=/path/to/galileo_api_key
 ```
 
 Use a unique `INSTANCE` per student. In Splunk, filter by:
@@ -167,40 +166,8 @@ Expected attributes:
 - `action.type=clean_claims_knowledge_cache`
 - `action.target=claims-knowledge-cache`
 - `app.business_transaction=remediation_decision`
-- `agent.monitoring.provider=galileo` when Galileo is enabled
 
-## 8. Validate Galileo monitoring
-
-Check agent monitoring status:
-
-```bash
-curl -s http://127.0.0.1:18110/remediation/agent-monitoring
-```
-
-Run the Galileo showcase:
-
-```bash
-docker compose run --rm galileo-showcase
-```
-
-In Galileo, open project `ciscolive26` and log stream `remediation-agent`.
-
-Expected traces:
-
-- `showcase.incident_intake`
-- `showcase.retrieve_observability_context`
-- `showcase.triage_agent`
-- `showcase.hypothesis_agent`
-- `showcase.guardrail_pre_action_check`
-- `showcase.action_planning_agent`
-- `showcase.human_approval`
-- `showcase.execute_remediation`
-- `showcase.verify_recovery`
-- `showcase.postmortem_agent`
-
-Open `showcase.guardrail_pre_action_check` and verify the unsafe restart instruction is blocked before the bounded cache cleanup is planned.
-
-## 9. Validate recovery
+## 8. Validate recovery
 
 After approval, run:
 
@@ -242,4 +209,3 @@ The Splunk validation passes only when:
 - Infrastructure metrics show cache filesystem pressure
 - Splunk MCP evidence creates an approval-required action
 - the remediation action executes and verifies recovery
-- Galileo shows the agent, tool, and guardrail spans for the remediation story

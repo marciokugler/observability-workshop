@@ -18,46 +18,6 @@ export type AgentHealthResponse = {
   status: string;
   model: string;
   telemetry: string;
-  agentMonitoring: string;
-};
-
-export type GalileoShowcaseResponse = {
-  incidentId: string;
-  sessionId?: string;
-  project: string;
-  logStream: string;
-  consoleUrl?: string;
-  model: string;
-  story: string[];
-  showcaseTraces: Array<{
-    name: string;
-    type: string;
-    includesProtectSpan?: boolean;
-    enabled?: boolean;
-  }>;
-  guardrail?: {
-    status?: string;
-    unsafeRestartInstruction?: boolean;
-    syntheticPiiDetected?: boolean;
-    nextAction?: string;
-  };
-  plan?: {
-    recommendedAction?: string;
-    target?: string;
-    needsApproval?: boolean;
-    reasoningSummary?: string;
-  };
-  verification?: {
-    status?: string;
-    measuredLatencyMs?: number;
-    latencyThresholdMs?: number;
-  };
-  postmortem?: {
-    summary?: string;
-    auditOutcome?: string;
-    governanceHighlights?: string[];
-  };
-  demoGuide: string[];
 };
 
 export class RemediationAgentClient {
@@ -144,21 +104,5 @@ export class RemediationAgentClient {
     });
 
     return response.json() as Promise<ActionVerificationResult>;
-  }
-
-  async runGalileoShowcase(input: {
-    incidentId?: string;
-    executeRemediation?: boolean;
-    includeUnsafeOperatorNote?: boolean;
-  } = {}): Promise<GalileoShowcaseResponse> {
-    const response = await fetch(`${this.baseUrl}/agent/galileo/showcase`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json"
-      },
-      body: JSON.stringify(input)
-    });
-
-    return response.json() as Promise<GalileoShowcaseResponse>;
   }
 }

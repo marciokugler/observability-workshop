@@ -360,41 +360,6 @@ services:
       frontend:
         condition: service_healthy
 
-  galileo-showcase:
-    <<: *node-service
-    profiles:
-      - tools
-    environment:
-      - GALILEO_SHOWCASE_ORCHESTRATOR_URL=${GALILEO_SHOWCASE_ORCHESTRATOR_URL:-http://remediation-orchestrator:18110}
-      - GALILEO_SHOWCASE_INCIDENT_ID
-      - GALILEO_SHOWCASE_EXECUTE_REMEDIATION=${GALILEO_SHOWCASE_EXECUTE_REMEDIATION:-true}
-      - GALILEO_SHOWCASE_UNSAFE_NOTE=${GALILEO_SHOWCASE_UNSAFE_NOTE:-true}
-    command: sh -lc "node scripts/galileo-showcase.mjs"
-    depends_on:
-      node-deps:
-        condition: service_completed_successfully
-      remediation-orchestrator:
-        condition: service_healthy
-
-  galileo-experiment:
-    image: python:3.12
-    working_dir: /workspace
-    profiles:
-      - tools
-    env_file: *optional-env-file
-    environment:
-      - GALILEO_EXPERIMENT_SUITE=${GALILEO_EXPERIMENT_SUITE:-mcp}
-      - GALILEO_EXPERIMENT_NAME
-      - GALILEO_EXPERIMENT_GROUP
-    command: >
-      sh -lc "python -m venv /opt/venv &&
-      . /opt/venv/bin/activate &&
-      pip install -e /workspace/apps/remediation-agent &&
-      python scripts/galileo-remediation-experiment.py --suite \"$${GALILEO_EXPERIMENT_SUITE}\""
-    volumes:
-      - ./:/workspace
-      - python_venv:/opt/venv
-
 volumes:
   node_modules:
   python_venv:

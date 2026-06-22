@@ -35,7 +35,7 @@ Recent Splunk direction gives you a more differentiated story than a standard Ob
 - AI Troubleshooting Agent
 - Splunk AI Assistant
 - Remediation Plan
-- Galileo agent monitoring
+- remediation-agent observability
 - new dashboard experience and log-based charting
 
 So the breakout should focus on three ideas:
@@ -102,8 +102,8 @@ Agent 2:
 - purpose-built remediation agent used in the demo
 - has a bounded toolset
 - can recommend or execute only approved actions
-- is implemented in Python so Galileo can instrument the agent workflow and OpenAI calls
-- is itself monitored through Galileo and standard Splunk observability telemetry
+- is implemented in Python so the agent workflow can emit trace and action telemetry
+- is itself monitored through standard Splunk observability telemetry
 
 This is the point where your talk stops being generic.
 
@@ -252,7 +252,7 @@ Why this stack:
 - simple enough to reset live
 - deterministic enough for demos
 - aligns the frontend with Splunk RUM and DEA
-- aligns the remediation agent with Galileo instrumentation
+- aligns the remediation agent with the telemetry strategy
 - uses a reliable hosted model for structured action selection
 
 ### Recommended App Story
@@ -595,7 +595,7 @@ This is critical because the validation step is what makes the remediation story
 
 ### Telemetry Requirements
 
-Instrument customer-facing and backend paths with OpenTelemetry, and instrument the remediation agent with Galileo metadata.
+Instrument customer-facing, backend, and remediation-agent paths with OpenTelemetry.
 
 Frontend telemetry should use Splunk RUM with Digital Experience Analytics enabled. If Session Replay is available in the demo environment, use it to show the degraded user journey before pivoting into backend analysis.
 
@@ -623,7 +623,7 @@ Feature-specific highlights:
 - endpoint grouping and operation grouping for clean URL views
 - service map for app and remediation topology
 - AI Troubleshooting Agent for evidence synthesis
-- Galileo for remediation-agent visibility
+- remediation-agent traces for action visibility
 - new dashboard experience for a unified operator view
 
 Add these attributes wherever possible:
@@ -873,7 +873,7 @@ To make this successful, create these assets in order:
 1. 150-word Cisco Live session abstract refresh for speaker intro and collateral
 2. final storyline and talk track
 3. demo app architecture and service contract
-4. telemetry plan for RUM, DEA, Session Replay, APM, and Galileo agent monitoring
+4. telemetry plan for RUM, DEA, Session Replay, APM, and remediation-agent spans
 5. repo scaffold and shared types
 6. webhook and evidence-intake contract
 7. Splunk dashboard and detector checklist

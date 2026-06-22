@@ -3,7 +3,6 @@ from __future__ import annotations
 import importlib.util
 import json
 import re
-import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -17,39 +16,15 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
-class MkDocsConfigLoader(yaml.SafeLoader):
-    pass
-
-
-def construct_python_name(loader: MkDocsConfigLoader, suffix: str, node: yaml.Node) -> str:
-    return suffix
-
-
-MkDocsConfigLoader.add_multi_constructor(
-    "tag:yaml.org,2002:python/name:", construct_python_name
-)
-
-
 @dataclass(frozen=True)
-class WorkshopSite:
+class WorkshopGuide:
     name: str
-    config_path: Path
-
-    @property
-    def config(self) -> dict[str, Any]:
-        return yaml.load(
-            self.config_path.read_text(encoding="utf-8"),
-            Loader=MkDocsConfigLoader,
-        )
-
-    @property
-    def docs_dir(self) -> Path:
-        return REPO_ROOT / self.config["docs_dir"]
+    docs_dir: Path
 
 
 @dataclass(frozen=True)
 class ShellCommand:
-    site: WorkshopSite
+    guide: WorkshopGuide
     path: Path
     line: int
     language: str
@@ -61,9 +36,8 @@ class ShellCommand:
         return f"{self.path.relative_to(REPO_ROOT)}:{self.line}"
 
 
-WORKSHOP_SITES = (
-    WorkshopSite("shopmate", REPO_ROOT / "mkdocs.yml"),
-    WorkshopSite("ticketmate", REPO_ROOT / "mkdocs-ticketmate.yml"),
+STUDENT_GUIDES = (
+    WorkshopGuide("shopmate", REPO_ROOT / "workshop"),
 )
 
 FORBIDDEN_STUDENT_TEXT = (
@@ -120,20 +94,6 @@ def source_yaml_files() -> tuple[Path, ...]:
 
 
 SOURCE_YAML_FILES = source_yaml_files()
-
-
-def nav_entries(nav: list[Any]) -> list[str]:
-    entries: list[str] = []
-    for item in nav:
-        if isinstance(item, str):
-            entries.append(item)
-        elif isinstance(item, dict):
-            for value in item.values():
-                if isinstance(value, str):
-                    entries.append(value)
-                elif isinstance(value, list):
-                    entries.extend(nav_entries(value))
-    return entries
 
 
 def fenced_code_blocks(markdown: str) -> list[tuple[str, int, list[str]]]:
@@ -207,8 +167,8 @@ def command_tool(command: str) -> str | None:
 
 def iter_kube_shell_commands() -> list[ShellCommand]:
     commands: list[ShellCommand] = []
-    for site in WORKSHOP_SITES:
-        for markdown_file in site.docs_dir.glob("*.md"):
+    for guide in STUDENT_GUIDES:
+        for markdown_file in guide.docs_dir.glob("*.md"):
             markdown = markdown_file.read_text(encoding="utf-8")
             for language, start_line, block_lines in fenced_code_blocks(markdown):
                 if language not in SHELL_FENCE_LANGUAGES:
@@ -218,7 +178,7 @@ def iter_kube_shell_commands() -> list[ShellCommand]:
                     if tool:
                         commands.append(
                             ShellCommand(
-                                site=site,
+                                guide=guide,
                                 path=markdown_file,
                                 line=line,
                                 language=language,
@@ -250,7 +210,7 @@ def is_external_link(target: str) -> bool:
     return bool(re.match(r"^[a-z][a-z0-9+.-]*:", target, re.IGNORECASE))
 
 
-def source_path_for_site_link(site: WorkshopSite, source: Path, target: str) -> Path | None:
+def source_path_for_guide_link(source: Path, target: str) -> Path | None:
     target = normalize_link_target(target)
     if not target or target.startswith("#") or is_external_link(target):
         return None
@@ -271,9 +231,8 @@ def load_yaml_documents(path: Path) -> list[Any]:
 
 
 def load_source_yaml_documents(path: Path) -> list[Any]:
-    loader = MkDocsConfigLoader if path.name.startswith("mkdocs") else yaml.SafeLoader
     with path.open("r", encoding="utf-8") as handle:
-        return [doc for doc in yaml.load_all(handle, Loader=loader) if doc is not None]
+        return [doc for doc in yaml.safe_load_all(handle) if doc is not None]
 
 
 def load_server_module(name: str, path: Path) -> ModuleType:
@@ -334,8 +293,8 @@ def resolves_for_student_workdir(command: ShellCommand, ref: str) -> bool:
 
     candidates = [
         command.path.parent / ref_path,
-        command.site.docs_dir / ref_path,
-        command.site.docs_dir / "lab-files" / ref_path.name,
+        command.guide.docs_dir / ref_path,
+        command.guide.docs_dir / "lab-files" / ref_path.name,
         REPO_ROOT / ref_path,
     ]
     return any(candidate.exists() for candidate in candidates)
@@ -383,40 +342,10 @@ def collector_value_files() -> tuple[Path, ...]:
     )
 
 
-@pytest.mark.parametrize("site", WORKSHOP_SITES, ids=lambda site: site.name)
-def test_mkdocs_site_builds_strictly(site: WorkshopSite, tmp_path: Path) -> None:
-    subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "mkdocs",
-            "build",
-            "--strict",
-            "-f",
-            str(site.config_path),
-            "--site-dir",
-            str(tmp_path / site.name),
-        ],
-        cwd=REPO_ROOT,
-        check=True,
-    )
-
-
-@pytest.mark.parametrize("site", WORKSHOP_SITES, ids=lambda site: site.name)
-def test_all_workshop_pages_are_in_navigation(site: WorkshopSite) -> None:
-    nav_pages = {Path(entry) for entry in nav_entries(site.config["nav"])}
-    markdown_pages = {path.relative_to(site.docs_dir) for path in site.docs_dir.glob("*.md")}
-
-    assert markdown_pages <= nav_pages
-
-    for page in nav_pages:
-        assert (site.docs_dir / page).is_file(), f"{site.name} nav references missing page {page}"
-
-
-@pytest.mark.parametrize("site", WORKSHOP_SITES, ids=lambda site: site.name)
-def test_student_pages_do_not_include_instructor_only_notes(site: WorkshopSite) -> None:
+@pytest.mark.parametrize("guide", STUDENT_GUIDES, ids=lambda guide: guide.name)
+def test_student_pages_do_not_include_instructor_only_notes(guide: WorkshopGuide) -> None:
     failures: list[str] = []
-    for markdown_file in site.docs_dir.glob("*.md"):
+    for markdown_file in guide.docs_dir.glob("*.md"):
         text = markdown_file.read_text(encoding="utf-8")
         for forbidden in FORBIDDEN_STUDENT_TEXT:
             if forbidden in text:
@@ -425,13 +354,13 @@ def test_student_pages_do_not_include_instructor_only_notes(site: WorkshopSite) 
     assert failures == []
 
 
-@pytest.mark.parametrize("site", WORKSHOP_SITES, ids=lambda site: site.name)
-def test_internal_workshop_links_resolve(site: WorkshopSite) -> None:
+@pytest.mark.parametrize("guide", STUDENT_GUIDES, ids=lambda guide: guide.name)
+def test_internal_workshop_links_resolve(guide: WorkshopGuide) -> None:
     failures: list[str] = []
-    for markdown_file in site.docs_dir.glob("*.md"):
+    for markdown_file in guide.docs_dir.glob("*.md"):
         text = markdown_file.read_text(encoding="utf-8")
         for raw_target in markdown_links(text):
-            resolved = source_path_for_site_link(site, markdown_file, raw_target)
+            resolved = source_path_for_guide_link(markdown_file, raw_target)
             if resolved is None:
                 continue
             if not resolved.exists():

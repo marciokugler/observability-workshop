@@ -6,7 +6,7 @@ This is the shortest reliable path to a working workshop run.
 
 At the end of this flow you should have:
 
-- the docs site running locally
+- the local workshop runbooks available
 - the app stack running in Docker Compose
 - collector telemetry running in the same Compose stack
 - the claims portal and operator console reachable
@@ -38,16 +38,11 @@ unzip observability-workshop.zip
 cd observability-workshop-main/workshop/support-portal-remediation-agent
 ```
 
-## 3. Install and serve docs
+## 3. Read the workshop docs
 
-From the app directory:
-
-```bash
-python3 -m pip install -r requirements-docs.txt
-python3 -m mkdocs serve -a 127.0.0.1:18082
-```
-
-Open `http://127.0.0.1:18082/`.
+From the app directory, start with [the docs index](../index.md). The workshop
+runbooks are plain Markdown files and do not require a local documentation
+server.
 
 ## 4. Optional `.env`
 
@@ -63,16 +58,16 @@ Set these for a full shared-account lab:
 
 ```dotenv
 INSTANCE=student-001
-SPLUNK_ACCESS_TOKEN=...
+DEPLOYMENT_ENVIRONMENT=demo
 SPLUNK_REALM=...
+SPLUNK_ACCESS_TOKEN=...
 VITE_SPLUNK_RUM_TOKEN=...
 OPENAI_API_KEY=...
-GALILEO_API_KEY_FILE=/path/to/galileo_api_key
 ```
 
 Each student should use a different `INSTANCE`, such as `student-014`.
 
-`SPLUNK_ACCESS_TOKEN` and `SPLUNK_REALM` enable Splunk export and evidence lookup. `VITE_SPLUNK_RUM_TOKEN` enables browser RUM. `OPENAI_API_KEY` enables model-backed remediation. `GALILEO_API_KEY_FILE` or `GALILEO_API_KEY` enables agent monitoring.
+`SPLUNK_ACCESS_TOKEN` and `SPLUNK_REALM` enable Splunk export and evidence lookup. `VITE_SPLUNK_RUM_TOKEN` enables browser RUM. `OPENAI_API_KEY` enables model-backed remediation. Ports, service URLs, OTLP routing, cache controls, metric names, and MCP endpoint defaults are already handled by Compose and the app code.
 
 ## 5. Build and check the code
 
@@ -160,7 +155,7 @@ The intended live sequence is:
 
 1. Show customer impact first.
 2. Show the default Splunk signals: RUM/APM plus host filesystem metrics.
-3. Use [Splunk Validation](splunk-validation.md) to confirm RUM, APM, infrastructure, MCP, remediation, and Galileo evidence.
+3. Use [Splunk Validation](splunk-validation.md) to confirm RUM, APM, infrastructure, MCP, and remediation evidence.
 4. Walk through orchestrator evidence and confidence.
 5. Show approval-required policy.
 6. Propose `clean_claims_knowledge_cache`.

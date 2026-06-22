@@ -12,7 +12,7 @@ Terraform is the only supported infrastructure lifecycle tool for the AWS lab st
 
 - Terraform is the only supported tool for infrastructure create, update, destroy, and rebuild.
 - Cleanup, reset, teardown, and rebuild are instructor-only responsibilities.
-- Cleanup documentation must remain internal and must not be added to the MkDocs student guide.
+- Cleanup documentation must remain internal and must not be added to the student guide.
 - Students do not run cleanup commands.
 - Students do not reset shared or namespace resources.
 - Students do not need AWS, Kubernetes admin, Splunk admin, or Terraform permissions.
@@ -239,4 +239,4 @@ infra/scripts/reset-lab-namespaces.sh
 infra/scripts/rebuild-lab-baseline.sh
 ```
 
-These files are instructor-only and must not be linked from the student MkDocs navigation.
+These files are instructor-only and must not be linked from the student guide.

@@ -91,7 +91,7 @@ The workshop path is driven by default signals:
 - Splunk RUM and browser spans for the portal
 - Splunk APM service metrics for latency, count, and errors
 - Splunk OTel Collector hostmetrics for filesystem utilization
-- Splunk remediation service spans plus Galileo traces for agent and model visibility
+- Splunk remediation service spans for agent action selection, execution, and validation visibility
 
 The incident does not require custom app metrics or log analysis.
 

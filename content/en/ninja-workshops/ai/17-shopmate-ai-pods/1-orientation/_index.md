@@ -70,7 +70,7 @@ Useful source paths:
 
 | Path | Purpose |
 | --- | --- |
-| `workshop/` | Original attendee-facing MkDocs lab guide. |
+| `workshop/` | Original attendee-facing Markdown lab guide. |
 | `workshop/lab-files/` | Student manifests and collector snippets. |
 | `shopmate-sports/` | Standalone retail AI app source. |
 | `infra/` | Instructor infrastructure, Kubernetes, Helm, and Terraform assets. |

@@ -49,15 +49,12 @@ Recommended for a realistic workshop:
 | `SPLUNK_REALM` | Splunk realm for API and ingest endpoints, such as `us1`. |
 | `VITE_SPLUNK_RUM_TOKEN` | Browser RUM token for the claims portal. |
 | `OPENAI_API_KEY` | Optional model-backed remediation agent decisions. |
-| `GALILEO_API_KEY_FILE` | Optional path to a Galileo key file; preferred when you do not want the key in shell history. |
-| `GALILEO_API_KEY` | Optional direct Galileo key for local agent monitoring. |
 
 If credentials are missing:
 
 - the local app still runs
 - telemetry export to Splunk is absent or partial
 - the remediation agent uses fallback logic when no OpenAI key is present
-- Galileo agent monitoring is disabled when no Galileo key is present
 
 ## Ports
 
@@ -65,7 +62,6 @@ Default local layout:
 
 - `18080` claims portal
 - `18081` operator console
-- `18082` docs, when served with the workshop command
 - `18100` API gateway
 - `18101` assistant service
 - `18102` case service

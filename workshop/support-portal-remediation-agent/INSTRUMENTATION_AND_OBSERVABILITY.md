@@ -10,7 +10,7 @@ The observability design should make it easy to explain:
 - which business transaction degraded
 - which service path is responsible
 - why default host, APM, and RUM signals support the remediation decision
-- how the remediation agent was monitored
+- how the remediation agent was traced and validated
 
 ## Telemetry Layers
 
@@ -87,7 +87,6 @@ Manual spans to add:
 Use:
 
 - OpenTelemetry Python
-- Galileo instrumentation for agent, tool, and OpenAI model-call monitoring
 - OpenAI Chat Completions API via ChatGPT
 
 Capture:
@@ -269,7 +268,7 @@ Charts:
 - time to validation
 - remediation success rate
 
-### 6. Galileo Agent Monitoring View
+### 6. Remediation Agent View
 
 Charts:
 
@@ -309,7 +308,7 @@ Primary webhook trigger:
 - service view
 - trace analyzer
 - remediation dashboard
-- Galileo project and remediation-agent log stream
+- remediation-agent service traces
 
 ## Automation-First Setup
 

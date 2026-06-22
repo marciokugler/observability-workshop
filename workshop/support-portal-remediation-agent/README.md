@@ -79,7 +79,7 @@ sudo usermod -aG docker "$USER"
 
 Close and reopen the terminal after adding your user to the `docker` group, or run `newgrp docker`.
 
-The app stack can run without credentials. Add `OPENAI_API_KEY`, `GALILEO_API_KEY` or `GALILEO_API_KEY_FILE`, `SPLUNK_ACCESS_TOKEN`, `SPLUNK_REALM`, and `VITE_SPLUNK_RUM_TOKEN` when you want model-backed remediation, Galileo agent monitoring, live Splunk export, and browser RUM.
+The app stack can run without credentials. Add `OPENAI_API_KEY`, `SPLUNK_ACCESS_TOKEN`, `SPLUNK_REALM`, and `VITE_SPLUNK_RUM_TOKEN` when you want model-backed remediation, live Splunk export, and browser RUM.
 
 Follow logs when needed:
 
@@ -119,7 +119,7 @@ The demo is now metric-driven and uses out-of-the-box Splunk Observability signa
 - Splunk RUM and browser spans show the customer journey.
 - Splunk APM service metrics show request duration, request count, and errors.
 - Splunk OTel Collector hostmetrics show filesystem pressure.
-- The remediation agent can be instrumented with Galileo for agent steps, tool calls, and OpenAI model calls.
+- The remediation agent emits OpenTelemetry spans for action selection, execution, and recovery validation.
 
 The deterministic incident is `cache-disk-pressure`. The scenario controller asks `claims-knowledge` to fill a controlled cache directory or tmpfs mount. That creates filesystem pressure visible through host metrics and slows the AI Claim Status path through normal APM spans. Policy Coverage Lookup and Claims FAQ Search remain available as healthy comparison journeys.
 
