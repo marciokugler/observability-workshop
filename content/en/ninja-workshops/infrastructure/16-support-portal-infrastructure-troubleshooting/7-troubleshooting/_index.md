@@ -4,10 +4,12 @@ linkTitle: 6. Troubleshooting
 weight: 6
 archetype: chapter
 time: 10 minutes
-description: Recover from common local setup, telemetry, and remediation issues during the workshop.
+description: Recover from common local setup, telemetry, MCP, and filesystem monitoring issues during the workshop.
+aliases:
+  - /ninja-workshops/ai/16-support-portal-remediation-agent/7-troubleshooting/
 ---
 
-Recover common setup, telemetry, and remediation issues without changing the learning objective.
+Recover common setup, telemetry, MCP, and local app issues without changing the learning objective.
 
 ## `npm install` Fails
 
@@ -17,9 +19,21 @@ Check:
 
 ```bash
 sudo apt update
+```
+
+```bash
 sudo apt install -y curl
+```
+
+```bash
 sudo apt install -y ca-certificates
+```
+
+```bash
 curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+```
+
+```bash
 sudo apt install -y nodejs
 ```
 
@@ -35,13 +49,19 @@ npm install
 
 Capture the first real error and fix that root issue before changing application code.
 
-## Python Agent Setup Fails
+## Python Cleanup Worker Setup Fails
 
 If `apps/remediation-agent/.venv` does not exist, the virtual environment creation failed. On Debian or Ubuntu, install Python venv support first:
 
 ```bash
 sudo apt update
+```
+
+```bash
 sudo apt install -y python3-venv
+```
+
+```bash
 sudo apt install -y python3-pip
 ```
 
@@ -111,6 +131,9 @@ If `docker compose version` is not available on Ubuntu, install the Compose pack
 
 ```bash
 sudo apt update
+```
+
+```bash
 sudo apt install -y docker-compose-v2
 ```
 
@@ -136,7 +159,7 @@ Action:
 lsof -i :18080 -i :18081
 ```
 
-## The Support Transaction Does Not Degrade
+## Claim Status Does Not Degrade
 
 Check:
 
@@ -151,13 +174,37 @@ Action:
 3. Generate fresh browser traffic with `npm run simulate:rum`.
 4. Compare `AI Claim Status` to `Policy Coverage Lookup` and `Claims FAQ Search`.
 
+## Filesystem Metrics Are Missing
+
+Check:
+
+- The collector is running.
+- `infra/otel-collector/config.yaml` includes `hostmetrics/cache_volume`.
+- The `metrics/cache_volume` pipeline includes `hostmetrics/cache_volume`.
+- `.env` has the expected `INSTANCE` value.
+- The cache mountpoint is `/var/cache/claims-knowledge`.
+
+Look for:
+
+```text
+system.filesystem.utilization
+mountpoint=/var/cache/claims-knowledge
+service.instance.id=<INSTANCE>
+```
+
+If the metric is missing, restart the collector after confirming the configuration:
+
+```bash
+npm run dev:collector
+```
+
 ## Telemetry Is Not Visible in Splunk
 
 Check locally first:
 
 1. Collector is running.
 2. App processes started with `.env` loaded.
-3. Fresh traffic was generated after collector startup.
+3. Fresh browser traffic was generated after collector startup.
 4. `INSTANCE` and `OTEL_RESOURCE_ATTRIBUTES` match the student lab.
 
 Look for:
@@ -174,14 +221,15 @@ If RUM sessions are missing:
 4. Wait a few minutes.
 5. Use `Pages` or `Network Requests` before relying on Session Search.
 
-## Remediation Recommendation Is Missing
+## MCP Evidence Is Missing
 
 Check:
 
-- `Gather MCP Evidence` created an evidence package.
-- The orchestrator built an evidence bundle.
-- Policy mode is visible.
-- The operator console can propose `clean_claims_knowledge_cache`.
+- `SPLUNK_ACCESS_TOKEN` is set.
+- `SPLUNK_REALM` is correct.
+- `SPLUNK_MCP_ENABLED=true`.
+- `tools/list` works from the setup page.
+- The operator console can reach `remediation-orchestrator`.
 
 Action:
 
@@ -189,4 +237,4 @@ Action:
 2. Click `Gather MCP Evidence`.
 3. Click `Explain`.
 4. Click `Propose`.
-5. If the proposal is still missing, inspect the terminal running `npm run dev` for the first failing service.
+5. If evidence is still missing, inspect the terminal running `npm run dev` for the first failing service.

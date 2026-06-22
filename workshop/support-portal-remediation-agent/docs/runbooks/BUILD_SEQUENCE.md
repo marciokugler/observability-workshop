@@ -2,18 +2,17 @@
 
 ## Current local build order
 
-1. Copy `.env.example` to `.env`.
-2. Set a unique `INSTANCE`.
-3. Start Docker.
-4. Build/check Node workspaces with `docker compose run --rm build-node`.
-5. Build/check the Python remediation agent with `docker compose run --rm build-agent`.
-6. Start the full lab stack with `docker compose up --wait`.
-7. Open the portal and operator console.
-8. Trigger `cache-disk-pressure`.
-9. Reproduce the incident in the portal.
-10. Use the operator console to create the incident, explain evidence, propose action, approve, and validate.
-11. Stop with `docker compose down`.
-12. Fully remove lab containers, networks, volumes, and service images with `docker compose down --volumes --remove-orphans --rmi all`.
+1. Start Docker.
+2. Optionally copy `.env.example` to `.env` and set a unique `INSTANCE` or credentials.
+3. Build/check Node workspaces with `docker compose run --rm build-node`.
+4. Build/check the Python remediation agent with `docker compose run --rm build-agent`.
+5. Start the full lab stack with `docker compose up --wait`.
+6. Open the portal and operator console.
+7. Trigger `cache-disk-pressure`.
+8. Reproduce the incident in the portal.
+9. Use the operator console to create the incident, explain evidence, propose action, approve, and validate.
+10. Stop with `docker compose down`.
+11. Fully remove lab containers, networks, volumes, and service images with `docker compose down --volumes --remove-orphans --rmi all`.
 
 ## Verification order
 

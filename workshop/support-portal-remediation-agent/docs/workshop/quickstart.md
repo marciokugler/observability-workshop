@@ -49,13 +49,15 @@ python3 -m mkdocs serve -a 127.0.0.1:18082
 
 Open `http://127.0.0.1:18082/`.
 
-## 4. Create `.env`
+## 4. Optional `.env`
 
 From the app directory:
 
 ```bash
 cp .env.example .env
 ```
+
+The stack starts without `.env` by using local defaults. Create `.env` when you need credentials, a unique student identity, or runtime overrides.
 
 Set these for a full shared-account lab:
 

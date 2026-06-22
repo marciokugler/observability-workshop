@@ -2,13 +2,13 @@
 
 This page explains the runtime environment.
 
-## 1. Create `.env`
+## 1. Optional `.env`
 
 ```bash
 cp .env.example .env
 ```
 
-Then populate values you actually have.
+The Compose stack starts without `.env` by using defaults in [compose.yaml](../../compose.yaml) and application code. Create `.env` when you need credentials, a unique `INSTANCE`, or runtime overrides.
 
 ## 2. Student identity
 
@@ -106,7 +106,7 @@ The knowledge service emits `CLAIMS_KNOWLEDGE_CACHE_UTILIZATION_METRIC` from the
 
 ## 8. Compose environment loading
 
-Docker Compose reads `.env` automatically from the app directory.
+Docker Compose reads `.env` automatically from the app directory when the file exists.
 
 ## 9. Optional public webhook
 

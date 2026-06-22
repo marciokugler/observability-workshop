@@ -43,7 +43,7 @@ Prerequisites:
 - Docker Desktop or another Docker daemon with Docker Compose v2
 - `cloudflared`, only if you want to test the optional live Splunk webhook delivery path
 
-One-time setup from this app directory:
+Optional setup for credentials, student identity, or other overrides:
 
 ```bash
 test -f .env || cp .env.example .env
@@ -144,7 +144,7 @@ The repo includes a root Compose file at [compose.yaml](compose.yaml). This is t
 docker compose up --wait
 ```
 
-Each major app component runs in a separate container. Compose reads `.env`, overrides service-to-service URLs to Docker DNS names, and keeps browser-facing URLs on `127.0.0.1`.
+Each major app component runs in a separate container. Compose reads `.env` when present, overrides service-to-service URLs to Docker DNS names, and keeps browser-facing URLs on `127.0.0.1`.
 
 Stop the stack without deleting dependency/cache volumes:
 

@@ -7,7 +7,7 @@ Prove that traces, APM service metrics, RUM data, and host filesystem metrics le
 ## Preconditions
 
 1. Docker daemon is running.
-2. `.env` contains:
+2. For live Splunk export, `.env` contains:
    - `SPLUNK_ACCESS_TOKEN`
    - `SPLUNK_REALM`
    - `INSTANCE`
@@ -56,7 +56,7 @@ Browser:
 
 ## If signals do not appear
 
-1. Confirm app processes started with `.env` loaded.
+1. Confirm app containers started with the intended environment.
 2. Confirm the collector host port `14318` is available.
 3. Confirm fresh traffic was generated after the collector was already running.
 4. Confirm `INSTANCE` and `OTEL_RESOURCE_ATTRIBUTES` match the filter you are using in Splunk.

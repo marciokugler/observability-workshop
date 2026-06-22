@@ -37,7 +37,7 @@ Check:
 - Docker daemon is running
 - your user can access `/var/run/docker.sock`
 - Docker Compose v2 is installed
-- `.env` exists in the app directory
+- `.env` is valid if you created one
 - host port `14318` is free
 - app ports `18080`, `18081`, `18100` through `18104`, `18110`, and `18800` are free
 
@@ -64,7 +64,7 @@ docker compose version
 ```
 
 ```bash
-grep -E '^OTEL_EXPORTER_OTLP_ENDPOINT=' .env
+test ! -f .env || grep -E '^OTEL_EXPORTER_OTLP_ENDPOINT=' .env
 ```
 
 ```bash

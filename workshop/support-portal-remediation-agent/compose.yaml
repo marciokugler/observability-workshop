@@ -1,10 +1,13 @@
 name: support-portal-remediation-agent
 
+x-optional-env-file: &optional-env-file
+  - path: .env
+    required: false
+
 x-node-service: &node-service
   image: node:22
   working_dir: /workspace
-  env_file:
-    - .env
+  env_file: *optional-env-file
   volumes:
     - ./:/workspace
     - node_modules:/workspace/node_modules
@@ -45,8 +48,7 @@ services:
     working_dir: /workspace
     profiles:
       - tools
-    env_file:
-      - .env
+    env_file: *optional-env-file
     command: >
       sh -lc "python -m venv /opt/venv &&
       . /opt/venv/bin/activate &&
@@ -59,17 +61,18 @@ services:
   splunk-otel-collector:
     image: quay.io/signalfx/splunk-otel-collector:0.147.1
     user: "0:0"
-    env_file:
-      - .env
+    env_file: *optional-env-file
     environment:
+      SPLUNK_ACCESS_TOKEN: ${SPLUNK_ACCESS_TOKEN:-}
       SPLUNK_REALM: ${SPLUNK_REALM:-us1}
       DEPLOYMENT_ENVIRONMENT: ${DEPLOYMENT_ENVIRONMENT:-demo}
       INSTANCE: ${INSTANCE:-student-001}
       OTEL_RESOURCE_ATTRIBUTES: ${OTEL_RESOURCE_ATTRIBUTES:-lab.name=ciscolive26,lab.student.id=student-001,service.instance.id=student-001,host.name=student-001,deployment.environment=demo}
     command:
-      - "--config=/etc/otel/config.yaml"
+      - "--config=${OTEL_COLLECTOR_CONFIG:-/etc/otel/config-local.yaml}"
     volumes:
       - ./infra/otel-collector/config.yaml:/etc/otel/config.yaml:ro
+      - ./infra/otel-collector/config-local.yaml:/etc/otel/config-local.yaml:ro
       - ./:/workspace:ro
       - /:/hostfs:ro
       - claims_knowledge_cache:/var/cache/claims-knowledge:ro
@@ -201,8 +204,7 @@ services:
   remediation-agent:
     image: python:3.12
     working_dir: /workspace
-    env_file:
-      - .env
+    env_file: *optional-env-file
     environment:
       REMEDIATION_AGENT_PORT: 18800
       OTEL_SERVICE_NAME: remediation-agent
@@ -379,8 +381,7 @@ services:
     working_dir: /workspace
     profiles:
       - tools
-    env_file:
-      - .env
+    env_file: *optional-env-file
     environment:
       - GALILEO_EXPERIMENT_SUITE=${GALILEO_EXPERIMENT_SUITE:-mcp}
       - GALILEO_EXPERIMENT_NAME

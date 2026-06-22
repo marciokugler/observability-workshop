@@ -1,13 +1,15 @@
 ---
-title: "Appendix: Galileo Agent Monitoring"
-linkTitle: "Appendix: Galileo"
+title: "Appendix: Optional Agent Monitoring"
+linkTitle: "Appendix: Agent Monitoring"
 weight: 99
 archetype: chapter
 time: 20 minutes
-description: Inspect remediation spans in Splunk and use Galileo showcase and experiments to evaluate agent behavior.
+description: Optional Galileo showcase and experiments for the cleanup workflow.
+aliases:
+  - /ninja-workshops/ai/16-support-portal-remediation-agent/6-observe-agent/
 ---
 
-Inspect evidence grounding, guardrails, approval, action execution, and verification so the remediation agent is observable.
+This appendix is optional. Use it only after the infrastructure troubleshooting path is complete. The core workshop is RUM, APM, Infrastructure, MCP evidence, and validated cleanup.
 
 ## Inspect Splunk Spans
 
@@ -41,10 +43,17 @@ Use this path when Galileo credentials are configured:
 
 ```bash
 cd observability-workshop/workshop/support-portal-remediation-agent
+```
+
+```bash
 npm run simulate:galileo
 ```
 
-If you used the ZIP download, use `cd observability-workshop-main/workshop/support-portal-remediation-agent` instead.
+If you used the ZIP download, use:
+
+```bash
+cd observability-workshop-main/workshop/support-portal-remediation-agent
+```
 
 You can also run it from the operator console by selecting `Run Showcase` in the Galileo Agent Monitoring area.
 
@@ -53,7 +62,7 @@ In Galileo:
 1. Open project `ciscolive26`.
 2. Open log stream `remediation-agent`.
 3. Group by sessions.
-4. Open the newest session named for the `AI Claim Status` incident.
+4. Open the newest session for the claim status incident.
 
 Walk through these traces:
 
@@ -66,7 +75,7 @@ Walk through these traces:
 | `showcase.guardrail_pre_action_check` | Unsafe restart instruction and fake PII are blocked. |
 | `showcase.action_planning_agent` | Selected controlled action is `clean_claims_knowledge_cache`. |
 | `showcase.human_approval` | Approval is captured as part of the workflow. |
-| `showcase.execute_remediation` | Remediation tool execution. |
+| `showcase.execute_remediation` | Cleanup tool execution. |
 | `showcase.verify_recovery` | Validation latency and healthy scenario state. |
 | `showcase.postmortem_agent` | Audit summary and governance highlights. |
 
@@ -105,16 +114,17 @@ Use these rows in a demo:
 
 ## Discussion
 
-Answer this before finishing:
+Answer this before finishing the appendix:
 
 ```text
-What evidence would you need before allowing this action to run automatically in a lower environment?
+What evidence would you need before allowing this cleanup action to run automatically in a lower environment?
 ```
 
 Expected themes:
 
 - Clear customer impact.
-- Two or more corroborating telemetry signals.
+- Slow trace evidence.
+- Cache filesystem pressure on the specific mountpoint.
 - Limited tool permissions.
 - Deterministic policy.
 - Human approval for production.
