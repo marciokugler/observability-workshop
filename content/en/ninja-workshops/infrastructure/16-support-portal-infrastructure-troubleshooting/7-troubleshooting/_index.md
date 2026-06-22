@@ -6,7 +6,7 @@ archetype: chapter
 time: 10 minutes
 description: Recover from common local setup, telemetry, MCP, and filesystem monitoring issues during the workshop.
 aliases:
-  - /ninja-workshops/ai/16-support-portal-remediation-agent/7-troubleshooting/
+  - /ninja-workshops/infrastructure/16-support-portal-infrastructure-troubleshooting/7-troubleshooting/
 ---
 
 Recover common setup, telemetry, MCP, and local app issues without changing the learning objective.
@@ -84,7 +84,7 @@ apps/remediation-agent/.venv/bin/python -m pip install --index-url https://pypi.
 ```
 
 ```bash
-apps/remediation-agent/.venv/bin/python -m pip show ibobs-remediation-agent
+apps/remediation-agent/.venv/bin/python -m pip show support-portal-agent
 ```
 
 ## Collector Will Not Start
@@ -159,20 +159,20 @@ Action:
 lsof -i :18080 -i :18081
 ```
 
-## Claim Status Does Not Degrade
+## Support Response Does Not Degrade
 
 Check:
 
 - `Trigger Cache Pressure` was clicked.
-- `AI Claim Status` was rerun after the scenario became active.
-- `CLAIMS_KNOWLEDGE_CACHE_DIR` points at a writable lab directory.
+- `AI Support Response` was rerun after the scenario became active.
+- `SUPPORT_KNOWLEDGE_CACHE_DIR` points at a writable lab directory.
 
 Action:
 
 1. Confirm the portal or operator console shows cache pressure as active.
-2. Rerun `AI Claim Status` from the claims portal.
+2. Rerun `AI Support Response` from the support portal.
 3. Generate fresh browser traffic with `npm run simulate:rum`.
-4. Compare `AI Claim Status` to `Policy Coverage Lookup` and `Claims FAQ Search`.
+4. Compare `AI Support Response` to `Account Status Lookup` and `Help Article Search`.
 
 ## Filesystem Metrics Are Missing
 
@@ -182,13 +182,13 @@ Check:
 - `infra/otel-collector/config.yaml` includes `hostmetrics/cache_volume`.
 - The `metrics/cache_volume` pipeline includes `hostmetrics/cache_volume`.
 - `.env` has the expected `INSTANCE` value.
-- The cache mountpoint is `/var/cache/claims-knowledge`.
+- The cache mountpoint is `/var/cache/support-knowledge`.
 
 Look for:
 
 ```text
 system.filesystem.utilization
-mountpoint=/var/cache/claims-knowledge
+mountpoint=/var/cache/support-knowledge
 service.instance.id=<INSTANCE>
 ```
 
@@ -209,8 +209,8 @@ Check locally first:
 
 Look for:
 
-- APM services such as `claims-knowledge`, `claims-assistant`, and `remediation-agent`.
-- Filesystem utilization for `/var/cache/claims-knowledge`.
+- APM services such as `support-knowledge`, `support-assistant`, and `remediation-agent`.
+- Filesystem utilization for `/var/cache/support-knowledge`.
 - RUM data for the portal if `VITE_SPLUNK_RUM_TOKEN` is set.
 
 If RUM sessions are missing:

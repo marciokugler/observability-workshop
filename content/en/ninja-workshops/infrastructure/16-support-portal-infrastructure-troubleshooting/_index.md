@@ -10,7 +10,7 @@ draft: false
 hidden: false
 product: "Observability Cloud"
 aliases:
-  - /ninja-workshops/ai/16-support-portal-remediation-agent/
+  - /ninja-workshops/infrastructure/16-support-portal-infrastructure-troubleshooting/
 ---
 
 In this workshop, you will troubleshoot a realistic infrastructure failure that starts as a customer experience problem. One transaction slows down, but the application is not fully down. Your job is to follow the evidence from Splunk RUM to APM traces, then to infrastructure metrics that identify the root cause.

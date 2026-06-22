@@ -6,7 +6,7 @@ archetype: chapter
 time: 25 minutes
 description: Start the collector and application stack, verify local endpoints, and create a healthy observability baseline.
 aliases:
-  - /ninja-workshops/ai/16-support-portal-remediation-agent/3-run-lab-stack/
+  - /ninja-workshops/infrastructure/16-support-portal-infrastructure-troubleshooting/3-run-lab-stack/
 ---
 
 Create a healthy baseline before introducing the failure. Confirm the portal, backend services, Splunk OpenTelemetry Collector, RUM path, and operator console all work.
@@ -38,7 +38,7 @@ Find the `receivers:` section. Add or verify this receiver:
         include_mount_points:
           match_type: strict
           mount_points:
-            - /var/cache/claims-knowledge
+            - /var/cache/support-knowledge
         metrics:
           system.filesystem.usage:
             enabled: true
@@ -48,7 +48,7 @@ Find the `receivers:` section. Add or verify this receiver:
 
 Why this receiver exists:
 
-- Students need a specific infrastructure signal for `/var/cache/claims-knowledge`.
+- Students need a specific infrastructure signal for `/var/cache/support-knowledge`.
 - The `15s` interval gives faster feedback during the lab than the general host metrics interval.
 
 ### Add the Lab Identity Processor
@@ -72,7 +72,7 @@ Find the `processors:` section. Add or verify this processor:
         value: ${INSTANCE}
       - action: upsert
         key: lab.name
-        value: ciscolive26
+        value: support-portal
       - action: upsert
         key: lab.student.id
         value: ${INSTANCE}
@@ -101,7 +101,7 @@ Find `service.pipelines`. Add or verify this pipeline:
 ```yaml
     metrics/cache_volume:
       receivers: [hostmetrics/cache_volume]
-      processors: [memory_limiter, resourcedetection, resource/lab_identity, resource/claims_knowledge_infra_relation, batch]
+      processors: [memory_limiter, resourcedetection, resource/lab_identity, resource/support_knowledge_infra_relation, batch]
       exporters: [signalfx]
 ```
 
@@ -110,7 +110,7 @@ This pipeline says:
 - Collect only the cache filesystem receiver.
 - Add normal system resource attributes.
 - Add the student lab identity.
-- Add the `claims-knowledge` relationship metadata used in the workshop.
+- Add the `support-knowledge` relationship metadata used in the workshop.
 - Export the resulting infrastructure metrics to Splunk Observability Cloud.
 
 Also confirm `resource/lab_identity` appears in the `traces`, `metrics`, and `metrics/infrastructure` pipelines. That keeps browser, APM, application metrics, and infrastructure metrics filterable by the same student identity.
@@ -152,7 +152,7 @@ Leave the collector running in its terminal.
 Open a second terminal and return to the app directory:
 
 ```bash
-cd observability-workshop/workshop/support-portal-remediation-agent
+cd observability-workshop/workshop/support-portal
 ```
 
 Load `.env`:
@@ -175,13 +175,13 @@ Start the app stack:
 npm run dev
 ```
 
-This starts the backend services, cleanup worker, claims portal, and operator console.
+This starts the backend services, cleanup worker, support portal, and operator console.
 
 ## Verify Local Endpoints
 
 Open:
 
-- Claims portal: `http://127.0.0.1:18080`
+- Support portal: `http://127.0.0.1:18080`
 - Operator console: `http://127.0.0.1:18081`
 
 Expected result:
@@ -192,16 +192,16 @@ Expected result:
 
 ## Establish a Healthy Baseline
 
-In the claims portal, run each journey once:
+In the support portal, run each journey once:
 
-1. Click `AI Claim Status`
-2. Click `Policy Coverage Lookup`
-3. Click `Claims FAQ Search`
+1. Click `AI Support Response`
+2. Click `Account Status Lookup`
+3. Click `Help Article Search`
 
 Confirm:
 
 - All three journeys return successful responses.
-- `AI Claim Status` is not noticeably slower than the comparison journeys.
+- `AI Support Response` is not noticeably slower than the comparison journeys.
 
 ## Generate Customer Browser Traffic
 
@@ -213,8 +213,8 @@ RUM_SIMULATOR_USERS=6 RUM_SIMULATOR_ROUNDS=6 RUM_SIMULATOR_BROWSERS=chromium RUM
 
 Expected result:
 
-- The simulator opens headless browser sessions against the claims portal.
-- Each session clicks `AI Claim Status`, `Policy Coverage Lookup`, and `Claims FAQ Search`.
+- The simulator opens headless browser sessions against the support portal.
+- Each session clicks `AI Support Response`, `Account Status Lookup`, and `Help Article Search`.
 - Backend services receive traffic through the same browser and API gateway path a customer uses.
 
 For longer demos, keep browser sessions running in a separate terminal:
@@ -227,10 +227,10 @@ RUM_SIMULATOR_USERS=4 RUM_SIMULATOR_ROUNDS=60 RUM_SIMULATOR_BROWSERS=chromium RU
 
 In Splunk APM, confirm these services appear:
 
-- `claims-portal-api`
-- `claims-assistant`
-- `claims-knowledge`
-- `claims-policy-service`
+- `support-portal-api`
+- `support-assistant`
+- `support-knowledge`
+- `support-case-service`
 - `scenario-controller`
 - `remediation-orchestrator`
 - `remediation-agent`
@@ -238,13 +238,13 @@ In Splunk APM, confirm these services appear:
 In Splunk RUM, confirm Digital Experience activity for:
 
 ```text
-ibobs-claims-portal
+support-portal
 ```
 
 In Metric Finder, confirm the cache filesystem metric is present for your instance:
 
 ```text
 system.filesystem.utilization
-mountpoint=/var/cache/claims-knowledge
+mountpoint=/var/cache/support-knowledge
 service.instance.id=<INSTANCE>
 ```

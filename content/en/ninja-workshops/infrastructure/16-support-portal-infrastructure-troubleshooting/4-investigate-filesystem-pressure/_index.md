@@ -6,7 +6,7 @@ archetype: chapter
 time: 30 minutes
 description: Trigger the cache filesystem incident and prove the root cause from RUM, APM traces, and Infrastructure metrics.
 aliases:
-  - /ninja-workshops/ai/16-support-portal-remediation-agent/4-investigate-cache-pressure/
+  - /ninja-workshops/infrastructure/16-support-portal-infrastructure-troubleshooting/4-investigate-cache-pressure/
 ---
 
 Prove the incident with telemetry. Separate customer impact, service behavior, and infrastructure cause.
@@ -18,21 +18,21 @@ Use the portal or operator console button named `Trigger Cache Pressure`.
 Expected result:
 
 - The portal or operator console shows that cache pressure is active.
-- The next browser request to `AI Claim Status` starts using the degraded path.
+- The next browser request to `AI Support Response` starts using the degraded path.
 - The comparison journeys remain available.
 
 ## Reproduce Customer Impact
 
-In the claims portal:
+In the support portal:
 
-1. Run `AI Claim Status`.
-2. Run `Policy Coverage Lookup`.
-3. Run `Claims FAQ Search`.
+1. Run `AI Support Response`.
+2. Run `Account Status Lookup`.
+3. Run `Help Article Search`.
 
 Expected result:
 
-- `AI Claim Status` is slower or partially degraded.
-- `Policy Coverage Lookup` and `Claims FAQ Search` remain healthier comparison journeys.
+- `AI Support Response` is slower or partially degraded.
+- `Account Status Lookup` and `Help Article Search` remain healthier comparison journeys.
 - The whole application is not down.
 
 ## Drive Degraded Browser Traffic
@@ -48,23 +48,23 @@ RUM_SIMULATOR_USERS=8 RUM_SIMULATOR_ROUNDS=8 RUM_SIMULATOR_BROWSERS=chromium RUM
 Open Splunk Observability Cloud and start with the customer experience.
 
 1. Go to **Digital Experience**.
-2. Open the RUM application named `ibobs-claims-portal`.
+2. Open the RUM application named `support-portal`.
 3. Set the time range to the last 15 minutes.
-4. Open network requests or page activity for the claims portal.
+4. Open network requests or page activity for the support portal.
 5. Find the slow request for `/api/support/respond`.
 
 What you are proving:
 
 - The customer-facing portal is receiving traffic.
 - The slow path starts at a browser journey, not a synthetic backend call.
-- The affected request is the claim status support path.
+- The affected request is the support response path.
 
 Use these filters when available:
 
 ```text
 deployment.environment=demo
 service.instance.id=<INSTANCE>
-lab.name=ciscolive26
+lab.name=support-portal
 lab.student.id=<INSTANCE>
 ```
 
@@ -75,19 +75,19 @@ From the slow RUM request, open the linked trace or trace waterfall when availab
 In the trace waterfall, follow the service path:
 
 ```text
-browser -> claims-portal-api -> claims-assistant -> claims-knowledge
+browser -> support-portal-api -> support-assistant -> support-knowledge
 ```
 
 Expected trace evidence:
 
 - The request route is related to `/api/support/respond`.
-- `claims-knowledge` is the slow backend service.
-- The delay is concentrated in the claim status path.
+- `support-knowledge` is the slow backend service.
+- The delay is concentrated in the support response path.
 - The comparison journeys are not showing the same degradation pattern.
 
 ## Confirm the Affected Service in APM
 
-Open Splunk APM and inspect `claims-knowledge`.
+Open Splunk APM and inspect `support-knowledge`.
 
 Use the same time range and student filters:
 
@@ -101,12 +101,12 @@ Confirm:
 - Service latency increased after cache pressure was triggered.
 - Request count exists for the degraded window.
 - Error rate is not the primary signal.
-- The service map connects the portal path to `claims-knowledge`.
+- The service map connects the portal path to `support-knowledge`.
 
 The APM conclusion should be narrow:
 
 ```text
-The slow customer journey reaches claims-knowledge, and claims-knowledge latency is elevated for this student instance.
+The slow customer journey reaches support-knowledge, and support-knowledge latency is elevated for this student instance.
 ```
 
 ## Confirm the Filesystem Root Cause
@@ -122,7 +122,7 @@ system.filesystem.utilization
 Filter to:
 
 ```text
-mountpoint=/var/cache/claims-knowledge
+mountpoint=/var/cache/support-knowledge
 service.instance.id=<INSTANCE>
 deployment.environment=demo
 ```
@@ -130,7 +130,7 @@ deployment.environment=demo
 Expected infrastructure evidence:
 
 - Filesystem utilization rises after the scenario is triggered.
-- The mountpoint is `/var/cache/claims-knowledge`.
+- The mountpoint is `/var/cache/support-knowledge`.
 - The instance matches your `INSTANCE` value.
 - The filesystem signal lines up with the slow trace time window.
 
@@ -138,7 +138,7 @@ If you use SignalFlow, the query shape is:
 
 ```text
 data("system.filesystem.utilization",
-  filter=filter("mountpoint", "/var/cache/claims-knowledge")
+  filter=filter("mountpoint", "/var/cache/support-knowledge")
     and filter("service.instance.id", "<INSTANCE>")
     and filter("deployment.environment", "demo")
 ).max().publish()
@@ -149,7 +149,7 @@ data("system.filesystem.utilization",
 Write a short evidence statement before moving to MCP evidence and cleanup:
 
 ```text
-The claim status support journey is degraded for <INSTANCE>. RUM shows slow /api/support/respond requests. APM traces show the slow path reaches claims-knowledge. Infrastructure metrics show system.filesystem.utilization rising for /var/cache/claims-knowledge on the same instance. The root cause is cache filesystem pressure, not a full portal outage.
+The support response journey is degraded for <INSTANCE>. RUM shows slow /api/support/respond requests. APM traces show the slow path reaches support-knowledge. Infrastructure metrics show system.filesystem.utilization rising for /var/cache/support-knowledge on the same instance. The root cause is cache filesystem pressure, not a full portal outage.
 ```
 
 {{% notice title="Checkpoint" style="green" icon="running" %}}

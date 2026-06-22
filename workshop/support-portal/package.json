@@ -1,0 +1,39 @@
+{
+  "name": "support-portal",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "simulate:traffic": "node scripts/traffic-simulator.mjs",
+    "simulate:rum": "node scripts/rum-simulator.mjs",
+    "test": "npm run test:ts",
+    "test:ts": "tsx --test tests/unit/*.test.ts",
+    "test:python": "python3 -m unittest discover -s tests -p 'test_*.py'",
+    "splunk:render": "python3 infra/splunk/sync_splunk_objects.py",
+    "splunk:apply": "python3 infra/splunk/sync_splunk_objects.py --apply",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.12",
+    "@types/react-dom": "^19.0.4",
+    "concurrently": "^9.2.1",
+    "playwright": "^1.54.2",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "^1.9.0",
+    "@splunk/otel": "^4.4.0",
+    "@splunk/otel-web": "^2.3.0"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-arm64-gnu": "4.61.1",
+    "@rollup/rollup-linux-x64-gnu": "4.61.1"
+  }
+}

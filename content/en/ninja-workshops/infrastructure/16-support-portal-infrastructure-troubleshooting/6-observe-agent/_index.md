@@ -6,7 +6,7 @@ archetype: chapter
 time: 20 minutes
 description: Optional Splunk span inspection for the cleanup workflow.
 aliases:
-  - /ninja-workshops/ai/16-support-portal-remediation-agent/6-observe-agent/
+  - /ninja-workshops/infrastructure/16-support-portal-infrastructure-troubleshooting/6-observe-agent/
 ---
 
 This appendix is optional. Use it only after the infrastructure troubleshooting path is complete. The core workshop is RUM, APM, Infrastructure, MCP evidence, and validated cleanup.
@@ -29,8 +29,8 @@ Look for route or span names such as:
 Expected attributes include:
 
 ```text
-action.type=clean_claims_knowledge_cache
-action.target=claims-knowledge-cache
+action.type=clean_support_knowledge_cache
+action.target=support-knowledge-cache
 app.business_transaction=remediation_decision
 ```
 

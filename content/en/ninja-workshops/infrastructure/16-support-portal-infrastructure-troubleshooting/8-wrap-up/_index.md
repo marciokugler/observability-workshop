@@ -6,23 +6,23 @@ archetype: chapter
 time: 5 minutes
 description: Review the infrastructure troubleshooting workflow and clean up local resources.
 aliases:
-  - /ninja-workshops/ai/16-support-portal-remediation-agent/8-wrap-up/
+  - /ninja-workshops/infrastructure/16-support-portal-infrastructure-troubleshooting/8-wrap-up/
 ---
 
 You have completed the **Support Portal Infrastructure Troubleshooting** workshop.
 
 You practiced how to:
 
-- Run the local claims support portal and operator console.
+- Run the local support portal and operator console.
 - Configure the Splunk OpenTelemetry Collector to monitor a specific cache filesystem.
 - Use `resource/lab_identity` so each student can filter telemetry by `INSTANCE`.
 - Establish a healthy baseline across three customer journeys.
 - Trigger a deterministic cache filesystem pressure incident.
 - Navigate from Splunk RUM to slow APM traces.
-- Identify `claims-knowledge` as the slow service in the transaction path.
-- Confirm `/var/cache/claims-knowledge` pressure with infrastructure metrics.
+- Identify `support-knowledge` as the slow service in the transaction path.
+- Confirm `/var/cache/support-knowledge` pressure with infrastructure metrics.
 - Configure MCP communication and collect the same evidence through Splunk MCP.
-- Run a controlled `clean_claims_knowledge_cache` cleanup.
+- Run a controlled `clean_support_knowledge_cache` cleanup.
 - Validate recovery through the portal, operator console, and telemetry.
 
 ## Adoption Checklist
@@ -43,7 +43,7 @@ Before using this pattern with real teams, confirm:
 
 ## Key Takeaway
 
-Infrastructure troubleshooting is strongest when customer impact, slow traces, and host metrics all point to the same root cause. In this lab, the root cause is not just "the app is slow"; it is filesystem pressure on `/var/cache/claims-knowledge`.
+Infrastructure troubleshooting is strongest when customer impact, slow traces, and host metrics all point to the same root cause. In this lab, the root cause is not just "the app is slow"; it is filesystem pressure on `/var/cache/support-knowledge`.
 
 ## Cleanup
 
@@ -52,18 +52,18 @@ Stop the lab before leaving the workshop environment.
 1. In the terminal running `npm run dev`, press `Ctrl+C`.
 2. In the terminal running `npm run dev:collector`, press `Ctrl+C`.
 3. In any terminal running browser traffic, press `Ctrl+C`.
-4. Close the claims portal and operator console browser tabs.
+4. Close the support portal and operator console browser tabs.
 
 From the app directory:
 
 ```bash
-cd observability-workshop/workshop/support-portal-remediation-agent
+cd observability-workshop/workshop/support-portal
 ```
 
 If you used the ZIP download, use:
 
 ```bash
-cd observability-workshop-main/workshop/support-portal-remediation-agent
+cd observability-workshop-main/workshop/support-portal
 ```
 
 Stop any collector containers left by Docker Compose:
@@ -89,7 +89,7 @@ set +a
 Remove the local cache-pressure data:
 
 ```bash
-rm -rf "$CLAIMS_KNOWLEDGE_CACHE_DIR"
+rm -rf "$SUPPORT_KNOWLEDGE_CACHE_DIR"
 ```
 
 Optional storage cleanup:

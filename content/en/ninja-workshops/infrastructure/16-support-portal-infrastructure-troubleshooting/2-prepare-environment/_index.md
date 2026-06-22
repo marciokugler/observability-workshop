@@ -6,7 +6,7 @@ archetype: chapter
 time: 25 minutes
 description: Install prerequisites, configure Splunk export, RUM, MCP.
 aliases:
-  - /ninja-workshops/ai/16-support-portal-remediation-agent/2-prepare-environment/
+  - /ninja-workshops/infrastructure/16-support-portal-infrastructure-troubleshooting/2-prepare-environment/
 ---
 
 The lab uses Node.js for the local services, Python for the controlled cleanup worker, Docker for the Splunk OpenTelemetry Collector, and Splunk credentials for live observability evidence.
@@ -104,7 +104,7 @@ Docker is required for the local collector.
 The remaining commands on this page assume your terminal is in the app directory:
 
 ```bash
-cd observability-workshop/workshop/support-portal-remediation-agent
+cd observability-workshop/workshop/support-portal
 ```
 Create a local environment file:
 
@@ -116,7 +116,7 @@ Edit `.env` and set a unique `INSTANCE` value:
 
 ```dotenv
 INSTANCE=student-001
-OTEL_RESOURCE_ATTRIBUTES=lab.name=ciscolive26,lab.student.id=student-001,service.instance.id=student-001,host.name=student-001,deployment.environment=demo
+OTEL_RESOURCE_ATTRIBUTES=lab.name=support-portal,lab.student.id=student-001,service.instance.id=student-001,host.name=student-001,deployment.environment=demo
 ```
 
 Use a unique value for every student when sharing one Splunk Observability Cloud organization. This value is what lets you filter RUM, APM, host metrics.
@@ -147,7 +147,7 @@ Credential purpose:
 | `SPLUNK_MCP_AUTH_TOKEN` | Optional bearer token for hosted MCP Gateway or Splunk platform plus Observability setups. |
 | `SPLUNK_MCP_TENANT` | Optional Splunk tenant header for hosted MCP Gateway setups. |
 | `SPLUNK_MCP_TIMEOUT_MS` | Timeout for MCP tool discovery and tool calls. |
-| `VITE_SPLUNK_RUM_TOKEN` | Browser RUM token for the claims portal. |
+| `VITE_SPLUNK_RUM_TOKEN` | Browser RUM token for the support portal. |
 
 If Splunk credentials are missing:
 
@@ -305,5 +305,5 @@ apps/remediation-agent/.venv/bin/python -m pip install --index-url https://pypi.
 Confirm the package is installed:
 
 ```bash
-apps/remediation-agent/.venv/bin/python -m pip show ibobs-remediation-agent
+apps/remediation-agent/.venv/bin/python -m pip show support-portal-agent
 ```
