@@ -8,7 +8,7 @@ Set these values in `.env` before starting the stack:
 
 ```dotenv
 INSTANCE=student-001
-DEPLOYMENT_ENVIRONMENT=demo
+DEPLOYMENT_ENVIRONMENT=student-001
 SPLUNK_REALM=us1
 SPLUNK_ACCESS_TOKEN=...
 VITE_SPLUNK_RUM_TOKEN=...
@@ -17,7 +17,7 @@ VITE_SPLUNK_RUM_TOKEN=...
 Use a unique `INSTANCE` per student. In Splunk, filter by:
 
 - `service.instance.id=<INSTANCE>`
-- `deployment.environment=demo`
+- `deployment.environment=student-001`
 - `lab.name=support-portal`
 - `lab.student.id=<INSTANCE>`
 
@@ -191,7 +191,7 @@ Use these filters and names during rehearsal:
 | Check | Filter or value |
 | --- | --- |
 | Student isolation | `service.instance.id=<INSTANCE>` |
-| Environment | `deployment.environment=demo` |
+| Environment | `deployment.environment=student-001` |
 | RUM app | `support-portal` |
 | Degraded service | `support-knowledge` |
 | Cache mount | `/var/cache/support-knowledge` |

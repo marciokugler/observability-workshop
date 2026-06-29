@@ -27,8 +27,12 @@ The Cisco AI Pods path remains useful when you have shared GPU infrastructure te
   detectors.
 * `rate-card-example.yaml` - Public-source-backed workshop rate card examples for
   token and GPU-hour pricing.
+* `model-decision-card-example.yaml` - Combines model-card facts, leaderboard
+  snapshots, local/on-prem/online rates, and placement rationale.
 * `scripts/benchmark_ollama.py` - Local Ollama benchmark that derives input, output,
   and blended token rates from observed throughput and an hourly cost model.
+* `scripts/compare_rate_cards.py` - Compares the local benchmark output with managed
+  online model pricing and optional on-prem rate-card values.
 * `scripts/simulate_token_cost_risk.py` - Synthetic event generator for token surge,
   tenant misuse, unknown attribution, and chargeback alarm labs.
 
@@ -38,12 +42,17 @@ The Cisco AI Pods path remains useful when you have shared GPU infrastructure te
 
 1. Start with `clean-llm-app/` and confirm the app can answer questions.
 2. Run `scripts/benchmark_ollama.py` against the local model.
-3. Choose an hourly cost model: market proxy, hardware amortization, or energy-only.
-4. Use the derived token rates as the workshop rate card.
-5. Manually add OpenTelemetry packages to the clean app.
-6. Add the span-enrichment helper and owner/outcome dimensions.
-7. Compare your result with `local-llm-app/`.
-8. Run `scripts/simulate_token_cost_risk.py` to practice proactive cost alarms.
+3. Start with energy-only cost: load watts, idle watts, and electricity price.
+4. Use the derived per-million-token rates as the workshop rate card.
+5. Compare the local rate with a managed online model price using
+   `scripts/compare_rate_cards.py`.
+6. Capture a ranking/evaluation snapshot in `model-decision-card-example.yaml`.
+7. Manually add OpenTelemetry packages to the clean app.
+8. Add the span-enrichment helper and owner/outcome dimensions.
+9. Compare your result with `local-llm-app/`.
+10. Optionally compare against hardware amortization, on-prem GPU rates, or a public
+   cloud proxy.
+11. Run `scripts/simulate_token_cost_risk.py` to practice proactive cost alarms.
 
 ### Shared GPU Path
 
@@ -58,5 +67,6 @@ The Cisco AI Pods path remains useful when you have shared GPU infrastructure te
    examples in `collector/otel-collector-chargeback-values.yaml`.
 7. Build dashboards and detectors with the SignalFlow examples.
 
-The rate card values in these files are fictional workshop values. Replace them with an
-approved internal rate card before using the pattern for production chargeback.
+The local and on-prem rate card values in these files are workshop examples. Managed
+online rates must be verified on the provider pricing page, and production chargeback
+should use the customer's approved internal rate card.

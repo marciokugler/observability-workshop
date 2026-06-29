@@ -1,9 +1,7 @@
 import cors from "@fastify/cors";
-import { metrics } from "@opentelemetry/api";
 import Fastify from "fastify";
 import { mkdir, readdir, rm, stat, statfs, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { performance } from "node:perf_hooks";
 import { defaultPorts, localServicePort } from "@support-portal/runtime-config";
 import { BUSINESS_TRANSACTIONS } from "@support-portal/shared-types";
 import {
@@ -12,8 +10,7 @@ import {
   buildNodeTelemetryConfig,
   buildTelemetryAttributes,
   createServiceLogger,
-  initSplunkNodeTelemetry,
-  runInSpan
+  initSplunkNodeTelemetry
 } from "@support-portal/telemetry";
 
 export const knowledgeService = {
@@ -54,107 +51,10 @@ const cacheBlockBytes = Number(
 const cacheQuotaBytes = Number(
   process.env.SUPPORT_KNOWLEDGE_CACHE_QUOTA_BYTES ?? 128 * 1024 * 1024
 );
-const cacheMetricMountpoint = process.env.SPLUNK_CACHE_MOUNTPOINT ?? "/var/cache/support-knowledge";
-const evidenceMetricSource = process.env.SPLUNK_EVIDENCE_METRIC_SOURCE ?? "support-knowledge-evidence";
-const cacheUtilizationMetricName =
-  process.env.SUPPORT_KNOWLEDGE_CACHE_UTILIZATION_METRIC ?? "support_knowledge.cache.utilization";
-const supportResponseLatencyMetricName =
-  process.env.SUPPORT_KNOWLEDGE_SUPPORT_RESPONSE_LATENCY_METRIC ?? "support_knowledge.support_response.latency_ms";
 const supportResponseTransactions = new Set<string>([
   BUSINESS_TRANSACTIONS.customerSupportResponse,
   BUSINESS_TRANSACTIONS.legacyCustomerSupportResponse
 ]);
-let cacheMetricsRegistered = false;
-let directMetricPublisherStarted = false;
-let latestCacheStatus: CacheStatus | undefined;
-let lastSupportResponseLatencyMs = 0;
-
-function defaultCacheStatusSnapshot(): CacheStatus {
-  return {
-    path: cacheDirectory,
-    totalBytes: cacheQuotaBytes,
-    freeBytes: cacheQuotaBytes,
-    usedBytes: 0,
-    usedPercent: 0,
-    filesystemTotalBytes: 0,
-    filesystemFreeBytes: 0,
-    filesystemUsedBytes: 0,
-    filesystemUsedPercent: 0
-  };
-}
-
-function metricDimensions(extra: Record<string, string> = {}) {
-  return {
-    "deployment.environment": process.env.DEPLOYMENT_ENVIRONMENT ?? "demo",
-    "service.name": knowledgeService.name,
-    "service.namespace": process.env.OTEL_SERVICE_NAMESPACE ?? "support-portal",
-    "service.instance.id": process.env.INSTANCE ?? "student-001",
-    "host.name": process.env.INSTANCE ?? "student-001",
-    "demo.metric_source": evidenceMetricSource,
-    ...extra
-  };
-}
-
-async function publishSplunkMetricSnapshot(cache: CacheStatus, latencyMs: number) {
-  const accessToken = process.env.SPLUNK_ACCESS_TOKEN;
-  const realm = process.env.SPLUNK_REALM;
-  if (!accessToken || !realm) {
-    return;
-  }
-
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 1500);
-  const timestamp = Date.now();
-
-  try {
-    await fetch(process.env.SPLUNK_INGEST_URL ?? `https://ingest.${realm}.signalfx.com/v2/datapoint`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-sf-token": accessToken
-      },
-      body: JSON.stringify({
-        gauge: [
-          {
-            metric: cacheUtilizationMetricName,
-            value: cache.usedPercent,
-            timestamp,
-            dimensions: metricDimensions({
-              mountpoint: cacheMetricMountpoint,
-              "cache.path": cacheDirectory
-            })
-          },
-          {
-            metric: supportResponseLatencyMetricName,
-            value: latencyMs,
-            timestamp,
-            dimensions: metricDimensions({
-              "app.business_transaction": BUSINESS_TRANSACTIONS.customerSupportResponse
-            })
-          }
-        ]
-      }),
-      signal: controller.signal
-    });
-  } catch {
-    // Metric publication is best-effort; the request path must stay deterministic for the demo.
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
-function publishLatestMetricSnapshot() {
-  void publishSplunkMetricSnapshot(latestCacheStatus ?? defaultCacheStatusSnapshot(), lastSupportResponseLatencyMs);
-}
-
-function startDirectMetricPublisher() {
-  if (directMetricPublisherStarted) {
-    return;
-  }
-  directMetricPublisherStarted = true;
-  const interval = setInterval(publishLatestMetricSnapshot, 5000);
-  interval.unref?.();
-}
 
 async function cachePressureBytes() {
   await mkdir(cacheDirectory, { recursive: true });
@@ -180,7 +80,7 @@ async function cacheStatus() {
   const freeBytes = Math.max(totalBytes - usedBytes, 0);
   const usedPercent = totalBytes > 0 ? Math.round((usedBytes / totalBytes) * 1000) / 10 : 0;
 
-  const status = {
+  return {
     path: cacheDirectory,
     totalBytes,
     freeBytes,
@@ -191,8 +91,6 @@ async function cacheStatus() {
     filesystemUsedBytes,
     filesystemUsedPercent
   };
-  latestCacheStatus = status;
-  return status;
 }
 
 async function clearDemoCache() {
@@ -251,52 +149,9 @@ function knowledgeAttributes(transaction: string) {
   };
 }
 
-function registerCacheUtilizationMetric() {
-  if (cacheMetricsRegistered) {
-    return;
-  }
-  cacheMetricsRegistered = true;
-
-  const meter = metrics.getMeter("support-knowledge-cache");
-  const utilizationGauge = meter.createObservableGauge(cacheUtilizationMetricName, {
-    description: "Synthetic support knowledge cache quota utilization used by the workshop scenario."
-  });
-  const latencyGauge = meter.createObservableGauge(supportResponseLatencyMetricName, {
-    description: "Last observed support knowledge latency for the AI Support Response transaction."
-  });
-
-  utilizationGauge.addCallback((observableResult) => {
-    const status = latestCacheStatus ?? defaultCacheStatusSnapshot();
-    observableResult.observe(status.usedPercent, {
-      "deployment.environment": process.env.DEPLOYMENT_ENVIRONMENT ?? "demo",
-      "service.name": knowledgeService.name,
-      "service.namespace": process.env.OTEL_SERVICE_NAMESPACE ?? "support-portal",
-      "service.instance.id": process.env.INSTANCE ?? "student-001",
-      "host.name": process.env.INSTANCE ?? "student-001",
-      mountpoint: cacheMetricMountpoint,
-      "cache.path": cacheDirectory,
-      "demo.metric_source": evidenceMetricSource
-    });
-  });
-  latencyGauge.addCallback((observableResult) => {
-    observableResult.observe(lastSupportResponseLatencyMs, {
-      "deployment.environment": process.env.DEPLOYMENT_ENVIRONMENT ?? "demo",
-      "service.name": knowledgeService.name,
-      "service.namespace": process.env.OTEL_SERVICE_NAMESPACE ?? "support-portal",
-      "service.instance.id": process.env.INSTANCE ?? "student-001",
-      "host.name": process.env.INSTANCE ?? "student-001",
-      "app.business_transaction": BUSINESS_TRANSACTIONS.customerSupportResponse,
-      "demo.metric_source": evidenceMetricSource
-    });
-  });
-}
-
 export function buildServer() {
   const app = Fastify({ loggerInstance: createServiceLogger(knowledgeService.name) });
   void buildNodeTelemetryConfig({ serviceName: knowledgeService.name });
-  registerCacheUtilizationMetric();
-  startDirectMetricPublisher();
-  void cacheStatus().then(() => publishLatestMetricSnapshot());
   void app.register(cors, { origin: true });
   app.addHook("preHandler", async (request) => {
     const routePath = request.routeOptions.url;
@@ -331,12 +186,10 @@ export function buildServer() {
   }));
   app.post("/knowledge/scenario", async (request) => {
     activeScenario = ((request.body as { mode?: ScenarioMode }).mode ?? "healthy") as ScenarioMode;
-    lastSupportResponseLatencyMs = 0;
     const cache =
       activeScenario === "cache-disk-pressure"
         ? await createCachePressure()
         : await clearDemoCache().then(() => cacheStatus());
-    publishLatestMetricSnapshot();
     request.log.info({ activeScenario, cache }, "knowledge scenario updated");
     return {
       activeScenario,
@@ -344,20 +197,14 @@ export function buildServer() {
     };
   });
   app.post("/knowledge/query", async (request, reply) => {
-    const startedAt = performance.now();
     const transaction = (request.body as { transaction?: string }).transaction ?? BUSINESS_TRANSACTIONS.knowledgeArticleSearch;
-    const recordSupportResponseLatency = () => {
-      if (supportResponseTransactions.has(transaction)) {
-        lastSupportResponseLatencyMs = Math.round((performance.now() - startedAt) * 10) / 10;
-      }
-    };
     request.log.info({ knowledgeRequest: request.body, transaction, activeScenario }, "knowledge query received");
     const telemetry = {
       ...buildTelemetryAttributes(transaction),
       ...knowledgeAttributes(transaction)
     };
     annotateCurrentSpan(telemetry);
-    await runInSpan("knowledge.apply_cache_pressure", telemetry, () => maybeDelay(transaction));
+    await maybeDelay(transaction);
 
     const cache = await cacheStatus();
     const cacheFullForSupport =
@@ -366,8 +213,6 @@ export function buildServer() {
       cache.usedPercent >= 98;
 
     if (cacheFullForSupport) {
-      recordSupportResponseLatency();
-      publishLatestMetricSnapshot();
       reply.code(503);
       request.log.warn({ transaction, activeScenario, cache }, "knowledge cache volume is full");
       return {
@@ -378,8 +223,6 @@ export function buildServer() {
       };
     }
 
-    recordSupportResponseLatency();
-    publishLatestMetricSnapshot();
     request.log.info({ transaction, activeScenario, cache }, "knowledge query served");
 
     return {

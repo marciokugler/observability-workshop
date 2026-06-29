@@ -62,9 +62,7 @@ type McpScope = {
   environment: string;
   instance?: string;
   cacheMountpoint: string;
-  cacheUtilizationMetric: string;
-  supportResponseLatencyMetric: string;
-  evidenceMetricSource: string;
+  filesystemUtilizationMetric: string;
   startTime: string;
   endTime: string;
 };
@@ -74,8 +72,6 @@ type ToolRecord = {
   result: unknown;
   text: string;
 };
-
-type SignalflowPurpose = "cache" | "latency";
 
 export function defaultSplunkMcpUrl(realm: string) {
   return `https://api.${realm}.signalfx.com/v2/mcp`;
@@ -186,16 +182,12 @@ export class SplunkMcpClient {
 
           try {
             if (toolName === "execute_signalflow_program") {
-              return await Promise.all(
-                (["cache", "latency"] as const).map(async (purpose) => {
-                  const result = await this.callTool(tool, scope, purpose);
-                  return {
-                    name: toolName,
-                    result,
-                    text: stringifyMcpResult(result)
-                  };
-                })
-              );
+              const result = await this.callTool(tool, scope);
+              return {
+                name: toolName,
+                result,
+                text: stringifyMcpResult(result)
+              };
             }
 
             const result = await this.callTool(tool, scope);
@@ -226,7 +218,8 @@ export class SplunkMcpClient {
     const environment =
       payload.dimensions?.environment ??
       process.env.DEPLOYMENT_ENVIRONMENT ??
-      "demo";
+      process.env.INSTANCE ??
+      "student-001";
 
     return {
       detectorId: payload.detectorId,
@@ -241,15 +234,9 @@ export class SplunkMcpClient {
         process.env.INSTANCE ??
         "student-001",
       cacheMountpoint: process.env.SPLUNK_CACHE_MOUNTPOINT ?? "/var/cache/support-knowledge",
-      cacheUtilizationMetric:
-        process.env.SPLUNK_CACHE_UTILIZATION_METRIC ??
-        process.env.SUPPORT_KNOWLEDGE_CACHE_UTILIZATION_METRIC ??
-        "support_knowledge.cache.utilization",
-      supportResponseLatencyMetric:
-        process.env.SPLUNK_SUPPORT_RESPONSE_LATENCY_METRIC ??
-        process.env.SUPPORT_KNOWLEDGE_SUPPORT_RESPONSE_LATENCY_METRIC ??
-        "support_knowledge.support_response.latency_ms",
-      evidenceMetricSource: process.env.SPLUNK_EVIDENCE_METRIC_SOURCE ?? "support-knowledge-evidence",
+      filesystemUtilizationMetric:
+        process.env.SPLUNK_FILESYSTEM_UTILIZATION_METRIC ??
+        "system.filesystem.utilization",
       startTime: start.toISOString(),
       endTime: end.toISOString()
     };
@@ -270,8 +257,8 @@ export class SplunkMcpClient {
     }
   }
 
-  private async callTool(tool: McpTool, scope: McpScope, signalflowPurpose?: SignalflowPurpose) {
-    const args = this.buildToolArguments(tool, scope, signalflowPurpose);
+  private async callTool(tool: McpTool, scope: McpScope) {
+    const args = this.buildToolArguments(tool, scope);
     const response = await this.callJsonRpc("tools/call", {
       name: tool.name,
       arguments: args
@@ -341,8 +328,8 @@ export class SplunkMcpClient {
     return headers;
   }
 
-  private buildToolArguments(tool: McpTool, scope: McpScope, signalflowPurpose?: SignalflowPurpose) {
-    const defaults = defaultParamsForTool(tool.name, scope, signalflowPurpose);
+  private buildToolArguments(tool: McpTool, scope: McpScope) {
+    const defaults = defaultParamsForTool(tool.name, scope);
     const paramProperties = schemaObjectProperties(valueAtPath(tool.inputSchema, "properties.params"), tool.inputSchema);
 
     if (!paramProperties) {
@@ -378,16 +365,16 @@ export class SplunkMcpClient {
     const combinedText = records.map((record) => record.text).join("\n");
     const affectedServices = uniqueStrings([scope.service, ...extractServiceNames(combinedText)]);
     const traceIds = uniqueStrings(extractTraceIds(combinedText));
-    const signalflowLatencyMs = extractSignalflowMetricValue(records, scope.supportResponseLatencyMetric);
-    const p95LatencyMs = signalflowLatencyMs ?? extractNumber(records, ["p95", "latency", "duration"]);
+    const p95LatencyMs = extractNumber(records, ["p95", "latency", "duration"]);
     const errorRate = extractNumber(records, ["error", "rate"]);
     const errorRatePercent = errorRate === undefined ? undefined : normalizeErrorRatePercent(errorRate);
-    const filesystemUtilization =
-      extractSignalflowMetricValue(records, scope.cacheUtilizationMetric, { max: 100 }) ??
-      extractSignalflowValue(records);
+    const filesystemUtilization = normalizeFilesystemUtilization(
+      extractSignalflowMetricValue(records, scope.filesystemUtilizationMetric, { max: 100, mode: "max" }) ??
+      extractSignalflowValue(records)
+    );
     const thresholds = evidenceThresholds();
     const filesystemQueried =
-      /support_knowledge\.cache\.utilization|disk\.utilization|filesystem|mountpoint|cache filesystem|cache mount|cache utilization|\/var\/cache\/support-knowledge/i.test(combinedText) ||
+      /system\.filesystem\.utilization|disk\.utilization|filesystem|mountpoint|cache filesystem|cache mount|cache utilization|\/var\/cache\/support-knowledge/i.test(combinedText) ||
       records.some((record) => record.name === "execute_signalflow_program");
     const filesystemPressureConfirmed =
       filesystemUtilization !== undefined
@@ -405,12 +392,12 @@ export class SplunkMcpClient {
 
     if (filesystemQueried && !filesystemPressureConfirmed) {
       warnings.push(
-        `Splunk MCP queried ${scope.cacheUtilizationMetric} but did not confirm cache utilization above ${thresholds.filesystemUtilization}.`
+        `Splunk MCP queried ${scope.filesystemUtilizationMetric} but did not confirm cache filesystem utilization above ${thresholds.filesystemUtilization}%.`
       );
     }
     if (records.some((record) => record.name === "get_apm_service_latency") && !latencyElevated) {
       warnings.push(
-        `Splunk MCP queried ${scope.supportResponseLatencyMetric}/APM latency but did not confirm latency above ${thresholds.apmLatencyMs} ms.`
+        `Splunk MCP queried APM latency but did not confirm latency above ${thresholds.apmLatencyMs} ms.`
       );
     }
 
@@ -474,7 +461,7 @@ export class SplunkMcpClient {
   }
 }
 
-function defaultParamsForTool(toolName: string, scope: McpScope, signalflowPurpose?: SignalflowPurpose): JsonObject {
+function defaultParamsForTool(toolName: string, scope: McpScope): JsonObject {
   const query = `${scope.detectorName} ${scope.service} ${scope.environment}`;
   const base = {
     environment: scope.environment,
@@ -504,22 +491,10 @@ function defaultParamsForTool(toolName: string, scope: McpScope, signalflowPurpo
   if (toolName === "execute_signalflow_program") {
     const cacheFilters = [
       `filter('deployment.environment', '${scope.environment}')`,
-      `filter('service.name', '${scope.service}')`,
-      scope.instance ? `filter('service.instance.id', '${scope.instance}')` : undefined,
-      `filter('mountpoint', '${scope.cacheMountpoint}')`,
-      `filter('demo.metric_source', '${scope.evidenceMetricSource}')`
+      scope.instance ? `filter('host.name', '${scope.instance}')` : undefined,
+      `filter('mountpoint', '${scope.cacheMountpoint}')`
     ].filter((filter): filter is string => Boolean(filter));
-    const latencyFilters = [
-      `filter('deployment.environment', '${scope.environment}')`,
-      `filter('service.name', '${scope.service}')`,
-      scope.instance ? `filter('service.instance.id', '${scope.instance}')` : undefined,
-      "filter('app.business_transaction', 'support_response')",
-      `filter('demo.metric_source', '${scope.evidenceMetricSource}')`
-    ].filter((filter): filter is string => Boolean(filter));
-    const program =
-      signalflowPurpose === "latency"
-        ? `data('${scope.supportResponseLatencyMetric}', filter=${latencyFilters.join(" and ")}).max(by=['service.name', 'service.instance.id', 'app.business_transaction']).publish(label='support response latency ms')`
-        : `data('${scope.cacheUtilizationMetric}', filter=${cacheFilters.join(" and ")}).max(by=['service.name', 'service.instance.id', 'mountpoint']).publish(label='cache utilization')`;
+    const program = `data('${scope.filesystemUtilizationMetric}', filter=${cacheFilters.join(" and ")}).max(by=['host.name', 'mountpoint']).publish(label='cache filesystem utilization')`;
 
     return {
       ...base,
@@ -736,6 +711,10 @@ function normalizeErrorRatePercent(value: number) {
   return value <= 1 ? value * 100 : value;
 }
 
+function normalizeFilesystemUtilization(value: number | undefined) {
+  return value === undefined ? undefined : value <= 1 ? value * 100 : value;
+}
+
 function roundMetric(value: number | undefined) {
   return value === undefined ? undefined : Math.round(value * 10) / 10;
 }
@@ -875,13 +854,8 @@ function buildResources(
   if (filesystemQueried) {
     resources.push({
       type: "metric",
-      name: scope.cacheUtilizationMetric,
+      name: scope.filesystemUtilizationMetric,
       detail: `Cache mount ${scope.cacheMountpoint}`
-    });
-    resources.push({
-      type: "metric",
-      name: scope.supportResponseLatencyMetric,
-      detail: "AI Support Response latency"
     });
   }
 
@@ -962,7 +936,7 @@ function buildApprovalEvidence(input: {
       {
         label: `${input.scope.service} p95 latency`,
         source: "apm",
-        metricName: input.scope.supportResponseLatencyMetric,
+        metricName: "service.request.duration.ns",
         value: roundMetric(input.p95LatencyMs),
         unit: "ms",
         threshold: input.thresholds.apmLatencyMs,
@@ -992,7 +966,7 @@ function buildApprovalEvidence(input: {
       {
         label: "Cache filesystem utilization",
         source: "infrastructure",
-        metricName: input.scope.cacheUtilizationMetric,
+        metricName: input.scope.filesystemUtilizationMetric,
         value: roundMetric(input.filesystemUtilization),
         unit: "%",
         threshold: input.thresholds.filesystemUtilization,
@@ -1064,10 +1038,10 @@ function buildAssistantSummary(input: {
 
   if (input.filesystemPressureConfirmed) {
     lines.push(
-      `Filesystem signal: ${input.scope.cacheUtilizationMetric} ${input.filesystemUtilization ?? "above threshold"} for ${input.scope.cacheMountpoint}.`
+      `Filesystem signal: ${input.scope.filesystemUtilizationMetric} ${input.filesystemUtilization ?? "above threshold"} for ${input.scope.cacheMountpoint}.`
     );
   } else if (input.filesystemQueried) {
-    lines.push(`Filesystem signal: ${input.scope.cacheUtilizationMetric} queried for ${input.scope.cacheMountpoint}, but pressure was not confirmed.`);
+    lines.push(`Filesystem signal: ${input.scope.filesystemUtilizationMetric} queried for ${input.scope.cacheMountpoint}, but pressure was not confirmed.`);
   }
   if (input.p95LatencyMs !== undefined && input.latencyElevated) {
     lines.push(`Latency evidence: p95 latency ${input.p95LatencyMs} ms.`);

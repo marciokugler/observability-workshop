@@ -6,10 +6,10 @@ These exercises teach students how to use standard Splunk Observability signals 
 
 Students should be able to:
 
-- separate lab data with `INSTANCE` and OpenTelemetry resource attributes
+- separate lab data with `INSTANCE` and `DEPLOYMENT_ENVIRONMENT`
 - identify the support portal journey in RUM/APM
 - find `support-knowledge` latency in APM
-- find cache pressure through host filesystem metrics
+- find cache pressure through standard filesystem metrics
 - inspect remediation service spans in Splunk
 
 ## Exercise 1: Set student identity
@@ -18,7 +18,7 @@ Set a unique instance value:
 
 ```dotenv
 INSTANCE=student-001
-OTEL_RESOURCE_ATTRIBUTES=lab.name=support-portal,lab.student.id=student-001,service.instance.id=student-001,host.name=student-001,deployment.environment=demo
+DEPLOYMENT_ENVIRONMENT=student-001
 ```
 
 Restart the stack after changing `.env`.
@@ -27,6 +27,7 @@ Expected result:
 
 - Splunk queries can filter by `service.instance.id=student-001`
 - lab dashboards can filter by `lab.student.id=student-001`
+- APM and RUM views can filter by `deployment.environment=student-001`
 
 Discussion prompt:
 
@@ -34,7 +35,7 @@ Discussion prompt:
 
 Expected answer:
 
-Shared accounts are fine for a workshop, but every participant needs a filter boundary so their signals do not blend together.
+Shared accounts are fine for a workshop, but every participant needs a filter boundary so their signals do not blend together. The collector and service startup code derive the resource attributes from `.env`, so students do not need to hand-write `OTEL_RESOURCE_ATTRIBUTES`.
 
 ## Exercise 2: Generate baseline signals
 
@@ -89,7 +90,8 @@ In Splunk Observability:
 
 Signals to look for:
 
-- `disk.utilization`
+- `system.filesystem.utilization`
+- container metrics from `docker_stats`
 - `service.request.duration.ns`
 - `service.request`
 - RUM/browser spans for the portal journey
@@ -144,4 +146,4 @@ Expected result:
 - Keep the story focused on default Splunk signals.
 - Do not introduce logs as required evidence.
 - Do not ask students to add custom metrics for the incident.
-- Use custom span/resource attributes only for trace filtering and lab identity.
+- Add custom spans only for the focused gateway operation taught in the lab; use `.env` identity for lab filtering.

@@ -40,12 +40,12 @@ class TokenRate:
 
 DEFAULT_RATE_CARD: Mapping[str, TokenRate] = {
     "meta/llama-3.2-1b-instruct": TokenRate(
-        input_usd_per_1k=0.00020,
-        output_usd_per_1k=0.00125,
+        input_usd_per_1k=0.0000013,
+        output_usd_per_1k=0.0000158,
     ),
     "default": TokenRate(
-        input_usd_per_1k=0.00020,
-        output_usd_per_1k=0.00125,
+        input_usd_per_1k=0.0000013,
+        output_usd_per_1k=0.0000158,
     ),
 }
 

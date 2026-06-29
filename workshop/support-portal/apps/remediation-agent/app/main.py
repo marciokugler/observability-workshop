@@ -166,7 +166,7 @@ def evaluate_agent(payload: dict[str, Any]) -> dict:
     annotate_current_span(
         {
             "service.namespace": "support-portal",
-            "deployment.environment": os.getenv("DEPLOYMENT_ENVIRONMENT", "demo"),
+            "deployment.environment": os.getenv("DEPLOYMENT_ENVIRONMENT") or os.getenv("INSTANCE") or "student-001",
             "app.business_transaction": "remediation_decision",
             "incident.id": incident_id,
             "agent.model": preferred_model(),
@@ -226,7 +226,7 @@ def execute_action(action_id: str, payload: dict[str, Any]) -> dict:
     annotate_current_span(
         {
             "service.namespace": "support-portal",
-            "deployment.environment": os.getenv("DEPLOYMENT_ENVIRONMENT", "demo"),
+            "deployment.environment": os.getenv("DEPLOYMENT_ENVIRONMENT") or os.getenv("INSTANCE") or "student-001",
             "app.business_transaction": "remediation_execution",
             "action.id": action_id,
             "action.type": action_type,
@@ -294,7 +294,7 @@ def verify_action(action_id: str, payload: dict[str, Any]) -> dict:
     annotate_current_span(
         {
             "service.namespace": "support-portal",
-            "deployment.environment": os.getenv("DEPLOYMENT_ENVIRONMENT", "demo"),
+            "deployment.environment": os.getenv("DEPLOYMENT_ENVIRONMENT") or os.getenv("INSTANCE") or "student-001",
             "app.business_transaction": "remediation_verification",
             "action.id": action_id,
             "action.type": action_type,

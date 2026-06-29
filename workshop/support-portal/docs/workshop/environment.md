@@ -14,7 +14,8 @@ The Compose stack starts without `.env` by using defaults in [compose.yaml](../.
 
 ```dotenv
 INSTANCE=student-001
-DEPLOYMENT_ENVIRONMENT=demo
+DEPLOYMENT_ENVIRONMENT=student-001
+OTEL_COLLECTOR_CONFIG=/etc/otel/config.yaml
 SPLUNK_REALM=us1
 SPLUNK_ACCESS_TOKEN=...
 VITE_SPLUNK_RUM_TOKEN=...
@@ -24,13 +25,14 @@ OPENAI_API_KEY=...
 | Variable | Use |
 | --- | --- |
 | `INSTANCE` | Separates each student's telemetry in shared Splunk searches and dashboards. |
-| `DEPLOYMENT_ENVIRONMENT` | Environment dimension for Splunk filters; `demo` is the default. |
+| `DEPLOYMENT_ENVIRONMENT` | Environment dimension for Splunk filters; set it to the same student value as `INSTANCE`. |
+| `OTEL_COLLECTOR_CONFIG` | Selects the live collector config path that students build during the workshop. |
 | `SPLUNK_REALM` | Splunk realm for API and ingest endpoints, such as `us1`. |
 | `SPLUNK_ACCESS_TOKEN` | Sends collector telemetry to Splunk Observability Cloud and enables live Splunk evidence lookup. |
 | `VITE_SPLUNK_RUM_TOKEN` | Browser RUM token for the support portal. |
 | `OPENAI_API_KEY` | Optional model-backed remediation agent decisions. |
 
-The stack can run without credentials, but live Splunk export, MCP evidence intake, browser RUM, and model-backed remediation will be limited.
+The stack can run without credentials, but live Splunk export, MCP evidence intake, browser RUM, and model-backed remediation will be limited. The workshop path keeps `OTEL_COLLECTOR_CONFIG=/etc/otel/config.yaml` and builds `observability/otel-collector/config.yaml` in the Configure Monitoring chapter.
 
 ## 3. Values we do not keep in `.env.example`
 

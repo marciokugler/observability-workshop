@@ -26,6 +26,14 @@ function loadSplunkOtel() {
   return require("@splunk/otel") as SplunkOtelModule;
 }
 
+function isDirectSplunkEndpoint(endpoint: string | undefined) {
+  return (
+    !endpoint ||
+    endpoint.includes("signalfx.com") ||
+    endpoint.includes("observability.splunkcloud.com")
+  );
+}
+
 export function initSplunkNodeTelemetry(serviceName: string) {
   if (globalThis.__supportPortalTelemetryStarted) {
     return false;
@@ -34,7 +42,7 @@ export function initSplunkNodeTelemetry(serviceName: string) {
   const accessToken = process.env.SPLUNK_ACCESS_TOKEN;
   const realm = process.env.SPLUNK_REALM;
   const endpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
-  const directSplunkExport = !endpoint || endpoint.includes("signalfx.com");
+  const directSplunkExport = isDirectSplunkEndpoint(endpoint);
 
   if (directSplunkExport && (!accessToken || !realm)) {
     return false;
@@ -76,11 +84,12 @@ export function initSplunkNodeTelemetry(serviceName: string) {
 
   const originalSplunkRealm = process.env.SPLUNK_REALM;
   const originalSplunkAccessToken = process.env.SPLUNK_ACCESS_TOKEN;
-  const localCollectorExport = endpoint && !directSplunkExport;
-  const missingDirectCredentials = !accessToken || !realm;
+  const localCollectorExport = Boolean(endpoint && !directSplunkExport);
 
   try {
-    if (localCollectorExport && missingDirectCredentials) {
+    if (localCollectorExport) {
+      // The Splunk SDK reads these env vars during startup and may configure direct
+      // ingest even when an OTLP collector endpoint is present.
       delete process.env.SPLUNK_REALM;
       delete process.env.SPLUNK_ACCESS_TOKEN;
     }

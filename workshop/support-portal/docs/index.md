@@ -8,7 +8,7 @@ The goal is to get the environment running reliably, explain the architecture cl
 
 - a customer-facing AI support portal
 - one degraded customer journey and two healthy comparison journeys
-- Splunk RUM, APM, host filesystem metrics, and remediation-agent spans
+- Splunk RUM, APM, container metrics, filesystem metrics, and remediation-agent spans
 - a remediation orchestrator that turns investigation evidence into structured policy input
 - a bounded remediation agent with approval and validation
 - a repeatable cache-pressure scenario that does not depend on logs or custom app metrics

@@ -16,7 +16,7 @@ function buildEvidence(overrides?: Partial<EvidenceBundle>): EvidenceBundle {
       detectorName: "Support Knowledge Cache Volume Pressure",
       severity: "critical",
       triggeredAt: "2026-04-08T12:00:00Z",
-      dimensions: { service: "support-knowledge", environment: "demo" }
+      dimensions: { service: "support-knowledge", environment: "student-001" }
     },
     browserExperience: {
       affectedSessions: 24,

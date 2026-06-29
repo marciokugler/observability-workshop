@@ -33,8 +33,8 @@ DEPLOYMENT_ENVIRONMENT = os.getenv("DEPLOYMENT_ENVIRONMENT", "local-tokenomics-w
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:1b")
 DEFAULT_NUM_PREDICT = int(os.getenv("OLLAMA_NUM_PREDICT", "180"))
-INPUT_USD_PER_1M = float(os.getenv("INPUT_USD_PER_1M", "0.20"))
-OUTPUT_USD_PER_1M = float(os.getenv("OUTPUT_USD_PER_1M", "1.25"))
+INPUT_USD_PER_1M = float(os.getenv("INPUT_USD_PER_1M", "0.0013"))
+OUTPUT_USD_PER_1M = float(os.getenv("OUTPUT_USD_PER_1M", "0.0158"))
 
 
 def create_app() -> Flask:

@@ -58,7 +58,8 @@ Set these for a full shared-account lab:
 
 ```dotenv
 INSTANCE=student-001
-DEPLOYMENT_ENVIRONMENT=demo
+DEPLOYMENT_ENVIRONMENT=student-001
+OTEL_COLLECTOR_CONFIG=/etc/otel/config.yaml
 SPLUNK_REALM=...
 SPLUNK_ACCESS_TOKEN=...
 VITE_SPLUNK_RUM_TOKEN=...
@@ -67,7 +68,7 @@ OPENAI_API_KEY=...
 
 Each student should use a different `INSTANCE`, such as `student-014`.
 
-`SPLUNK_ACCESS_TOKEN` and `SPLUNK_REALM` enable Splunk export and evidence lookup. `VITE_SPLUNK_RUM_TOKEN` enables browser RUM. `OPENAI_API_KEY` enables model-backed remediation. Ports, service URLs, OTLP routing, cache controls, metric names, and MCP endpoint defaults are already handled by Compose and the app code.
+`SPLUNK_ACCESS_TOKEN` and `SPLUNK_REALM` enable Splunk export and evidence lookup. `VITE_SPLUNK_RUM_TOKEN` enables browser RUM. `OTEL_COLLECTOR_CONFIG=/etc/otel/config.yaml` selects the collector file students build during the workshop. `OPENAI_API_KEY` enables optional model-backed remediation. Ports, service URLs, OTLP routing, cache controls, metric names, and MCP endpoint defaults are already handled by Compose and the app code.
 
 ## 5. Build and check the code
 
@@ -154,7 +155,7 @@ Then:
 The intended live sequence is:
 
 1. Show customer impact first.
-2. Show the default Splunk signals: RUM/APM plus host filesystem metrics.
+2. Show the default Splunk signals: RUM, APM, container metrics, and filesystem metrics.
 3. Use [Splunk Validation](splunk-validation.md) to confirm RUM, APM, infrastructure, MCP, and remediation evidence.
 4. Walk through orchestrator evidence and confidence.
 5. Show approval-required policy.

@@ -64,10 +64,6 @@ docker compose version
 ```
 
 ```bash
-test ! -f .env || grep -E '^OTEL_EXPORTER_OTLP_ENDPOINT=' .env
-```
-
-```bash
 docker compose up --wait
 ```
 
@@ -80,11 +76,7 @@ sudo apt install -y docker-compose-v2
 
 If your system uses Docker's upstream package repository instead of Ubuntu's `docker.io` package, install `docker-compose-plugin`.
 
-Expected local value:
-
-```dotenv
-OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:14318
-```
+Do not set `OTEL_EXPORTER_OTLP_ENDPOINT` in `.env` for the normal Compose lab. Compose sets app containers to `http://splunk-otel-collector:4318`. The host-mapped `http://127.0.0.1:14318` endpoint is only for optional host-side checks.
 
 ## Portal or console does not load
 
@@ -140,13 +132,27 @@ Check locally first:
 1. collector is running
 2. `.env` has the expected Splunk and RUM values
 3. fresh traffic was generated after collector startup
-4. `INSTANCE` and `OTEL_RESOURCE_ATTRIBUTES` match the student lab
+4. `INSTANCE` and `DEPLOYMENT_ENVIRONMENT` match the student lab
 
 Look for:
 
 - APM services such as `support-knowledge`, `support-assistant`, and `remediation-agent`
-- host filesystem metric `disk.utilization`
+- host or filesystem metric `system.filesystem.utilization`
+- container metrics from `docker_stats`
 - RUM data for the portal if `VITE_SPLUNK_RUM_TOKEN` is set
+
+If a trace shows `ingest.<realm>.signalfx.com` as an application child span, recreate the app containers and verify they are exporting to the collector:
+
+```bash
+docker compose up --force-recreate --wait
+docker compose exec -T api-gateway env | grep OTEL_EXPORTER_OTLP_ENDPOINT
+```
+
+Expected value:
+
+```text
+OTEL_EXPORTER_OTLP_ENDPOINT=http://splunk-otel-collector:4318
+```
 
 If the APM trace waterfall shows `Infrastructure (0)`:
 

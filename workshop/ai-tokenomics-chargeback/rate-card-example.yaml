@@ -1,47 +1,50 @@
 version: workshop-2026-06
 currency: USD
 
-# These are workshop examples collected from public pricing models on 2026-06-09.
+# These are workshop examples collected from public pricing models on 2026-06-22.
 # Always verify current prices and use your organization's approved internal rates
 # before using this for production chargeback.
 sources:
   openai_api_pricing: https://developers.openai.com/api/docs/pricing
-  github_copilot_models_pricing: https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing
+  openai_api_pricing_marketing: https://openai.com/api/pricing/
+  mistral_ai_pricing: https://mistral.ai/pricing/
   hugging_face_inference_providers_pricing: https://huggingface.co/docs/inference-providers/en/pricing
   hugging_face_inference_endpoints_pricing: https://huggingface.co/docs/inference-endpoints/en/pricing
   aws_ec2_on_demand_pricing: https://aws.amazon.com/ec2/pricing/on-demand/
   ollama_usage_metrics: https://docs.ollama.com/api/usage
 
 token_models:
-  # Public managed API style examples.
-  github-copilot-gpt-5-mini:
+  # Public managed API examples. These are not local Ollama rates. They are here so
+  # the workshop can compare derived local/on-prem economics with online model pricing.
+  # Verify the rates on the provider page before teaching the lab.
+  mistral-large-public-example:
     basis: public_token_rate
-    input_usd_per_1m_tokens: 0.25
-    cached_input_usd_per_1m_tokens: 0.025
-    output_usd_per_1m_tokens: 2.00
-    source: github_copilot_models_pricing
+    input_usd_per_1m_tokens: 2.00
+    output_usd_per_1m_tokens: 6.00
+    source: mistral_ai_pricing
 
-  openai-gpt-5.4-nano:
+  openai-gpt-5.5-public-example:
     basis: public_token_rate
-    input_usd_per_1m_tokens: 0.20
-    cached_input_usd_per_1m_tokens: 0.02
-    output_usd_per_1m_tokens: 1.25
+    input_usd_per_1m_tokens: 5.00
+    cached_input_usd_per_1m_tokens: 0.50
+    output_usd_per_1m_tokens: 30.00
     source: openai_api_pricing
 
-  openai-gpt-5.4-mini:
-    basis: public_token_rate
-    input_usd_per_1m_tokens: 0.75
-    cached_input_usd_per_1m_tokens: 0.075
-    output_usd_per_1m_tokens: 4.50
-    source: openai_api_pricing
+  hugging-face-inference-provider:
+    basis: provider_pass_through
+    input_usd_per_1m_tokens: null
+    output_usd_per_1m_tokens: null
+    source: hugging_face_inference_providers_pricing
+    note: Enter the selected provider model rate from the Hugging Face billing page.
 
   # Internal workshop model. This is not a vendor-published token price for NIM.
-  # Use it only to keep the lab math simple when the application runs on shared GPUs.
+  # This local energy-only example is intentionally tiny. It is a lower bound for a
+  # small Ollama model on a laptop, not a fully loaded production chargeback rate.
   internal-llama-3.2-1b-instruct:
-    basis: workshop_internal_showback
-    input_usd_per_1m_tokens: 0.20
-    output_usd_per_1m_tokens: 1.25
-    source: workshop_assumption
+    basis: observed_local_energy_only
+    input_usd_per_1m_tokens: 0.0013
+    output_usd_per_1m_tokens: 0.0158
+    source: local_ollama_benchmark_example
 
 gpu_hourly:
   hf-endpoint-t4-aws-x1:
@@ -100,20 +103,37 @@ local_hourly_cost_models:
   # Use this only to demonstrate that electricity alone understates true platform cost.
   energy_only:
     basis: local_power_draw
-    power_watts: 65
-    electricity_usd_per_kwh: 0.17
-    derived_energy_hourly_usd: 0.01105
+    load_power_watts: 30
+    idle_power_watts: 6.88
+    incremental_power_watts: 23.12
+    electricity_usd_per_kwh: 0.1856
+    derived_total_load_energy_hourly_usd: 0.005568
+    derived_incremental_energy_hourly_usd: 0.004291
 
 derived_local_token_rates:
   # Replace these values with output from scripts/benchmark_ollama.py.
   local-ollama-example:
     basis: observed_local_throughput
     model: llama3.2:1b
-    cost_model: market_proxy
+    cost_model: energy_only
+    input_usd_per_1m_tokens: 0.0013
+    output_usd_per_1m_tokens: 0.0158
+    blended_usd_per_1m_tokens: 0.0172
+    source: local_benchmark
+
+derived_onprem_token_rates:
+  # Example only. Replace monthly cost, billable GPU-hours, and measured throughput
+  # with values from the customer's Cisco AI Pods or equivalent data-center platform.
+  cisco-ai-pod-style-example:
+    basis: owned_data_center_gpu_pool
+    monthly_platform_cost_usd: 48000
+    gpu_count: 16
+    hours_per_month: 730
+    usable_utilization_target: 0.70
+    derived_gpu_hour_rate_usd: 5.87
     input_usd_per_1m_tokens: null
     output_usd_per_1m_tokens: null
-    blended_usd_per_1m_tokens: null
-    source: local_benchmark
+    source: customer_internal_cost_pool
 
 overhead:
   shared_platform_overhead_percent: 15

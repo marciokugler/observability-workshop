@@ -10,7 +10,7 @@ The audience should leave understanding five points:
 
 1. customer experience is the first signal
 2. APM shows which service is slow
-3. host filesystem metrics explain the infrastructure condition
+3. container and filesystem metrics explain the infrastructure condition
 4. the remediation path is bounded and governed
 5. recovery is validated and auditable
 
@@ -75,7 +75,7 @@ Use [Splunk Validation](splunk-validation.md) during rehearsal for the full chec
 
 Narrate:
 
-> We are not relying on logs or custom demo metrics. We are using the default signals students should expect in a real environment: browser experience, APM service health, and host filesystem metrics from the collector.
+> We are not relying on logs or custom demo metrics. We are using the default signals students should expect in a real environment: browser experience, APM service health, container metrics, and filesystem metrics from the collector.
 
 Optional RUM click path:
 
@@ -96,12 +96,12 @@ Investigate the support portal incident over the last 15 minutes.
 
 Scope the investigation to:
 - service.instance.id = $INSTANCE
-- deployment.environment = demo
+- deployment.environment = $INSTANCE
 - affected journey or business transaction = AI Support Response
 - likely service = support-knowledge
 - cache mountpoint = /var/cache/support-knowledge
 
-Use default Splunk Observability signals only: RUM or browser experience, APM service latency/error evidence, and host filesystem metrics. Do not use logs and do not invent custom metrics.
+Use default Splunk Observability signals only: RUM or browser experience, APM service latency/error evidence, container metrics, and filesystem metrics. Do not use logs and do not invent custom metrics.
 
 Return a concise incident summary that includes:
 - whether AI Support Response is degraded

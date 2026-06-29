@@ -37,7 +37,7 @@ Expected result:
 
 ## Drive Degraded Browser Traffic
 
-Use browser traffic to create more RUM and APM data points. The simulator clicks the portal journeys instead of calling backend APIs directly.
+Use browser traffic to create more RUM and APM data points.
 
 ```bash
 RUM_SIMULATOR_USERS=8 RUM_SIMULATOR_ROUNDS=8 RUM_SIMULATOR_BROWSERS=chromium RUM_SIMULATOR_CONCURRENCY=2 docker compose run --rm rum-simulator
@@ -62,7 +62,7 @@ What you are proving:
 Use these filters when available:
 
 ```text
-deployment.environment=demo
+deployment.environment=<DEPLOYMENT_ENVIRONMENT>
 service.instance.id=<INSTANCE>
 lab.name=support-portal
 lab.student.id=<INSTANCE>
@@ -92,7 +92,7 @@ Open Splunk APM and inspect `support-knowledge`.
 Use the same time range and student filters:
 
 ```text
-deployment.environment=demo
+deployment.environment=<DEPLOYMENT_ENVIRONMENT>
 service.instance.id=<INSTANCE>
 ```
 
@@ -111,7 +111,7 @@ The slow customer journey reaches support-knowledge, and support-knowledge laten
 
 ## Confirm the Filesystem Root Cause
 
-Now move from APM to Infrastructure or Metric Finder.
+Now move from APM to Infrastructure.
 
 Search for:
 
@@ -124,14 +124,13 @@ Filter to:
 ```text
 mountpoint=/var/cache/support-knowledge
 service.instance.id=<INSTANCE>
-deployment.environment=demo
+deployment.environment=<DEPLOYMENT_ENVIRONMENT>
 ```
 
 Expected infrastructure evidence:
 
 - Filesystem utilization rises after the scenario is triggered.
 - The mountpoint is `/var/cache/support-knowledge`.
-- The instance matches your `INSTANCE` value.
 - The filesystem signal lines up with the slow trace time window.
 
 If you use SignalFlow, the query shape is:
@@ -140,7 +139,7 @@ If you use SignalFlow, the query shape is:
 data("system.filesystem.utilization",
   filter=filter("mountpoint", "/var/cache/support-knowledge")
     and filter("service.instance.id", "<INSTANCE>")
-    and filter("deployment.environment", "demo")
+    and filter("deployment.environment", "<DEPLOYMENT_ENVIRONMENT>")
 ).max().publish()
 ```
 
@@ -151,9 +150,3 @@ Write a short evidence statement before moving to MCP evidence and cleanup:
 ```text
 The support response journey is degraded for <INSTANCE>. RUM shows slow /api/support/respond requests. APM traces show the slow path reaches support-knowledge. Infrastructure metrics show system.filesystem.utilization rising for /var/cache/support-knowledge on the same instance. The root cause is cache filesystem pressure, not a full portal outage.
 ```
-
-{{% notice title="Checkpoint" style="green" icon="running" %}}
-
-Do not move on until you can point to one RUM signal, one slow trace, and one filesystem metric that all describe the same incident window.
-
-{{% /notice %}}

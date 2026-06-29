@@ -90,7 +90,7 @@ The workshop path is driven by default signals:
 
 - Splunk RUM and browser spans for the portal
 - Splunk APM service metrics for latency, count, and errors
-- Splunk OTel Collector hostmetrics for filesystem utilization
+- Splunk OTel Collector host, container, and filesystem metrics
 - Splunk remediation service spans for agent action selection, execution, and validation visibility
 
 The incident does not require custom app metrics or log analysis.
@@ -108,7 +108,7 @@ Local collector configuration for OTLP, hostmetrics, traces, and infrastructure 
 ## Architecture story to tell live
 
 1. customer experience degrades
-2. Splunk correlates browser, APM, and filesystem evidence
+2. Splunk correlates browser, APM, container, and filesystem evidence
 3. the orchestrator turns investigation output into structured evidence
 4. deterministic policy decides what is allowed
 5. the remediation agent proposes `clean_support_knowledge_cache`

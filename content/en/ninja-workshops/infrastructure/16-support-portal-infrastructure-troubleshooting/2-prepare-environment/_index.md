@@ -9,11 +9,9 @@ aliases:
   - /ninja-workshops/infrastructure/16-support-portal-infrastructure-troubleshooting/2-prepare-environment/
 ---
 
-The lab runs the application, remediation agent, traffic simulators, and Splunk OpenTelemetry Collector through Docker Compose. You do not need host Node.js, Python, `npm install`, or a local virtual environment.
-
 ## Required Software
 
-Install only these tools on the host:
+Install these tools on the host:
 
 | Tool | Why it is needed |
 | --- | --- |
@@ -21,7 +19,7 @@ Install only these tools on the host:
 | Git | Clones the workshop repository. |
 | Browser | Opens the support portal, operator console, and Splunk Observability Cloud. |
 
-For Ubuntu or Debian workshop VMs, install Docker and basic clone/download tools:
+For Ubuntu or Debian workshop VMs, install Docker and download tools:
 
 ```bash
 sudo apt update

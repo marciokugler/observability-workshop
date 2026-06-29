@@ -13,7 +13,6 @@ import {
   Zap
 } from "lucide-react";
 import { currentBrowserAppConfig } from "@support-portal/runtime-config/browser";
-import { setJourneyContext, trackBusinessTransaction } from "./rum";
 import "./App.css";
 
 type ActionKey =
@@ -90,12 +89,6 @@ export function App() {
   const isIncidentActive = activeScenario !== "healthy";
 
   useEffect(() => {
-    setJourneyContext({
-      "app.active_scenario": activeScenario
-    });
-  }, [activeScenario]);
-
-  useEffect(() => {
     void refreshScenario();
   }, []);
 
@@ -122,29 +115,17 @@ export function App() {
 
   async function callSupportResponse() {
     await runAction("support", async () => {
-      const payload = await trackBusinessTransaction(
-        "support_response",
-        "support_response_submit",
-        {
-          "app.business_transaction": "support_response",
-          "app.transaction_name": "AI Support Response",
-          "app.active_scenario": activeScenario,
-          "app.ui_surface": "support_portal"
-        },
-        async () => {
-          const response = await fetch(`${apiBaseUrl}/api/support/respond`, {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ prompt: supportPrompt })
-          });
+      const response = await fetch(`${apiBaseUrl}/api/support/respond`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ prompt: supportPrompt })
+      });
 
-          if (!response.ok) {
-            throw new Error(`Support request failed with status ${response.status}`);
-          }
+      if (!response.ok) {
+        throw new Error(`Support request failed with status ${response.status}`);
+      }
 
-          return response.json();
-        }
-      ) as { response?: string; dependency?: { answer?: string; error?: string } };
+      const payload = (await response.json()) as { response?: string; dependency?: { answer?: string; error?: string } };
 
       setCustomerResult({
         title: "Support guidance",
@@ -157,23 +138,11 @@ export function App() {
 
   async function callCaseLookup() {
     await runAction("case", async () => {
-      const payload = await trackBusinessTransaction(
-        "account_status_lookup",
-        "account_status_lookup",
-        {
-          "app.business_transaction": "account_status_lookup",
-          "app.transaction_name": "Account Status Lookup",
-          "app.active_scenario": activeScenario,
-          "app.ui_surface": "support_portal"
-        },
-        async () => {
-          const response = await fetch(`${apiBaseUrl}/api/cases/${encodeURIComponent(caseId)}`);
-          if (!response.ok) {
-            throw new Error(`Account status lookup failed with status ${response.status}`);
-          }
-          return response.json();
-        }
-      ) as { accountStatus?: string; nextStep?: string; accountId?: string };
+      const response = await fetch(`${apiBaseUrl}/api/cases/${encodeURIComponent(caseId)}`);
+      if (!response.ok) {
+        throw new Error(`Account status lookup failed with status ${response.status}`);
+      }
+      const payload = (await response.json()) as { accountStatus?: string; nextStep?: string; accountId?: string };
 
       setCustomerResult({
         title: `Account ${payload.accountId ?? caseId}`,
@@ -186,23 +155,11 @@ export function App() {
 
   async function callArticleSearch() {
     await runAction("article", async () => {
-      const payload = await trackBusinessTransaction(
-        "help_article_search",
-        "help_article_search",
-        {
-          "app.business_transaction": "help_article_search",
-          "app.transaction_name": "Help Article Search",
-          "app.active_scenario": activeScenario,
-          "app.ui_surface": "support_portal"
-        },
-        async () => {
-          const response = await fetch(`${apiBaseUrl}/api/articles/search?q=${encodeURIComponent(articleQuery)}`);
-          if (!response.ok) {
-            throw new Error(`Help Article search failed with status ${response.status}`);
-          }
-          return response.json();
-        }
-      ) as { answer?: string; error?: string };
+      const response = await fetch(`${apiBaseUrl}/api/articles/search?q=${encodeURIComponent(articleQuery)}`);
+      if (!response.ok) {
+        throw new Error(`Help Article search failed with status ${response.status}`);
+      }
+      const payload = (await response.json()) as { answer?: string; error?: string };
 
       setCustomerResult({
         title: "Help center",

@@ -21,7 +21,7 @@
 3. Operator console loads on `18081`.
 4. API gateway responds on `18100`.
 5. Scenario controller toggles state on `18104`.
-6. Splunk receives APM service metrics and host filesystem metrics.
+6. Splunk receives APM service metrics, container metrics, and filesystem metrics.
 7. MCP evidence intake produces a policy result.
 8. Agent evaluation produces `clean_support_knowledge_cache`.
 9. Approval executes and validates.

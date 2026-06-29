@@ -1,6 +1,5 @@
 import SplunkRum from "@splunk/otel-web";
 import SplunkRumRecorder from "@splunk/otel-web-session-recorder";
-import { SpanStatusCode, trace } from "@opentelemetry/api";
 import { currentBrowserAppConfig } from "@support-portal/runtime-config/browser";
 import { buildRumConfig } from "@support-portal/telemetry/browser";
 
@@ -29,13 +28,7 @@ export function initRum() {
     deploymentEnvironment: config.deploymentEnvironment,
     instrumentations: {
       fetch: {
-        propagateTraceHeaderCorsUrls: appConfig.tracePropagationUrls,
-        applyCustomAttributesOnSpan(span) {
-          span.setAttributes({
-            "app.frontend_surface": "support_portal",
-            "app.rum_to_apm_candidate": true
-          });
-        }
+        propagateTraceHeaderCorsUrls: appConfig.tracePropagationUrls
       },
       xhr: {
         propagateTraceHeaderCorsUrls: appConfig.tracePropagationUrls
@@ -48,8 +41,6 @@ export function initRum() {
 
   SplunkRum.setGlobalAttributes({
     "app.name": "support-portal",
-    "app.demo": "support-portal",
-    "app.session_type": "customer-facing",
     "deployment.environment": config.deploymentEnvironment
   });
 
@@ -61,48 +52,4 @@ export function initRum() {
   }
 
   window.__supportPortalRumStarted = true;
-}
-
-export async function trackBusinessTransaction<T>(
-  transactionId: string,
-  actionName: string,
-  attributes: Record<string, string | number | boolean>,
-  fn: () => Promise<T>
-) {
-  const tracer = trace.getTracer("support-portal-frontend");
-  const transactionName = String(attributes["app.transaction_name"] ?? transactionId);
-  const workflowAttributes = {
-    ...attributes,
-    "app.workflow_name": transactionName,
-    "app.workflow_action": actionName
-  };
-
-  SplunkRum.setGlobalAttributes(workflowAttributes);
-
-  return tracer.startActiveSpan(`ui.${transactionName}`, { attributes: workflowAttributes }, async (span) => {
-    try {
-      const result = await fn();
-      span.setAttributes({
-        "app.business_transaction": transactionId,
-        "app.transaction_name": transactionName,
-        "app.transaction_result": "success"
-      });
-      return result;
-    } catch (error) {
-      span.setStatus({ code: SpanStatusCode.ERROR });
-      span.setAttributes({
-        "app.business_transaction": transactionId,
-        "app.transaction_name": transactionName,
-        "app.transaction_result": "failure"
-      });
-      await SplunkRum.reportError(error instanceof Error ? error : String(error));
-      throw error;
-    } finally {
-      span.end();
-    }
-  });
-}
-
-export function setJourneyContext(attributes: Record<string, string | number | boolean>) {
-  SplunkRum.setGlobalAttributes(attributes);
 }

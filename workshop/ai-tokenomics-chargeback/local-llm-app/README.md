@@ -28,11 +28,15 @@ pip install -r requirements.txt
 
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
 export OLLAMA_MODEL=llama3.2:1b
-export INPUT_USD_PER_1M=0.20
-export OUTPUT_USD_PER_1M=1.25
+export INPUT_USD_PER_1M=0.0013
+export OUTPUT_USD_PER_1M=0.0158
 
 python app.py
 ```
+
+These rates are per-million-token rates from the local energy-only benchmark example.
+Replace them with your own benchmark output before comparing users, teams, or business
+units.
 
 ## Send Normal Traffic
 

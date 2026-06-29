@@ -8,7 +8,7 @@ from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 from splunk_otel import init_splunk_otel
 
-deployment_environment = os.getenv("DEPLOYMENT_ENVIRONMENT", "demo")
+deployment_environment = os.getenv("DEPLOYMENT_ENVIRONMENT") or os.getenv("INSTANCE") or "student-001"
 service_namespace = os.getenv("OTEL_SERVICE_NAMESPACE", "support-portal")
 service_name = os.getenv("OTEL_SERVICE_NAME", "remediation-agent")
 app_version = os.getenv("OTEL_SERVICE_VERSION", os.getenv("APP_VERSION", "0.1.0"))

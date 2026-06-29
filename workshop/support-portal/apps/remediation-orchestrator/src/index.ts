@@ -32,6 +32,10 @@ import {
 import { RemediationAgentClient } from "./agent-client";
 import { SplunkObservabilityClient, type SplunkEnrichmentResult } from "./splunk-client";
 
+function defaultDeploymentEnvironment() {
+  return process.env.DEPLOYMENT_ENVIRONMENT ?? process.env.INSTANCE ?? "student-001";
+}
+
 async function buildEvidenceBundle(
   input: AssistantEvidenceInput,
   splunkClient: SplunkObservabilityClient,
@@ -57,7 +61,7 @@ async function buildEvidenceBundle(
       incidentId: input.incidentId,
       dimensions: {
         service: "support-knowledge",
-        environment: "demo"
+        environment: defaultDeploymentEnvironment()
       }
     };
   const enrichment = await splunkClient.enrichDetector(detectorPayload);
@@ -202,7 +206,7 @@ function normalizeDetectorWebhookPayload(input: unknown): DetectorWebhookPayload
     environment:
       (typeof payload.environment === "string" && payload.environment) ||
       (typeof payload["deployment.environment"] === "string" && (payload["deployment.environment"] as string)) ||
-      "demo"
+      defaultDeploymentEnvironment()
   };
 
   return {

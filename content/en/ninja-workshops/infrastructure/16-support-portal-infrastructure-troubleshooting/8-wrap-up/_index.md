@@ -14,8 +14,11 @@ You have completed the **Support Portal Infrastructure Troubleshooting** worksho
 You practiced how to:
 
 - Run the local support portal and operator console.
-- Configure the Splunk OpenTelemetry Collector to monitor a specific cache filesystem.
-- Use `resource/lab_identity` so each student can filter telemetry by `INSTANCE`.
+- Add browser RUM with the standard frontend snippet.
+- Enable backend APM auto instrumentation for the app services.
+- Configure the Splunk OpenTelemetry Collector for host, container, and cache filesystem monitoring.
+- Add one focused custom API gateway span after the default signals work.
+- Use `INSTANCE` and `DEPLOYMENT_ENVIRONMENT` so each student can filter telemetry cleanly.
 - Establish a healthy baseline across three customer journeys.
 - Trigger a deterministic cache filesystem pressure incident.
 - Navigate from Splunk RUM to slow APM traces.
@@ -33,7 +36,7 @@ Before using this pattern with real teams, confirm:
 | --- | --- |
 | Customer impact | RUM identifies the affected journey and request. |
 | Trace evidence | APM traces identify the slow service path. |
-| Infrastructure proof | Host or container metrics identify the filesystem, mountpoint, and affected instance. |
+| Infrastructure proof | Host, container, or filesystem metrics identify the affected instance and mountpoint. |
 | Identity strategy | `service.instance.id`, `host.name`, and environment attributes let responders isolate the right system. |
 | MCP communication | Tool discovery and evidence calls work with the intended Splunk endpoint. |
 | Action boundary | Cleanup actions have narrow targets and no broad production blast radius. |
@@ -43,7 +46,7 @@ Before using this pattern with real teams, confirm:
 
 ## Key Takeaway
 
-Infrastructure troubleshooting is strongest when customer impact, slow traces, and host metrics all point to the same root cause. In this lab, the root cause is not just "the app is slow"; it is filesystem pressure on `/var/cache/support-knowledge`.
+Infrastructure troubleshooting is strongest when customer impact, slow traces, and infrastructure metrics all point to the same root cause. In this lab, the root cause is not just "the app is slow"; it is filesystem pressure on `/var/cache/support-knowledge`.
 
 ## Cleanup
 

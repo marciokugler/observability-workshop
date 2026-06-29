@@ -36,6 +36,7 @@ to out-of-the-box GPU telemetry.
 * Run a clean Ollama-backed AI workload with no custom instrumentation.
 * Benchmark a local model with Ollama or an OpenAI-compatible local endpoint.
 * Derive internal token rates from observed throughput and hourly accelerator cost.
+* Compare local derived rates with managed online model pricing.
 * Use public GPU hourly data as a market proxy when no internal rate card exists.
 * Enable out-of-the-box AI monitoring views for token usage, estimated cost, and traces.
 * Add OpenTelemetry span attributes for business and user attribution.
@@ -54,7 +55,7 @@ to out-of-the-box GPU telemetry.
 flowchart LR
     Clean["Clean AI workload"] --> Local["Local model benchmark"]
     Local --> Throughput["Observed token throughput"]
-    Public["Public GPU hourly proxy"] --> RateCard["Derived internal rate card"]
+    Public["Managed online pricing"] --> RateCard["Comparable rate card"]
     Throughput --> RateCard
     RateCard --> Instr["Business span attributes"]
     OOTB["AI and GPU monitoring"] --> GPUCost["Built-in platform signals"]
@@ -74,7 +75,8 @@ flowchart LR
   Pods** workshop, or equivalent NVIDIA DCGM and NIM Prometheus metrics.
 * Permission to view dashboards, Infrastructure Monitoring, APM, traces, detectors, and
   Metric Finder.
-* A sample public GPU hourly proxy or internal hardware amortization value.
+* A public managed online model price, public GPU hourly proxy, or internal hardware
+  amortization value.
 
 {{% notice title="Workshop Positioning" style="info" %}}
 This workshop can run as a standalone local-model lab. The **Monitoring Cisco AI Pods**
@@ -92,7 +94,8 @@ By the end of the workshop, you will have a working pattern for:
 * A derived token rate card from local benchmark data.
 * Built-in token usage and estimated-cost views from AI monitoring where supported.
 * Request-level internal cost attributes for local or unsupported model paths.
-* Local-vs-cloud cost comparison formulas based on throughput and public GPU proxies.
+* Local-vs-online and on-prem-vs-cloud comparison formulas based on throughput and
+  public pricing.
 * Infrastructure health views for latency, errors, and optional GPU utilization.
 * A dashboard layout for executive summary, team breakdown, model economics, and GPU
   efficiency or placement decisions.

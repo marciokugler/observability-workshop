@@ -5,9 +5,9 @@ weight: 7
 
 Token cost is directly attributable when the application reports owner dimensions.
 Accelerator cost can be local, on-prem, or cloud-based. A laptop GPU might serve one
-developer, an on-prem GPU pool might serve many business units, and a cloud endpoint
-might charge by running GPU-hour. Your placement decision must consider cost,
-utilization, reliability, latency, and operational control.
+developer, an on-prem GPU pool might serve many business units, and a managed online
+model might charge by input and output token. Your placement decision must consider
+cost, utilization, reliability, latency, quality, governance, and operational control.
 
 ## Allocation Options
 
@@ -18,21 +18,39 @@ utilization, reliability, latency, and operational control.
 | Request-time weighted | Request traces include model latency and owner | Better for mixed request cost, but needs consistent traces |
 | Energy-weighted | DCGM power or energy data is trusted | Good for sustainability reporting, but still needs attribution |
 | Local throughput | Laptop/workstation model benchmark | No cluster needed, but it is a rate-card estimate rather than fleet telemetry |
+| Managed online token rate | Provider publishes `$ / 1M input` and `$ / 1M output` | Easy to compare, but quality and data governance can differ |
 | Cloud proxy | Public endpoint or cloud GPU hourly rate | Good for placement comparison, but not a negotiated internal price |
 
 For the local workshop, start with throughput-derived rates from the benchmark and
-compare them with a public cloud proxy:
+compare them with a public managed online rate:
 
 ```text
-local_cost_per_1m_tokens = benchmark-derived local blended rate
-cloud_cost_per_1m_tokens = cloud hourly proxy / observed or expected cloud throughput
-placement_delta = cloud_cost_per_1m_tokens - local_cost_per_1m_tokens
+local_cost =
+  prompt_tokens / 1,000,000 * local_input_rate
+  + completion_tokens / 1,000,000 * local_output_rate
+
+online_cost =
+  prompt_tokens / 1,000,000 * online_input_rate
+  + completion_tokens / 1,000,000 * online_output_rate
+
+placement_delta = online_cost - local_cost
 ```
 
 For a shared GPU workshop, use token-weighted allocation:
 
 ```text
 team_gpu_cost = gpu_pool_cost * team_tokens / all_tokens
+```
+
+Then convert that on-prem allocation back to a per-million-token rate so it can sit in
+the same dashboard as local and managed online rates:
+
+```text
+onprem_gpu_hour_rate =
+  monthly_platform_cost / monthly_billable_gpu_hours
+
+onprem_output_usd_per_1m =
+  onprem_gpu_hour_rate / output_tokens_per_gpu_hour * 1,000,000
 ```
 
 For production, decide whether idle GPU capacity is platform overhead, charged to
@@ -83,35 +101,49 @@ Build a GPU pool view:
 
 In a dashboard, show the placement decision in three steps:
 
-1. Local or on-prem cost:
+1. Local, on-prem, or online cost:
 
 ```text
-local_cost = local_token_rate * tokens + local_overhead
+estimated_cost =
+  input_tokens / 1,000,000 * input_usd_per_1m
+  + output_tokens / 1,000,000 * output_usd_per_1m
 ```
 
-2. Cloud proxy cost:
+2. Placement comparison:
 
 ```text
-cloud_cost = cloud_token_rate_or_gpu_hourly_proxy * usage
+price_delta = managed_online_cost - local_or_onprem_cost
 ```
 
 3. Decision:
 
 ```text
-run_local_when = lower cost + healthy infrastructure + acceptable latency
-run_cloud_when = better reliability, scale, latency, compliance, or lower fully loaded cost
+run_local_or_onprem_when =
+  lower fully loaded cost + healthy infrastructure + acceptable latency + policy fit
+
+run_managed_online_when =
+  better quality, scale, reliability, latency, compliance, or lower fully loaded cost
 ```
+
+Use `workshop/ai-tokenomics-chargeback/model-decision-card-example.yaml` as the audit
+trail for that decision. The card should show the price-only winner, the quality or
+ranking snapshot, and the final recommended placement. Those three fields do not have
+to match. A model can be cheapest locally and still lose because it fails the task
+quality threshold.
 
 {{% notice title="Exercise" style="green" icon="running" %}}
 
 Add placement charts to the dashboard:
 
 1. Add a single value for local estimated cost.
-2. Add a single value for cloud proxy cost.
-3. Add a delta chart showing local vs cloud cost per 1M tokens.
-4. Add latency and error charts next to the cost comparison.
-5. Add a table that shows BU, user, tokens, estimated cost, outcome category, and cost
+2. Add a single value for on-prem estimated cost if you have a GPU pool rate card.
+3. Add a single value for managed online estimated cost.
+4. Add a delta chart showing local/on-prem vs managed online cost per 1M tokens.
+5. Add latency and error charts next to the cost comparison.
+6. Add a table that shows BU, user, tokens, estimated cost, outcome category, and cost
    per useful outcome.
+7. Add a markdown panel that links to the model decision card and states the placement
+   rationale in one sentence.
 
 {{% /notice %}}
 

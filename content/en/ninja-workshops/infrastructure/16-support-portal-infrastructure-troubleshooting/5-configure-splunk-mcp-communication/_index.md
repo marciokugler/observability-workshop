@@ -9,7 +9,7 @@ aliases:
   - /ninja-workshops/infrastructure/16-support-portal-infrastructure-troubleshooting/5-configure-splunk-mcp-communication/
 ---
 
-The lab app is an MCP client. Splunk Observability Cloud provides the MCP endpoint, and the local remediation orchestrator calls it when the operator console asks to gather evidence.
+Splunk Observability Cloud provides the MCP endpoint, and the local remediation orchestrator can calls it when the operator console asks to gather evidence.
 
 Use this session to configure that communication path before you use MCP evidence for remediation.
 
@@ -38,7 +38,7 @@ cd observability-workshop/workshop/support-portal
 ```
 
 ```bash
-test -f .env || cp .env.example .env
+vi .env
 ```
 
 Add or verify:
@@ -53,7 +53,7 @@ SPLUNK_MCP_TENANT=
 SPLUNK_MCP_TIMEOUT_MS=8000
 ```
 
-Leave `SPLUNK_MCP_URL` blank for the direct Splunk Observability Cloud endpoint. Set it only if your instructor provides a hosted MCP gateway.
+Leave `SPLUNK_MCP_URL` blank for the direct Splunk Observability Cloud endpoint.
 
 How the official headers map to this lab:
 

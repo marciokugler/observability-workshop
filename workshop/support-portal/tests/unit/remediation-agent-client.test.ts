@@ -19,7 +19,7 @@ function buildEvidence(): EvidenceBundle {
       triggeredAt: "2026-06-03T12:00:00Z",
       dimensions: {
         service: "support-knowledge",
-        environment: "demo"
+        environment: "student-001"
       }
     },
     browserExperience: {

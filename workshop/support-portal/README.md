@@ -47,6 +47,8 @@ Optional setup for credentials, student identity, or other overrides:
 test -f .env || cp .env.example .env
 ```
 
+The workshop path intentionally starts with `observability/otel-collector/config.yaml` empty and builds that file in the Configure Monitoring chapter. If you only want a developer smoke test before doing the workshop steps, remove `OTEL_COLLECTOR_CONFIG` from `.env` so Compose uses `observability/otel-collector/config-local.yaml`.
+
 Build and check the code inside Docker:
 
 ```bash
@@ -112,27 +114,29 @@ Key local URLs:
 
 ## Demo Scenario
 
-The demo is now metric-driven and uses out-of-the-box Splunk Observability signals:
+The demo is metric-driven and starts with out-of-the-box Splunk Observability signals:
 
 - Splunk RUM and browser spans show the customer journey.
 - Splunk APM service metrics show request duration, request count, and errors.
-- Splunk OTel Collector hostmetrics show filesystem pressure.
+- Splunk OTel Collector host and container metrics show infrastructure context.
+- Standard filesystem metrics show cache pressure.
+- One custom API gateway span isolates the downstream support-response forwarding call after the default signals work.
 - The remediation agent emits OpenTelemetry spans for action selection, execution, and recovery validation.
 
-The deterministic incident is `cache-disk-pressure`. The scenario controller asks `support-knowledge` to fill a controlled cache directory or tmpfs mount. That creates filesystem pressure visible through host metrics and slows the AI Support Response path through normal APM spans. Account Status Lookup and Help Article Search remain available as healthy comparison journeys.
+The deterministic incident is `cache-disk-pressure`. The scenario controller asks `support-knowledge` to fill a controlled cache directory or tmpfs mount. That creates filesystem pressure visible through infrastructure metrics and slows the AI Support Response path through normal APM spans. Account Status Lookup and Help Article Search remain available as healthy comparison journeys.
 
 The controlled remediation action is `clean_support_knowledge_cache`. Approval calls the remediation agent, which resets the scenario through the scenario controller and verifies recovery by running a post-remediation support response request.
 
 ## Student Isolation
 
-For a shared Splunk Observability Cloud account, each student should set a unique `INSTANCE` value:
+For a shared Splunk Observability Cloud account, each student should set a unique `INSTANCE` value and use the same value for `DEPLOYMENT_ENVIRONMENT`:
 
 ```dotenv
 INSTANCE=student-001
-OTEL_RESOURCE_ATTRIBUTES=lab.name=support-portal,lab.student.id=student-001,service.instance.id=student-001,host.name=student-001,deployment.environment=demo
+DEPLOYMENT_ENVIRONMENT=student-001
 ```
 
-Splunk views can filter by `deployment.environment` plus `service.instance.id` so multiple students can share one Splunk Observability Cloud account.
+Splunk views can filter by `deployment.environment` plus `service.instance.id` so multiple students can share one Splunk Observability Cloud account. The collector and service startup code map those two `.env` values into the resource attributes used by Splunk; students do not need to maintain a manual `OTEL_RESOURCE_ATTRIBUTES` string.
 
 ## Docker Compose
 

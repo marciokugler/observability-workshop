@@ -57,41 +57,99 @@ sources depending on how the AI workload is hosted:
 | Local Ollama, llama.cpp, vLLM, or NIM | Observed token throughput plus an hourly accelerator cost model | Internal token economics |
 | Self-hosted NIM or vLLM on a cluster | Cloud GPU hourly cost, reserved capacity cost, license cost, and platform overhead | Shared GPU allocation |
 
+This workshop demonstrates three cards:
+
+| Card | Source | Purpose |
+| --- | --- | --- |
+| Managed online | Public provider pricing page | Compare against an API model with published `$ / 1M` token prices |
+| Local Ollama | Local benchmark, watts, electricity, and optional amortization | Estimate laptop or workstation economics |
+| On-prem GPU pool | Customer cost pool, GPU-hours, utilization target, and token throughput | Estimate Cisco AI Pods or similar data-center economics |
+
 The workshop includes a starter file you can copy and edit:
 
 ```text
 workshop/ai-tokenomics-chargeback/rate-card-example.yaml
 ```
 
+It also includes a model decision card:
+
+```text
+workshop/ai-tokenomics-chargeback/model-decision-card-example.yaml
+```
+
+Use the model decision card when price is not enough. It keeps the model-card facts,
+leaderboard snapshot, rate-card economics, observed workload behavior, and placement
+rationale in one reviewable artifact.
+
+## Rankings and Model Cards
+
+Leaderboards are useful, but they are not model cards and they are not rate cards. Use
+them as dated evaluation snapshots:
+
+| Source | What it helps answer | Workshop use |
+| --- | --- | --- |
+| LMArena / Chatbot Arena | Which model do users prefer for broad interactive tasks? | General quality and user preference signal |
+| Hugging Face Open LLM Leaderboard | How do open-weight models compare on reproducible benchmark suites? | Open model comparison |
+| Stanford HELM | How does a model behave across specific scenarios, safety, robustness, and transparency dimensions? | Scenario-specific risk and capability review |
+| Internal evaluation | Does the model perform well on this customer's prompts, retrieval data, and outcome criteria? | Final production decision |
+
+Capture leaderboard data with the source URL, capture date, task, metric name, rank,
+and score. Do not copy a leaderboard rank into the model card as if it were permanent.
+Ranks change, benchmark coverage differs, and a high general ranking does not guarantee
+good performance for a specific support, coding, legal, healthcare, or retrieval task.
+
 {{% notice title="Exercise" style="green" icon="running" %}}
 
 Create a simple workshop rate card before continuing. For this lab, derive the token
-rates from local throughput instead of copying a managed API token price:
+rates from local throughput instead of copying a managed API token price.
+
+Use the cheapest honest model first: energy-only cost on the local Mac. This answers
+"what did this one Ollama call add to my electric bill?" It is a lower bound, not a
+production chargeback rate.
+
+Keep the rate card in per-million-token units. The per-request number is useful for
+intuition, but per-million input and output token rates are the normalized units used by
+the app, dashboard, simulator, and chargeback model.
 
 1. Pick a local model, for example `llama3.2:1b`.
-2. Pick an hourly cost model:
-   * **Market proxy** - use a public GPU hourly price for a comparable endpoint.
-   * **Hardware amortization** - use laptop/workstation purchase price, useful life,
-     and residual value.
-   * **Energy-only** - use power draw and electricity cost to show the lower bound.
-3. Confirm the currency is `USD`.
-4. Confirm the rate-card version, for example `workshop-2026-06`.
-5. Decide whether shared platform overhead is included. The workshop uses `15%`.
+2. Measure or choose the local load power in watts while the model is answering.
+3. Measure or choose the idle baseline in watts.
+4. Use the latest U.S. average residential electricity price from EIA. The workshop
+   default is `$0.1856/kWh`, from EIA March 2026 data.
+5. Set hardware, support, and overhead to zero for the energy-only lower bound.
+6. Confirm the currency is `USD`.
+7. Confirm the rate-card version, for example `workshop-2026-06`.
 
 For a short lab, this is enough:
 
-| Cost element | Workshop value |
+| Input | Workshop value | Why this value exists |
 | --- | --- |
-| Local model | `llama3.2:1b` |
-| Hourly accelerator proxy | `$0.80` per GPU-hour |
-| Energy estimate | `65 W` at `$0.17` per kWh |
-| Shared platform overhead | `15%` |
-| Derived input token rate | Calculated by the benchmark |
-| Derived output token rate | Calculated by the benchmark |
+| Local model | `llama3.2:1b` | Small local model that runs on a laptop with Ollama |
+| Load power | `30 W` | Example measured or estimated system draw while the model responds |
+| Idle power | `6.88 W` | Apple-published idle display-on value for a 16-inch 2023 MacBook Pro at 115V |
+| Incremental power | `23.12 W` | `30 W - 6.88 W`; the extra power attributed to the local request |
+| Electricity rate | `$0.1856/kWh` | EIA U.S. residential average for March 2026 |
+| Hardware cost | `$0.00/hour` | Zero for energy-only; add amortization later for chargeback |
+| Support cost | `$0.00/hour` | Zero for energy-only; add platform support later for chargeback |
+| Overhead | `0%` | Zero for energy-only; use `15%` only for fully loaded platform cost |
+| Derived input token rate | Calculated by the benchmark | Based on prompt tokens and prompt evaluation time |
+| Derived output token rate | Calculated by the benchmark | Based on completion tokens and completion time |
+
+Do not use the `140 W` power adapter rating as the workload power. Adapter wattage is
+maximum capacity, not actual draw. Use measured wall power, measured macOS system power,
+or a clearly labeled estimate.
+
+## Calculation Inputs
 
 The benchmark uses this formula:
 
 ```text
+energy_hourly_usd =
+  load_power_watts / 1000 * electricity_usd_per_kwh
+
+incremental_energy_hourly_usd =
+  (load_power_watts - idle_power_watts) / 1000 * electricity_usd_per_kwh
+
 effective_hourly_cost =
   (accelerator_hourly_usd + support_hourly_usd + energy_hourly_usd)
   * (1 + overhead_percent / 100)
@@ -103,7 +161,27 @@ input_usd_per_1m =
 output_usd_per_1m =
   effective_hourly_cost * (completion_eval_seconds / 3600)
   / completion_tokens * 1,000,000
+
+energy_cost_per_request =
+  load_power_watts / 1000 * average_wall_seconds / 3600
+  * electricity_usd_per_kwh
 ```
+
+Every constant in the formula has a narrow meaning:
+
+| Constant | Meaning |
+| --- | --- |
+| `1000` | Converts watts to kilowatts, because electricity is priced per kWh |
+| `3600` | Converts seconds to hours, because hourly cost is dollars per hour |
+| `1,000,000` | Scales a tiny per-token cost into a readable per-1M-token rate |
+| `load_power_watts` | Average system or wall draw while the Ollama call is running |
+| `idle_power_watts` | Baseline draw before the model call; subtract it for incremental cost |
+| `electricity_usd_per_kwh` | Local electricity price; use EIA U.S. average only for the workshop default |
+| `accelerator_hourly_usd` | Optional cloud GPU, amortized hardware, or internal capacity rate |
+| `support_hourly_usd` | Optional license, support, or platform labor allocation |
+| `overhead_percent` | Optional shared platform overhead; use `0` for pure energy-only cost |
+| `prompt_eval_seconds` | Ollama-reported time spent processing input tokens |
+| `completion_eval_seconds` | Ollama-reported time spent generating output tokens |
 
 Then decide which attribution dimensions are mandatory for your lab:
 

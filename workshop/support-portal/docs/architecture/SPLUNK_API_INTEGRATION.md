@@ -110,7 +110,7 @@ The current lab intentionally does not query custom demo metrics from the orches
 Use Splunk UI, detectors, and dashboards for default signals:
 
 - APM service request metrics such as `service.request` and `service.request.duration.ns`
-- host filesystem metrics such as `disk.utilization`
+- filesystem metrics such as `system.filesystem.utilization`
 - RUM and browser spans for the support portal
 - remediation service spans in Splunk APM
 

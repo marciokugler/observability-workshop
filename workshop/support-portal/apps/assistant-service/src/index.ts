@@ -8,8 +8,7 @@ import {
   buildNodeTelemetryConfig,
   buildTelemetryAttributes,
   createServiceLogger,
-  initSplunkNodeTelemetry,
-  runInSpan
+  initSplunkNodeTelemetry
 } from "@support-portal/telemetry";
 
 export const assistantService = {
@@ -64,21 +63,16 @@ export function buildServer() {
       ...assistantService.telemetry,
       "support.prompt_length": prompt.length
     });
-    const knowledgeResponse = await runInSpan(
-      "assistant.knowledge_fetch_context",
-      assistantService.telemetry,
-      () =>
-        fetch(`${knowledgeServiceBaseUrl}/knowledge/query`, {
-          method: "POST",
-          headers: {
-            "content-type": "application/json"
-          },
-          body: JSON.stringify({
-            transaction: BUSINESS_TRANSACTIONS.customerSupportResponse,
-            prompt
-          })
-        })
-    );
+    const knowledgeResponse = await fetch(`${knowledgeServiceBaseUrl}/knowledge/query`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({
+        transaction: BUSINESS_TRANSACTIONS.customerSupportResponse,
+        prompt
+      })
+    });
 
     const knowledgePayload = await knowledgeResponse.json();
     if (!knowledgeResponse.ok) {

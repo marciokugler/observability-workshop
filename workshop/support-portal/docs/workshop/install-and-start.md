@@ -109,7 +109,7 @@ Confirm:
 
 Click `Trigger Cache Pressure`.
 
-The scenario fills the support-knowledge cache directory up to `SUPPORT_KNOWLEDGE_CACHE_QUOTA_BYTES`. In Docker Compose, that directory is also a size-limited tmpfs volume mounted into the collector, so Splunk host filesystem metrics see real pressure without risking the host disk.
+The scenario fills the support-knowledge cache directory up to `SUPPORT_KNOWLEDGE_CACHE_QUOTA_BYTES`. In Docker Compose, that directory is also a size-limited tmpfs volume mounted into the collector, so Splunk filesystem metrics see real pressure without risking the host disk.
 
 ### 9. Reproduce the degraded transaction
 

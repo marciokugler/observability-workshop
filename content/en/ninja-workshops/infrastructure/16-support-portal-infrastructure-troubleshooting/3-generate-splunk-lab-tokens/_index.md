@@ -15,9 +15,10 @@ Create the Splunk Observability Cloud tokens before starting the lab stack. You 
 
 | `.env` value | Token or setting | Purpose |
 | --- | --- | --- |
-| `SPLUNK_ACCESS_TOKEN` | Splunk Observability Cloud access token | Authenticates collector export and MCP evidence requests. |
+| `SPLUNK_ACCESS_TOKEN` | Splunk Observability Cloud access token | Authenticates collector export. When the token also has the instructor-provided API role, it also authenticates MCP evidence requests. |
 | `VITE_SPLUNK_RUM_TOKEN` | RUM access token | Lets the browser support portal send RUM telemetry. |
 | `SPLUNK_REALM` | Realm, such as `us1` | Builds the Splunk ingest, API, and MCP endpoints. |
+| `OTEL_COLLECTOR_CONFIG` | Collector config path | Uses the live Splunk exporter config instead of the local debug config. |
 
 {{% notice title="Token Handling" style="warning" %}}
 Treat `SPLUNK_ACCESS_TOKEN` as sensitive. The RUM token is designed for browser ingestion, but use a lab-specific token so it can be rotated after the workshop.
@@ -27,12 +28,11 @@ Treat `SPLUNK_ACCESS_TOKEN` as sensitive. The RUM token is designed for browser 
 
 In Splunk Observability Cloud:
 
-1. Open the main menu.
-2. Select **Settings**.
-3. Select **Access Tokens**.
-4. Select **New Token**.
+1. Open **Settings** from the left navigation.
+2. In the Settings panel, under **Access**, select **Access tokens**.
+3. Select **Create Token**.
 
-> Snapshot placeholder: Add a screenshot of **Settings > Access Tokens** with the **New Token** button visible.
+![Access Tokens page with Create Token button](../images/screenshot-splunk-o11y-settings-token-menu.png?width=70vw)
 
 ## Create the Lab Access Token
 
@@ -44,15 +44,23 @@ Recommended naming pattern:
 support-portal-<student-id>-lab-access
 ```
 
-Use the token scope provided by your instructor for the lab tenant. The lab uses this value as `SPLUNK_ACCESS_TOKEN` for:
+On the **Name & Scope** screen:
 
-- Splunk OpenTelemetry Collector export
-- Splunk MCP evidence lookup
-- local validation requests that call Splunk Observability Cloud
+1. Enter the token name.
+2. Select **INGEST token**.
+3. If your instructor tells you to use the same token for MCP evidence, also select **API token with roles** and choose the provided role.
+4. Select **Next**.
 
-If your Splunk organization separates ingest and API permissions into different tokens, follow the instructor-provided token mapping for your tenant before continuing.
 
-> Snapshot placeholder: Add a screenshot of the access-token setup screen for the lab access token scope.
+![Create an ingest access token](../images/screenshot-splunk-o11y-create-new-token-ingestion.png?width=45vw)
+
+On the **Permission** screen, keep **Only admins can read**.
+
+![Access token read permissions](../images/screenshot-splunk-o11y-create-new-token-permissions.png?width=45vw)
+
+On the **Expiration** screen, set a future date then select **Create**.
+
+![Access token expiration date](../images/screenshot-splunk-o11y-create-new-token-exp-date.png?width=45vw)
 
 After creating the token, copy the value into `.env`:
 
@@ -70,9 +78,15 @@ Recommended naming pattern:
 support-portal-<student-id>-rum
 ```
 
-Select the **RUM token** scope. This token is used only by the browser-facing support portal.
+Select **Create Token** again. On the **Name & Scope** screen:
 
-> Snapshot placeholder: Add a screenshot of the access-token setup screen with **RUM token** selected.
+1. Enter the token name.
+2. Select **RUM token**.
+3. Select **Next**.
+
+Use the same permission and expiration choices from the lab access token.
+
+![Create a RUM access token](../images/screenshot-splunk-o11y-create-new-token.png?width=45vw)
 
 After creating the token, copy the value into `.env`:
 
@@ -85,16 +99,17 @@ VITE_SPLUNK_RUM_TOKEN=<your-rum-token>
 Confirm the Splunk realm for your organization, then update `.env`:
 
 ```dotenv
-INSTANCE=student-001
-DEPLOYMENT_ENVIRONMENT=demo
+INSTANCE=student-00x
+DEPLOYMENT_ENVIRONMENT=student-00x
+OTEL_COLLECTOR_CONFIG=/etc/otel/config.yaml
 SPLUNK_REALM=us1
 SPLUNK_ACCESS_TOKEN=<your-lab-access-token>
 VITE_SPLUNK_RUM_TOKEN=<your-rum-token>
 ```
 
-Use a unique `INSTANCE` value for every student when sharing one Splunk Observability Cloud organization. This value is what lets you filter RUM, APM, and host metrics.
+Use a unique `INSTANCE` value for every student when sharing one Splunk Observability Cloud organization. Set `DEPLOYMENT_ENVIRONMENT`.
 
-> Snapshot placeholder: Add a screenshot that shows where students can confirm the Splunk realm or the instructor-provided realm value.
+`OTEL_COLLECTOR_CONFIG=/etc/otel/config.yaml` tells Docker Compose to start the collector with the live Splunk export configuration.
 
 ## Checkpoint
 
@@ -102,6 +117,8 @@ Before starting the lab stack:
 
 - `.env` exists in `workshop/support-portal`.
 - `INSTANCE` is unique for the student.
+- `DEPLOYMENT_ENVIRONMENT` matches `INSTANCE`.
+- `OTEL_COLLECTOR_CONFIG` is set to `/etc/otel/config.yaml`.
 - `SPLUNK_REALM` matches the Splunk Observability Cloud organization.
 - `SPLUNK_ACCESS_TOKEN` is set.
 - `VITE_SPLUNK_RUM_TOKEN` is set.

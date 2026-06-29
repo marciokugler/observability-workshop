@@ -5,6 +5,9 @@ receivers:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
+  docker_stats:
+    endpoint: unix:///var/run/docker.sock
+    collection_interval: 30s
   hostmetrics:
     collection_interval: 30s
     root_path: /hostfs
@@ -65,21 +68,6 @@ processors:
       - action: upsert
         key: lab.student.id
         value: ${INSTANCE}
-  resource/support_knowledge_infra_relation:
-    attributes:
-      - action: upsert
-        key: sf_service
-        value: support-knowledge
-      - action: upsert
-        key: service.name
-        value: support-knowledge
-      - action: upsert
-        key: service.namespace
-        value: support-portal
-      - action: upsert
-        key: sf_environment
-        value: ${DEPLOYMENT_ENVIRONMENT}
-
 exporters:
   debug:
     verbosity: basic
@@ -96,9 +84,13 @@ service:
       exporters: [debug]
     metrics/infrastructure:
       receivers: [hostmetrics]
-      processors: [memory_limiter, resourcedetection, resource/lab_identity, resource/support_knowledge_infra_relation, batch]
+      processors: [memory_limiter, resourcedetection, resource/lab_identity, batch]
+      exporters: [debug]
+    metrics/containers:
+      receivers: [docker_stats]
+      processors: [memory_limiter, resourcedetection, resource/lab_identity, batch]
       exporters: [debug]
     metrics/cache_volume:
       receivers: [hostmetrics/cache_volume]
-      processors: [memory_limiter, resourcedetection, resource/lab_identity, resource/support_knowledge_infra_relation, batch]
+      processors: [memory_limiter, resourcedetection, resource/lab_identity, batch]
       exporters: [debug]

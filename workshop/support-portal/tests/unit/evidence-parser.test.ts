@@ -64,7 +64,7 @@ test("parseAssistantEvidence honors explicit low confidence from Splunk AI", () 
     rawText: `Confidence: low
 Affected journey: AI Support Response
 Suspect service: support-knowledge
-Filesystem signal: No disk.utilization time series matched filters for mountpoint=/var/cache/support-knowledge on student-001 in the last -15m to now (empty result set), so filesystem evidence could not be confirmed from Metric Finder execution.
+Filesystem signal: No system.filesystem.utilization time series matched filters for mountpoint=/var/cache/support-knowledge on student-001 in the last -15m to now (empty result set), so filesystem evidence could not be confirmed from Metric Finder execution.
 APM evidence: Unavailable due to APM query timeout, so I cannot provide latency/error evidence for support-knowledge from APM signals right now.
 Likely cause: Insufficient signal retrieval.
 Recommended action: clean_support_knowledge_cache.`

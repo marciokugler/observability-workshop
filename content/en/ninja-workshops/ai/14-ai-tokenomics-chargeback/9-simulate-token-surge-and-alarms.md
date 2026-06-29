@@ -28,12 +28,16 @@ the rate card:
 
 ```bash
 python3 workshop/ai-tokenomics-chargeback/scripts/simulate_token_cost_risk.py \
-  --input-usd-per-1m 0.20 \
-  --output-usd-per-1m 1.25 \
+  --input-usd-per-1m 0.0013 \
+  --output-usd-per-1m 0.0158 \
   --minutes 60 \
   --requests-per-minute 12 \
   --out-dir /tmp/ai-tokenomics-simulation
 ```
+
+The example rates are per-million-token local energy-only rates. Use your own benchmark
+values if they differ. For a classroom demo with larger dollar numbers, rerun the same
+scenario with a fully loaded or public-proxy rate card.
 
 Open the report:
 

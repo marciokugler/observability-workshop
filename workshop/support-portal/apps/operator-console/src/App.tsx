@@ -21,6 +21,7 @@ import { currentBrowserAppConfig } from "@support-portal/runtime-config/browser"
 import "./App.css";
 
 const exampleAssistantOutput = "";
+const deploymentEnvironment = import.meta.env.VITE_DEPLOYMENT_ENVIRONMENT ?? "student-001";
 
 type EvidenceMetricStatus = "confirmed" | "not_confirmed" | "unavailable" | string;
 
@@ -438,7 +439,7 @@ export function App() {
           severity: "critical",
           triggeredAt: new Date().toISOString(),
           service: "support-knowledge",
-          environment: "demo"
+          environment: deploymentEnvironment
         })
       });
       const payload = await response.json();

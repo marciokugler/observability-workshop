@@ -61,7 +61,7 @@ export async function runInSpan<T>(
   attributes: Record<string, string | number | boolean | string[]> | undefined,
   fn: () => Promise<T>
 ) {
-  const tracer = trace.getTracer("support-portal-demo");
+  const tracer = trace.getTracer("support-portal");
   return tracer.startActiveSpan(name, async (span) => {
     if (attributes) {
       annotateCurrentSpan(attributes);

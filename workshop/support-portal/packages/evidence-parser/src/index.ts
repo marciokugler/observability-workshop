@@ -110,7 +110,6 @@ function inferConfidence(text: string) {
   }
 
   if (
-    normalized.includes("no disk.utilization") ||
     normalized.includes("no disk utilization") ||
     normalized.includes("no filesystem") ||
     normalized.includes("could not be confirmed") ||

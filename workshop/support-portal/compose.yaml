@@ -65,15 +65,16 @@ services:
     environment:
       SPLUNK_ACCESS_TOKEN: ${SPLUNK_ACCESS_TOKEN:-}
       SPLUNK_REALM: ${SPLUNK_REALM:-us1}
-      DEPLOYMENT_ENVIRONMENT: ${DEPLOYMENT_ENVIRONMENT:-demo}
       INSTANCE: ${INSTANCE:-student-001}
-      OTEL_RESOURCE_ATTRIBUTES: ${OTEL_RESOURCE_ATTRIBUTES:-lab.name=support-portal,lab.student.id=student-001,service.instance.id=student-001,host.name=student-001,deployment.environment=demo}
+      DEPLOYMENT_ENVIRONMENT: ${DEPLOYMENT_ENVIRONMENT:-${INSTANCE:-student-001}}
+      OTEL_RESOURCE_ATTRIBUTES: ${OTEL_RESOURCE_ATTRIBUTES:-lab.name=support-portal,lab.student.id=${INSTANCE:-student-001},service.instance.id=${INSTANCE:-student-001},host.name=${INSTANCE:-student-001},deployment.environment=${DEPLOYMENT_ENVIRONMENT:-${INSTANCE:-student-001}}}
     command:
       - "--config=${OTEL_COLLECTOR_CONFIG:-/etc/otel/config-local.yaml}"
     volumes:
       - ./observability/otel-collector/config.yaml:/etc/otel/config.yaml:ro
       - ./observability/otel-collector/config-local.yaml:/etc/otel/config-local.yaml:ro
       - ./:/workspace:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       - /:/hostfs:ro
       - support_knowledge_cache:/var/cache/support-knowledge:ro
     ports:
@@ -270,7 +271,7 @@ services:
       VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://127.0.0.1:18100}
       VITE_ORCHESTRATOR_BASE_URL: ${VITE_ORCHESTRATOR_BASE_URL:-http://127.0.0.1:18110}
       VITE_SCENARIO_CONTROLLER_BASE_URL: ${VITE_SCENARIO_CONTROLLER_BASE_URL:-http://127.0.0.1:18104}
-      VITE_DEPLOYMENT_ENVIRONMENT: ${VITE_DEPLOYMENT_ENVIRONMENT:-${DEPLOYMENT_ENVIRONMENT:-demo}}
+      VITE_DEPLOYMENT_ENVIRONMENT: ${VITE_DEPLOYMENT_ENVIRONMENT:-${DEPLOYMENT_ENVIRONMENT:-${INSTANCE:-student-001}}}
       VITE_SPLUNK_REALM: ${VITE_SPLUNK_REALM:-${SPLUNK_REALM:-us1}}
       VITE_SPLUNK_RUM_TOKEN: ${VITE_SPLUNK_RUM_TOKEN:-}
       VITE_SPLUNK_SESSION_REPLAY_ENABLED: ${VITE_SPLUNK_SESSION_REPLAY_ENABLED:-true}
@@ -297,6 +298,7 @@ services:
     environment:
       VITE_ORCHESTRATOR_BASE_URL: ${VITE_ORCHESTRATOR_BASE_URL:-http://127.0.0.1:18110}
       VITE_SCENARIO_CONTROLLER_BASE_URL: ${VITE_SCENARIO_CONTROLLER_BASE_URL:-http://127.0.0.1:18104}
+      VITE_DEPLOYMENT_ENVIRONMENT: ${VITE_DEPLOYMENT_ENVIRONMENT:-${DEPLOYMENT_ENVIRONMENT:-${INSTANCE:-student-001}}}
     command: sh -lc "npm run dev --workspace @support-portal/operator-console -- --host 0.0.0.0 --port 18081"
     ports:
       - "18081:18081"

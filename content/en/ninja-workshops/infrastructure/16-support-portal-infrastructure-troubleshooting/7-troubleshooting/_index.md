@@ -82,10 +82,6 @@ docker compose version
 ```
 
 ```bash
-grep -E '^OTEL_EXPORTER_OTLP_ENDPOINT=' .env
-```
-
-```bash
 docker compose up --wait
 ```
 
@@ -101,11 +97,7 @@ sudo apt install -y docker-compose-v2
 
 If your system uses Docker's upstream package repository instead of Ubuntu's `docker.io` package, install `docker-compose-plugin`.
 
-Expected local endpoint:
-
-```dotenv
-OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:14318
-```
+Do not add `OTEL_EXPORTER_OTLP_ENDPOINT` to `.env` for the normal Compose lab. Compose sets the app containers to export to `http://splunk-otel-collector:4318`. The host-mapped `http://127.0.0.1:14318` endpoint is only for optional host-side checks.
 
 ## Portal or Console Does Not Load
 
@@ -143,6 +135,7 @@ Check:
 - The collector is running.
 - `observability/otel-collector/config.yaml` includes `hostmetrics/cache_volume`.
 - The `metrics/cache_volume` pipeline includes `hostmetrics/cache_volume`.
+- `observability/otel-collector/config.yaml` includes `docker_stats` and the `metrics/containers` pipeline.
 - `.env` has the expected `INSTANCE` value.
 - The cache mountpoint is `/var/cache/support-knowledge`.
 
@@ -160,6 +153,12 @@ If the metric is missing, restart the collector after confirming the configurati
 docker compose restart splunk-otel-collector
 ```
 
+If container metrics are missing, confirm the collector has access to Docker:
+
+```bash
+docker compose exec -T splunk-otel-collector test -S /var/run/docker.sock
+```
+
 ## Telemetry Is Not Visible in Splunk
 
 Check locally first:
@@ -167,13 +166,29 @@ Check locally first:
 1. Collector is running.
 2. App processes started with `.env` loaded.
 3. Fresh browser traffic was generated after collector startup.
-4. `INSTANCE` and `OTEL_RESOURCE_ATTRIBUTES` match the student lab.
+4. `INSTANCE` and `DEPLOYMENT_ENVIRONMENT` match the student lab.
 
 Look for:
 
 - APM services such as `support-knowledge`, `support-assistant`, and `remediation-agent`.
 - Filesystem utilization for `/var/cache/support-knowledge`.
 - RUM data for the portal if `VITE_SPLUNK_RUM_TOKEN` is set.
+
+If APM traces show `ingest.<realm>.signalfx.com` as a child span, an app process started with direct Splunk ingest settings instead of the collector endpoint. Recreate the app containers and confirm the container environment:
+
+```bash
+docker compose up --force-recreate --wait
+```
+
+```bash
+docker compose exec -T api-gateway env | grep OTEL_EXPORTER_OTLP_ENDPOINT
+```
+
+Expected value inside app containers:
+
+```text
+OTEL_EXPORTER_OTLP_ENDPOINT=http://splunk-otel-collector:4318
+```
 
 If RUM sessions are missing:
 

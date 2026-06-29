@@ -51,7 +51,7 @@ Map the operator console output back to the Splunk UI:
 | Cache filesystem pressure | Infrastructure or Metric Finder for `system.filesystem.utilization`. |
 | High confidence | Both service latency and filesystem pressure are confirmed in the same incident window. |
 
-This comparison is the key learning point. MCP is not replacing the Splunk UI investigation. It is a way to collect the same observability evidence through a tool interface so the local workflow can package it consistently.
+This comparison is the key learning point. MCP is not replacing the Splunk UI investigation. It is a way to collect the same observability evidence through a AI tool interface.
 
 ## Review the Cleanup Policy
 
@@ -94,20 +94,3 @@ Validate from the browser first:
 2. In the support portal, run `AI Support Response`.
 3. Run `Account Status Lookup`.
 4. Run `Help Article Search`.
-
-Then generate fresh customer browser traffic:
-
-```bash
-RUM_SIMULATOR_USERS=4 RUM_SIMULATOR_ROUNDS=4 RUM_SIMULATOR_BROWSERS=chromium RUM_SIMULATOR_CONCURRENCY=2 docker compose run --rm rum-simulator
-```
-
-Then validate in Splunk:
-
-- RUM requests for `/api/support/respond` improve.
-- `support-knowledge` latency improves.
-- Slow traces stop matching the degraded pattern.
-- `system.filesystem.utilization` for `/var/cache/support-knowledge` drops or stops rising.
-- Comparison journeys remain healthy.
-- Operator console validation status is `validated`.
-
-Cleanup is complete only when the customer journey and telemetry recover, not when a command returns successfully.

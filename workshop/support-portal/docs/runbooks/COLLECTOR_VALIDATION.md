@@ -2,7 +2,7 @@
 
 ## Goal
 
-Prove that traces, APM service metrics, RUM data, and host filesystem metrics leave the demo app through the Splunk Distribution of the OpenTelemetry Collector before checking Splunk UI views.
+Prove that traces, APM service metrics, RUM data, host metrics, container metrics, and filesystem metrics leave the demo app through the Splunk Distribution of the OpenTelemetry Collector before checking Splunk UI views.
 
 ## Preconditions
 
@@ -11,9 +11,11 @@ Prove that traces, APM service metrics, RUM data, and host filesystem metrics le
    - `SPLUNK_ACCESS_TOKEN`
    - `SPLUNK_REALM`
    - `INSTANCE`
-   - `OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:14318`
-   - `OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf`
+   - `DEPLOYMENT_ENVIRONMENT`
+   - `VITE_SPLUNK_RUM_TOKEN`
 3. Docker Compose v2 is available.
+
+Do not set `OTEL_EXPORTER_OTLP_ENDPOINT` in `.env` for the Compose lab. Compose sets app containers to `http://splunk-otel-collector:4318`; the host port `14318` is only for optional host-side checks.
 
 ## Start order
 
@@ -47,7 +49,8 @@ Metrics:
 
 - `service.request`
 - `service.request.duration.ns`
-- `disk.utilization`
+- `system.filesystem.utilization`
+- container metrics from `docker_stats`
 
 Browser:
 
@@ -59,7 +62,7 @@ Browser:
 1. Confirm app containers started with the intended environment.
 2. Confirm the collector host port `14318` is available.
 3. Confirm fresh traffic was generated after the collector was already running.
-4. Confirm `INSTANCE` and `OTEL_RESOURCE_ATTRIBUTES` match the filter you are using in Splunk.
+4. Confirm `INSTANCE` and `DEPLOYMENT_ENVIRONMENT` match the filter you are using in Splunk.
 5. Confirm app services log normal startup without telemetry initialization errors.
 
 ## After collector verification
@@ -82,6 +85,6 @@ Expected:
 
 - host resource ID is `host.name=$INSTANCE`
 - `support-knowledge` is updated with `method":"PUT"`
-- `disk.utilization` is visible for mountpoint `/var/cache/support-knowledge`
+- `system.filesystem.utilization` is visible for mountpoint `/var/cache/support-knowledge`
 
 If the trace waterfall still shows `Infrastructure (0)`, use the APM service view or Infrastructure Monitoring filtered to `$INSTANCE`. The trace can remain visible after the current service-to-host relation has aged out.

@@ -48,7 +48,7 @@ test("SplunkMcpClient gathers service, latency, metric, and trace evidence", asy
       get_apm_service_latency: '{"service":"support-knowledge","p95LatencyMs":2400}',
       get_apm_service_errors_and_requests: '{"service":"support-knowledge","errorRate":0.01,"requests":120}',
       get_apm_exemplar_traces: "traceId=0123456789abcdef0123456789abcdef service=support-knowledge",
-      execute_signalflow_program: "disk.utilization for /var/cache/support-knowledge is above threshold"
+      execute_signalflow_program: "system.filesystem.utilization for /var/cache/support-knowledge is above threshold"
     };
 
     return new Response(
@@ -83,7 +83,7 @@ test("SplunkMcpClient gathers service, latency, metric, and trace evidence", asy
       incidentId: "incident-1",
       dimensions: {
         service: "support-knowledge",
-        environment: "demo"
+        environment: "student-001"
       }
     });
 
@@ -105,7 +105,7 @@ test("SplunkMcpClient gathers service, latency, metric, and trace evidence", asy
   }
 });
 
-test("SplunkMcpClient maps Splunk MCP schema refs to cache metric queries", async () => {
+test("SplunkMcpClient maps Splunk MCP schema refs to OOB filesystem metric queries", async () => {
   const originalFetch = globalThis.fetch;
   const originalInstance = process.env.INSTANCE;
   const calls: Array<{ method: string; params: { name?: string; arguments?: { params?: Record<string, unknown> } } }> = [];
@@ -143,8 +143,8 @@ test("SplunkMcpClient maps Splunk MCP schema refs to cache metric queries", asyn
     const result =
       name === "execute_signalflow_program"
         ? {
-            metadata: { series: { sf_originatingMetric: "support_knowledge.cache.utilization" } },
-            timeseries: { "1780084800000": { series: 92.4 } }
+            metadata: { series: { sf_originatingMetric: "system.filesystem.utilization" } },
+            timeseries: { "1780084800000": { series: 0.924 } }
           }
         : { p95LatencyMs: 2400 };
 
@@ -167,7 +167,7 @@ test("SplunkMcpClient maps Splunk MCP schema refs to cache metric queries", asyn
       incidentId: "incident-1",
       dimensions: {
         service: "support-knowledge",
-        environment: "demo"
+        environment: "student-001"
       }
     });
 
@@ -178,17 +178,22 @@ test("SplunkMcpClient maps Splunk MCP schema refs to cache metric queries", asyn
     const signalflowPrograms = signalflowCalls.map((call) => String(call.params.arguments?.params?.program));
 
     assert.equal(latencyParams?.service_name, "support-knowledge");
-    assert.equal(latencyParams?.environment_name, "demo");
+    assert.equal(latencyParams?.environment_name, "student-001");
     assert.equal(typeof (latencyParams?.time_range as { start?: unknown })?.start, "string");
     assert.equal(typeof (latencyParams?.time_range as { stop?: unknown })?.stop, "string");
     assert.deepEqual(latencyParams?.tags_or_dimensions, {
       "app.business_transaction": ["support_response"],
       "service.instance.id": ["student-001"]
     });
-    assert.ok(signalflowPrograms.some((program) => /support_knowledge\.cache\.utilization/.test(program)));
-    assert.ok(signalflowPrograms.some((program) => /support_knowledge\.support_response\.latency_ms/.test(program)));
-    assert.ok(signalflowPrograms.every((program) => !/disk\.utilization/.test(program)));
-    assert.ok(signalflowPrograms.every((program) => /demo\.metric_source/.test(program)));
+    const filesystemProgram = signalflowPrograms.find((program) => /system\.filesystem\.utilization/.test(program));
+    assert.ok(filesystemProgram);
+    assert.match(filesystemProgram, /filter\('host\.name', 'student-001'\)/);
+    assert.match(filesystemProgram, /filter\('mountpoint', '\/var\/cache\/support-knowledge'\)/);
+    assert.doesNotMatch(filesystemProgram, /filter\('service\.name'/);
+    assert.doesNotMatch(filesystemProgram, /demo\.metric_source/);
+    assert.equal(signalflowCalls.length, 1);
+    assert.ok(signalflowPrograms.every((program) => !/support_knowledge\.support_response\.latency_ms/.test(program)));
+    assert.ok(signalflowPrograms.every((program) => !/support_knowledge\.cache\.utilization/.test(program)));
     assert.equal(typeof (signalflowParams?.time_range as { start?: unknown })?.start, "string");
     assert.equal(typeof (signalflowParams?.time_range as { stop?: unknown })?.stop, "string");
     assert.equal(signalflowParams?.resolution_ms, 30000);
@@ -236,7 +241,7 @@ test("SplunkMcpClient does not treat SignalFlow decimals as trace ids", async ()
                 text: JSON.stringify({
                   metadata: {
                     series: {
-                      sf_originatingMetric: "support_knowledge.support_response.latency_ms"
+                      sf_originatingMetric: "system.filesystem.utilization"
                     }
                   },
                   timeseries: {
@@ -276,7 +281,7 @@ test("SplunkMcpClient does not treat SignalFlow decimals as trace ids", async ()
       incidentId: "incident-1",
       dimensions: {
         service: "support-knowledge",
-        environment: "demo"
+        environment: "student-001"
       }
     });
 

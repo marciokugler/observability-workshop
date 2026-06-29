@@ -73,8 +73,8 @@ Set the local model and rate card values from your benchmark:
 ```bash
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
 export OLLAMA_MODEL=llama3.2:1b
-export INPUT_USD_PER_1M=0.20
-export OUTPUT_USD_PER_1M=1.25
+export INPUT_USD_PER_1M=0.0013
+export OUTPUT_USD_PER_1M=0.0158
 export AI_TEAM_DEFAULT=support-ai
 export AI_BUSINESS_UNIT_DEFAULT=customer-success
 export AI_COST_CENTER_DEFAULT=cc-ml-1200
@@ -82,6 +82,10 @@ export AI_TENANT_ID_DEFAULT=tenant-local
 export AI_USER_ID_DEFAULT=workshop-user-1
 export AI_OUTCOME_CATEGORY_DEFAULT=answered
 ```
+
+`INPUT_USD_PER_1M` and `OUTPUT_USD_PER_1M` are still per-million-token rates. The
+example values come from the energy-only local benchmark. If your benchmark produced
+different values, use yours.
 
 {{% /notice %}}
 

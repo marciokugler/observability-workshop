@@ -1,7 +1,7 @@
 import cors from "@fastify/cors";
 import Fastify, { type FastifyRequest } from "fastify";
 import { defaultPorts, localServicePort, localServiceUrl } from "@support-portal/runtime-config";
-import { type SpanContext, isSpanContextValid, SpanStatusCode, TraceFlags, trace } from "@opentelemetry/api";
+import { type SpanContext, isSpanContextValid, TraceFlags, trace } from "@opentelemetry/api";
 import { BUSINESS_TRANSACTIONS } from "@support-portal/shared-types";
 import {
   annotateServerEntrySpan,
@@ -164,38 +164,22 @@ export function buildServer() {
 
   app.post("/api/support/respond", async (request, reply) => {
     request.log.info({ supportResponseRequest: request.body }, "forwarding support response request");
-    const tracer = trace.getTracer("support-portal-demo");
-    return tracer.startActiveSpan("support.gateway.support_response_request", async (span) => {
-      annotateCurrentSpan(routes()[0].telemetry);
+    annotateCurrentSpan(routes()[0].telemetry);
+    const downstream = await runInSpan("support.gateway.forward_support_response", routes()[0].telemetry, () =>
+      fetch(`${assistantServiceBaseUrl}/assistant/respond`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json"
+        },
+        body: JSON.stringify(request.body ?? {})
+      })
+    );
+    const payload = await downstream.json();
+    request.log.info({ downstreamStatus: downstream.status, supportResponseResponse: payload }, "support response request completed");
 
-      try {
-        const downstream = await runInSpan("support.gateway.forward_support_response", routes()[0].telemetry, () =>
-          fetch(`${assistantServiceBaseUrl}/assistant/respond`, {
-            method: "POST",
-            headers: {
-              "content-type": "application/json"
-            },
-            body: JSON.stringify(request.body ?? {})
-          })
-        );
-        const payload = await downstream.json();
-        request.log.info({ downstreamStatus: downstream.status, supportResponseResponse: payload }, "support response request completed");
-
-        attachServerTimingHeaderForRequest(request, reply, span.spanContext());
-        span.setStatus({ code: SpanStatusCode.OK });
-        reply.code(downstream.status);
-        return payload;
-      } catch (error) {
-        span.recordException(error as Error);
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: error instanceof Error ? error.message : "support gateway failure"
-        });
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+    attachServerTimingHeaderForRequest(request, reply, trace.getActiveSpan()?.spanContext());
+    reply.code(downstream.status);
+    return payload;
   });
 
   app.get("/api/cases/:caseId", async (request, reply) => {
@@ -205,9 +189,7 @@ export function buildServer() {
       ...routes()[1].telemetry,
       "support.account_id": caseId
     });
-    const downstream = await runInSpan("support.gateway.lookup_account_status", routes()[1].telemetry, () =>
-      fetch(`${caseServiceBaseUrl}/cases/${encodeURIComponent(caseId)}`)
-    );
+    const downstream = await fetch(`${caseServiceBaseUrl}/cases/${encodeURIComponent(caseId)}`);
     const payload = await downstream.json();
     request.log.info({ accountId: caseId, downstreamStatus: downstream.status, accountPayload: payload }, "account status lookup completed");
     attachServerTimingHeaderForRequest(request, reply, trace.getActiveSpan()?.spanContext());
@@ -222,18 +204,16 @@ export function buildServer() {
       ...routes()[2].telemetry,
       "help_article.query_length": query.length
     });
-    const downstream = await runInSpan("support.gateway.search_help_articles", routes()[2].telemetry, () =>
-      fetch(`${knowledgeServiceBaseUrl}/knowledge/query`, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json"
-        },
-        body: JSON.stringify({
-          transaction: BUSINESS_TRANSACTIONS.knowledgeArticleSearch,
-          query
-        })
+    const downstream = await fetch(`${knowledgeServiceBaseUrl}/knowledge/query`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({
+        transaction: BUSINESS_TRANSACTIONS.knowledgeArticleSearch,
+        query
       })
-    );
+    });
     const payload = await downstream.json();
     request.log.info({ query, downstreamStatus: downstream.status, articlePayload: payload }, "help article search completed");
     attachServerTimingHeaderForRequest(request, reply, trace.getActiveSpan()?.spanContext());
